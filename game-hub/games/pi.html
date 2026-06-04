@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Pi Game!</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <!-- Main site styles -->
+  <link rel="stylesheet" href="../css/style.css">
+
+  <style>
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background-color: #8c8989;
+    }
+
+    .page {
+      display: flex;
+      min-height: 100vh;
+    }
+
+    
+
+    .content {
+      flex: 1;
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    h1 {
+      margin-bottom: 10px;
+    }
+
+   
+
+    .back-link {
+      margin-top: 50px;
+      text-decoration: none;
+      color: #0077cc;
+      font-weight: bold;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="page">
+
+
+    <!-- Main Content -->
+    <div class="content">
+      <h1>Pi Game!</h1>
+
+     <label>type digits: </label>
+    <h4>3.</h4> <input id="UserInput"><br><br>
+     <button id="SubmitButton">Submit</button>
+      <p id="NumPlaceholder">type digit number 1</p>
+     
+     
+    
+    </div>
+ <a class="back-link" href="../index.html">← Back to Games</a>
+   
+
+  </div>
+
+<script src="../js/pi.js"></script>
+</body>
+</html>
