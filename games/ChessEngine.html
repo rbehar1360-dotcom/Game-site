@@ -1,0 +1,348 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Advanced Chess AI</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #1e1f22;
+            color: #fff;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            margin: 0;
+        }
+        h1 { margin-bottom: 5px; color: #e0e0e0; }
+        p { margin: 0 0 15px 0; color: #aaa; }
+        
+        #chess-board {
+            display: grid;
+            grid-template-columns: repeat(8, 55px);
+            grid-template-rows: repeat(8, 55px);
+            border: 6px solid #111;
+            box-shadow: 0 12px 24px rgba(0,0,0,0.5);
+            margin: 10px auto;
+        }
+        .square {
+            width: 55px;
+            height: 55px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2.5rem;
+            cursor: pointer;
+            user-select: none;
+            transition: background-color 0.1s;
+        }
+        .light { background-color: #f0d9b5; }
+        .dark { background-color: #b58863; }
+        
+        /* Highlighting */
+        .selected { background-color: #7a9a60 !important; }
+        .last-move { background-color: #aaa23a !important; }
+
+        .status { font-size: 1.2rem; font-weight: bold; margin-top: 15px; min-height: 30px; }
+        button {
+            padding: 10px 25px;
+            background-color: #007acc;
+            border: none;
+            color: white;
+            font-size: 1rem;
+            cursor: pointer;
+            border-radius: 4px;
+            margin-top: 10px;
+            font-weight: bold;
+        }
+        button:hover { background-color: #0062a3; }
+    </style>
+</head>
+<body>
+
+    <h1>Advanced Chess AI</h1>
+    <p>Stronger Evaluation Engine</p>
+    <div id="chess-board"></div>
+    <div class="status" id="status">Your turn (White)</div>
+    <button onclick="resetGame()">Restart Game</button>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/chess.js/0.10.3/chess.min.js"></script>
+    <script>
+        let game = new Chess();
+        const boardElement = document.getElementById('chess-board');
+        const statusElement = document.getElementById('status');
+        let selectedSquare = null;
+        let lastMoveSquares = [];
+
+        // Clean White and Black Unicode Pieces
+        const PIECES = {
+            'wp': '♙', 'wr': '♖', 'wn': '♘', 'wb': '♗', 'wq': '♕', 'wk': '♔',
+            'bp': '♟', 'br': '♜', 'bn': '♞', 'bb': '♝', 'bq': '♛', 'bk': '♚'
+        };
+
+        // --- Advanced Engine Logic ---
+        const PIECE_VALUES = { p: 100, n: 320, b: 330, r: 500, q: 900, k: 20000 };
+
+        const PAWN_MATRIX = [
+            [0,  0,  0,  0,  0,  0,  0,  0],
+            [50, 50, 50, 50, 50, 50, 50, 50],
+            [10, 10, 20, 30, 30, 20, 10, 10],
+            [5,  5, 10, 25, 25, 10,  5,  5],
+            [0,  0,  0, 20, 20,  0,  0,  0],
+            [5, -5,-10,  0,  0,-10, -5,  5],
+            [5, 10, 10,-20,-20, 10, 10,  5],
+            [0,  0,  0,  0,  0,  0,  0,  0]
+        ];
+
+        const KNIGHT_MATRIX = [
+            [-50,-40,-30,-30,-30,-30,-40,-50],
+            [-40,-20,  0,  0,  0,  0,-20,-40],
+            [-30,  0, 10, 15, 15, 10,  0,-30],
+            [-30,  5, 15, 20, 20, 15,  5,-30],
+            [-30,  0, 15, 20, 20, 15,  0,-30],
+            [-30,  5, 10, 15, 15, 10,  5,-30],
+            [-40,-20,  0,  5,  5,  0,-20,-40],
+            [-50,-40,-30,-30,-30,-30,-40,-50]
+        ];
+
+        const BISHOP_MATRIX = [
+            [-20,-10,-10,-10,-10,-10,-10,-20],
+            [-10,  0,  0,  0,  0,  0,  0,-10],
+            [-10,  0,  5, 10, 10,  5,  0,-10],
+            [-10,  5,  5, 10, 10,  5,  5,-10],
+            [-10,  0, 10, 10, 10, 10,  0,-10],
+            [-10, 10, 10, 10, 10, 10, 10,-10],
+            [-10,  5,  0,  0,  0,  0,  5,-10],
+            [-20,-10,-10,-10,-10,-10,-10,-20]
+        ];
+
+        const ROOK_MATRIX = [
+            [0,  0,  0,  0,  0,  0,  0,  0],
+            [5, 10, 10, 10, 10, 10, 10,  5],
+            [-5,  0,  0,  0,  0,  0,  0, -5],
+            [-5,  0,  0,  0,  0,  0,  0, -5],
+            [-5,  0,  0,  0,  0,  0,  0, -5],
+            [-5,  0,  0,  0,  0,  0,  0, -5],
+            [-5,  0,  0,  0,  0,  0,  0, -5],
+            [0,  0,  0,  5,  5,  0,  0,  0]
+        ];
+
+        const QUEEN_MATRIX = [
+            [-20,-10,-10, -5, -5,-10,-10,-20],
+            [-10,  0,  0,  0,  0,  0,  0,-10],
+            [-10,  0,  5,  5,  5,  5,  0,-10],
+            [-5,  0,  5,  5,  5,  5,  0, -5],
+            [0,  0,  5,  5,  5,  5,  0, -5],
+            [-10,  5,  5,  5,  5,  5,  0,-10],
+            [-10,  0,  5,  0,  0,  0,  0,-10],
+            [-20,-10,-10, -5, -5,-10,-10,-20]
+        ];
+
+        const KING_MATRIX = [
+            [-30,-40,-40,-50,-50,-40,-40,-30],
+            [-30,-40,-40,-50,-50,-40,-40,-30],
+            [-30,-40,-40,-50,-50,-40,-40,-30],
+            [-30,-40,-40,-50,-50,-40,-40,-30],
+            [-20,-30,-30,-40,-40,-30,-30,-20],
+            [-10,-20,-20,-20,-20,-20,-20,-10],
+            [20, 20,  0,  0,  0,  0, 20, 20],
+            [20, 30, 10,  0,  0, 10, 30, 20]
+        ];
+
+        function evaluateBoard(boardState) {
+            let totalEvaluation = 0;
+            for (let r = 0; r < 8; r++) {
+                for (let c = 0; c < 8; c++) {
+                    let piece = boardState[r][c];
+                    if (piece) {
+                        let value = PIECE_VALUES[piece.type];
+                        
+                        // Apply specific matrices depending on white vs black perspective
+                        let matrixY = piece.color === 'b' ? r : 7 - r;
+                        
+                        if (piece.type === 'p') value += PAWN_MATRIX[matrixY][c];
+                        else if (piece.type === 'n') value += KNIGHT_MATRIX[matrixY][c];
+                        else if (piece.type === 'b') value += BISHOP_MATRIX[matrixY][c];
+                        else if (piece.type === 'r') value += ROOK_MATRIX[matrixY][c];
+                        else if (piece.type === 'q') value += QUEEN_MATRIX[matrixY][c];
+                        else if (piece.type === 'k') value += KING_MATRIX[matrixY][c];
+
+                        totalEvaluation += (piece.color === 'w') ? value : -value;
+                    }
+                }
+            }
+            return totalEvaluation;
+        }
+
+        function minimax(game, depth, alpha, beta, isMaximizingPlayer) {
+            if (depth === 0 || game.game_over()) {
+                return -evaluateBoard(game.board());
+            }
+
+            let moves = game.moves({ verbose: true });
+            
+            // Move ordering: checks and captures sorted first makes alpha-beta pruning much faster
+            moves.sort((a, b) => {
+                let scoreA = 0; let scoreB = 0;
+                if (a.captured) scoreA += 10 + PIECE_VALUES[a.captured];
+                if (b.captured) scoreB += 10 + PIECE_VALUES[b.captured];
+                if (a.san.includes('+')) scoreA += 5;
+                if (b.san.includes('+')) scoreB += 5;
+                return scoreB - scoreA;
+            });
+
+            if (isMaximizingPlayer) {
+                let bestMoveValue = -Infinity;
+                for (let move of moves) {
+                    game.move(move);
+                    let value = minimax(game, depth - 1, alpha, beta, false);
+                    game.undo();
+                    bestMoveValue = Math.max(bestMoveValue, value);
+                    alpha = Math.max(alpha, value);
+                    if (beta <= alpha) break;
+                }
+                return bestMoveValue;
+            } else {
+                let bestMoveValue = Infinity;
+                for (let move of moves) {
+                    game.move(move);
+                    let value = minimax(game, depth - 1, alpha, beta, true);
+                    game.undo();
+                    bestMoveValue = Math.min(bestMoveValue, value);
+                    beta = Math.min(beta, value);
+                    if (beta <= alpha) break;
+                }
+                return bestMoveValue;
+            }
+        }
+
+        function makeAIMove() {
+            let moves = game.moves({ verbose: true });
+            if (moves.length === 0) return;
+
+            let bestMove = null;
+            let bestValue = -Infinity;
+
+            // Deeper depth 3 calculations + enhanced matrix evaluation
+            for (let move of moves) {
+                game.move(move);
+                let boardValue = minimax(game, 2, -Infinity, Infinity, false);
+                game.undo();
+                
+                if (boardValue > bestValue) {
+                    bestValue = boardValue;
+                    bestMove = move;
+                }
+            }
+            
+            game.move(bestMove);
+            lastMoveSquares = [bestMove.from, bestMove.to];
+            renderBoard();
+            updateStatus();
+        }
+
+        // --- Render UI ---
+        function renderBoard() {
+            boardElement.innerHTML = '';
+            const boardState = game.board();
+            const algebraicFiles = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h'];
+
+            for (let r = 0; r < 8; r++) {
+                for (let c = 0; c < 8; c++) {
+                    const squareDiv = document.createElement('div');
+                    const squareName = algebraicFiles[c] + (8 - r);
+                    
+                    const isLight = (r + c) % 2 === 0;
+                    squareDiv.className = `square ${isLight ? 'light' : 'dark'}`;
+                    squareDiv.dataset.square = squareName;
+
+                    if (selectedSquare === squareName) {
+                        squareDiv.classList.add('selected');
+                    } else if (lastMoveSquares.includes(squareName)) {
+                        squareDiv.classList.add('last-move');
+                    }
+
+                    const piece = boardState[r][c];
+                    if (piece) {
+                        squareDiv.textContent = PIECES[piece.color + piece.type];
+                        // White pieces style
+                        if(piece.color === 'w') {
+                            squareDiv.style.color = "#ffffff";
+                            squareDiv.style.textShadow = "1px 1px 2px #000";
+                        } else { // Black pieces style
+                            squareDiv.style.color = "#000000";
+                            squareDiv.style.textShadow = "none";
+                        }
+                    }
+
+                    squareDiv.addEventListener('click', () => handleSquareClick(squareName));
+                    boardElement.appendChild(squareDiv);
+                }
+            }
+        }
+
+        function handleSquareClick(squareName) {
+            if (game.game_over() || game.turn() === 'b') return;
+
+            if (selectedSquare === null) {
+                const piece = game.get(squareName);
+                if (piece && piece.color === 'w') {
+                    selectedSquare = squareName;
+                    renderBoard();
+                }
+            } else {
+                let move = game.move({
+                    from: selectedSquare,
+                    to: squareName,
+                    promotion: 'q'
+                });
+
+                if (move !== null) {
+                    lastMoveSquares = [selectedSquare, squareName];
+                    selectedSquare = null;
+                    renderBoard();
+                    updateStatus();
+                    statusElement.innerHTML = "Thinking...";
+                    setTimeout(makeAIMove, 100);
+                } else {
+                    // Change selection if clicking another white piece
+                    const piece = game.get(squareName);
+                    if (piece && piece.color === 'w') {
+                        selectedSquare = squareName;
+                    } else {
+                        selectedSquare = null;
+                    }
+                    renderBoard();
+                }
+            }
+        }
+
+        function updateStatus() {
+            let status = '';
+            let moveColor = game.turn() === 'b' ? 'Black (AI)' : 'White (You)';
+
+            if (game.in_checkmate()) {
+                status = 'Game over, ' + moveColor + ' is in checkmate.';
+            } else if (game.in_draw()) {
+                status = 'Game over, drawn position.';
+            } else {
+                status = moveColor + ' to move.';
+                if (game.in_check()) status += ' (Check!)';
+            }
+            statusElement.innerHTML = status;
+        }
+
+        function resetGame() {
+            game.reset();
+            selectedSquare = null;
+            lastMoveSquares = [];
+            renderBoard();
+            statusElement.innerHTML = 'Your turn (White)';
+        }
+
+        renderBoard();
+    </script>
+</body>
+</html>
