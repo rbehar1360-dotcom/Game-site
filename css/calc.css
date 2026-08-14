@@ -1,98 +1,355 @@
-/* Reset & page setup */
+/* =========================================
+   RESET & PAGE
+========================================= */
+
 * {
     box-sizing: border-box;
 }
 
+
 body {
     margin: 0;
+
     min-height: 100vh;
+
     display: flex;
+
     justify-content: center;
+
     align-items: center;
-    background: radial-gradient(circle at top, #0f2027, #000);
-    font-family: "Segoe UI", system-ui, sans-serif;
-}
 
-/* Calculator shell */
-#Calc {
-    width: 480px; /* ⬅️ wider */
     padding: 20px;
-    border-radius: 18px;
-    background: rgba(20, 20, 25, 0.85);
-    backdrop-filter: blur(12px);
-    box-shadow:
-        0 0 25px rgba(0, 255, 255, 0.15),
-        0 20px 40px rgba(0, 0, 0, 0.6);
-    border: 1px solid rgba(0, 255, 255, 0.15);
-}
-/* Display */
-#display {
-    width: 100%;
-    height: 70px;
-    margin-bottom: 16px;
-    padding: 10px 14px;
-    font-size: 2rem;
-    text-align: right;
-    color: #00fff0;
-    background: linear-gradient(180deg, #000, #050505);
-    border: none;
-    border-radius: 12px;
-    box-shadow: inset 0 0 12px rgba(0, 255, 255, 0.25);
+
+    background:
+        linear-gradient(
+            135deg,
+            var(--background-1),
+            var(--background-2),
+            var(--background-3)
+        );
+
+    font-family:
+        "Segoe UI",
+        system-ui,
+        sans-serif;
+
+    color: var(--text);
+
+    transition:
+        background 0.4s ease,
+        color 0.4s ease;
 }
 
-/* Buttons grid */
+
+/* =========================================
+   CALCULATOR SHELL
+========================================= */
+
+#Calc {
+
+    width: 480px;
+
+    max-width: 100%;
+
+    padding: 20px;
+
+    border-radius: 18px;
+
+    background:
+        var(--card);
+
+    backdrop-filter: blur(12px);
+
+    border:
+        1px solid
+        var(--accent);
+
+    box-shadow:
+        0 0 25px var(--shadow),
+        0 20px 40px rgba(0, 0, 0, 0.45);
+
+    transition:
+        background 0.4s ease,
+        border 0.4s ease,
+        box-shadow 0.4s ease;
+}
+
+
+/* =========================================
+   DISPLAY
+========================================= */
+
+#display {
+
+    width: 100%;
+
+    height: 70px;
+
+    margin-bottom: 16px;
+
+    padding: 10px 14px;
+
+    font-size: 2rem;
+
+    text-align: right;
+
+    color: var(--accent);
+
+    background:
+        rgba(0, 0, 0, 0.65);
+
+    border:
+        1px solid
+        var(--accent);
+
+    border-radius: 12px;
+
+    box-shadow:
+        inset 0 0 12px var(--shadow),
+        0 0 8px var(--shadow);
+
+    outline: none;
+
+    transition:
+        color 0.3s ease,
+        border 0.3s ease,
+        box-shadow 0.3s ease;
+}
+
+
+/* =========================================
+   BUTTON GRID
+========================================= */
+
 #keys {
+
     display: grid;
-    grid-template-columns: repeat(6, 1fr); /* ⬅️ MORE COLUMNS */
+
+    grid-template-columns:
+        repeat(4, 1fr);
+
     gap: 12px;
 }
-/* Buttons */
+
+
+/* =========================================
+   BUTTONS
+========================================= */
+
 #keys button {
+
     height: 52px;
+
     font-size: 1.1rem;
+
     border-radius: 14px;
-    border: none;
+
+    border:
+        1px solid
+        rgba(255, 255, 255, 0.08);
+
     cursor: pointer;
-    color: #eaeaea;
-    background: linear-gradient(145deg, #1b1b1f, #111);
+
+    color: var(--text);
+
+    background:
+        var(--card);
+
     box-shadow:
-        0 6px 12px rgba(0, 0, 0, 0.6),
-        inset 0 0 0 rgba(0, 255, 255, 0);
-    transition: all 0.15s ease;
+        0 6px 12px
+        rgba(0, 0, 0, 0.35);
+
+    transition:
+        all 0.15s ease;
 }
 
-/* Hover effect */
+
+/* =========================================
+   HOVER
+========================================= */
+
 #keys button:hover {
-    color: #00fff0;
+
+    color: var(--accent);
+
+    border-color:
+        var(--accent);
+
     box-shadow:
-        0 0 12px rgba(0, 255, 255, 0.35),
-        inset 0 0 6px rgba(0, 255, 255, 0.25);
+        0 0 12px var(--shadow),
+        inset 0 0 6px var(--shadow);
+
+    transform:
+        translateY(-2px);
 }
 
-/* Click effect */
+
+/* =========================================
+   CLICK
+========================================= */
+
 #keys button:active {
-    transform: scale(0.95);
+
+    transform:
+        scale(0.95);
+
 }
 
-/* Operator buttons */
+
+/* =========================================
+   OPERATOR BUTTONS
+========================================= */
+
 #keys button:nth-child(4n + 1),
 #keys button:nth-child(4n) {
-    background: linear-gradient(145deg, #0a2a2a, #041818);
-    color: #00fff0;
+
+    background:
+        color-mix(
+            in srgb,
+            var(--accent) 15%,
+            var(--card)
+        );
+
+    color:
+        var(--accent);
+
+    border-color:
+        color-mix(
+            in srgb,
+            var(--accent) 40%,
+            transparent
+        );
+
 }
 
 
+/* =========================================
+   EQUALS BUTTON
+========================================= */
 
-/* Clear button */
-#keys button:last-child {
-    background: linear-gradient(145deg, #3a0000, #220000);
-    color: #ff6b6b;
+#keys button:nth-child(24) {
+
+    background:
+        var(--accent);
+
+    color:
+        #001018;
+
+    box-shadow:
+        0 0 12px var(--shadow);
+
 }
-#keys {
-    grid-template-columns: repeat(4, 1fr);
+
+
+#keys button:nth-child(24):hover {
+
+    color:
+        #001018;
+
+    box-shadow:
+        0 0 20px var(--glow);
+
 }
+
+
+/* =========================================
+   CLEAR BUTTON
+========================================= */
+
+#keys button:nth-child(28) {
+
+    background:
+        rgba(255, 60, 60, 0.15);
+
+    color:
+        #ff6b6b;
+
+}
+
+
+#keys button:nth-child(28):hover {
+
+    background:
+        rgba(255, 60, 60, 0.25);
+
+    color:
+        #ff8585;
+
+    box-shadow:
+        0 0 15px
+        rgba(255, 60, 60, 0.4);
+
+}
+
+
+/* =========================================
+   DEG/RAD MODE BUTTON
+========================================= */
 
 #mode {
-    grid-column: span 4;
-    background: linear-gradient(145deg, #002a3a, #001822);
+
+    grid-column:
+        span 4;
+
+    background:
+        color-mix(
+            in srgb,
+            var(--accent) 15%,
+            var(--card)
+        ) !important;
+
+    color:
+        var(--accent) !important;
+
+    border:
+        1px solid
+        var(--accent) !important;
+
+}
+
+
+/* =========================================
+   MOBILE
+========================================= */
+
+@media (max-width: 550px) {
+
+    body {
+        padding: 10px;
+    }
+
+
+    #Calc {
+
+        width: 100%;
+
+        padding: 14px;
+
+    }
+
+
+    #keys {
+
+        gap: 8px;
+
+    }
+
+
+    #keys button {
+
+        height: 48px;
+
+        font-size: 1rem;
+
+    }
+
+
+    #display {
+
+        height: 60px;
+
+        font-size: 1.5rem;
+
+    }
+
 }

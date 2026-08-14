@@ -1,142 +1,619 @@
-/* ===== GLOBAL ===== */
+/* =========================================
+   THEME VARIABLES
+========================================= */
+
+:root {
+  --background-1: #081a24;
+  --background-2: #0f2e44;
+  --background-3: #00bcd4;
+
+  --card: rgba(15, 40, 55, 0.9);
+  --header: rgba(10, 25, 35, 0.9);
+
+  --accent: #00e5ff;
+  --accent-light: #a7eaff;
+
+  --text: #ffffff;
+  --title: #dffcff;
+
+  --shadow: rgba(0, 200, 255, 0.25);
+  --glow: rgba(0, 255, 255, 0.7);
+}
+
+
+/* =========================================
+   GLOBAL
+========================================= */
+
+* {
+  box-sizing: border-box;
+}
+
 
 body {
   margin: 0;
+
   font-family: Arial, sans-serif;
-  background: linear-gradient(135deg, #081a24, #0f2e44, #00bcd4);
-  color: white;
+
+  background:
+    linear-gradient(
+      135deg,
+      var(--background-1),
+      var(--background-2),
+      var(--background-3)
+    );
+
+  color: var(--text);
+
   text-align: center;
+
   background-attachment: fixed;
+
+  min-height: 100vh;
+
+  transition:
+    background 0.4s ease,
+    color 0.4s ease;
 }
 
-/* ===== GAME HUB ===== */
 
-.game-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-  gap: 15px;
-  max-width: 900px;
-  margin: 40px auto;
-  padding: 10px;
+/* =========================================
+   HEADER
+========================================= */
+
+.site-header {
+  display: flex;
+
+  justify-content: space-between;
+  align-items: center;
+
+  padding: 18px 30px;
+
+  background: var(--header);
+
+  border-bottom:
+    1px solid
+    color-mix(in srgb, var(--accent) 30%, transparent);
+
+  backdrop-filter: blur(10px);
 }
 
-/* ===== SEARCH BAR ===== */
+
+.site-header h1 {
+  margin: 0;
+
+  font-size: 22px;
+}
+
+
+.site-header p {
+  margin: 5px 0 0;
+}
+
+
+/* =========================================
+   SETTINGS BUTTON
+========================================= */
+
+.settings-button {
+  width: 48px;
+  height: 48px;
+
+  border: none;
+  border-radius: 50%;
+
+  background: var(--card);
+
+  color: var(--text);
+
+  font-size: 22px;
+
+  cursor: pointer;
+
+  transition: all 0.25s ease;
+
+  box-shadow:
+    0 0 10px var(--shadow);
+}
+
+
+.settings-button:hover {
+  transform: rotate(25deg) scale(1.1);
+
+  box-shadow:
+    0 0 20px var(--glow);
+}
+
+
+/* =========================================
+   SEARCH BAR
+========================================= */
 
 .searchInput {
   width: 80%;
   max-width: 420px;
+
   padding: 12px;
+
+  margin-top: 30px;
   margin-bottom: 30px;
+
   border-radius: 30px;
+
   border: none;
+
   font-size: 16px;
 
-  background: #0f2433;
-  color: white;
+  background: var(--card);
 
-  box-shadow: 0 0 10px rgba(0, 200, 255, 0.6);
+  color: var(--text);
+
+  box-shadow:
+    0 0 10px var(--shadow);
+
   transition: all 0.25s ease;
 }
 
+
 .searchInput::placeholder {
-  color: #a7eaff;
+  color: var(--accent-light);
 }
+
 
 .searchInput:focus {
   outline: none;
-  box-shadow: 0 0 18px rgba(0, 255, 255, 0.9);
+
+  box-shadow:
+    0 0 18px var(--glow);
 }
 
-/* ===== GAME LINKS ===== */
+
+/* =========================================
+   GAME GRID
+========================================= */
+
+.game-grid {
+  display: grid;
+
+  grid-template-columns:
+    repeat(
+      auto-fit,
+      minmax(150px, 1fr)
+    );
+
+  gap: 15px;
+
+  max-width: 900px;
+
+  margin: 10px auto 40px;
+
+  padding: 10px;
+}
+
+
+/* =========================================
+   GAME LINKS
+========================================= */
 
 .game-link {
   text-decoration: none;
+
   color: inherit;
 }
 
-/* ===== GAME CARDS ===== */
+
+/* =========================================
+   GAME CARDS
+========================================= */
 
 .game-card {
-  background: rgba(15, 40, 55, 0.9);
+  background: var(--card);
+
   border-radius: 16px;
+
   padding: 20px;
+
   transition: all 0.25s ease;
 
-  box-shadow: 0 4px 12px rgba(0, 200, 255, 0.25);
+  box-shadow:
+    0 4px 12px var(--shadow);
+
   backdrop-filter: blur(6px);
 }
 
+
 .game-card:hover {
-  transform: translateY(-6px) scale(1.03);
-  box-shadow: 0 6px 22px rgba(0, 255, 255, 0.7);
+  transform:
+    translateY(-6px)
+    scale(1.03);
+
+  box-shadow:
+    0 6px 22px var(--glow);
 }
 
-/* ===== GAME ICON ===== */
+
+/* =========================================
+   GAME ICON
+========================================= */
 
 .icon {
   font-size: 48px;
+
   margin-bottom: 10px;
+
   width: 80px;
   height: 80px;
+
+  object-fit: contain;
+
   align-items: center;
 }
 
-/* ===== GAME TITLE ===== */
+
+/* =========================================
+   GAME TITLE
+========================================= */
 
 .title {
   font-size: 15px;
+
   font-weight: bold;
-  color: #dffcff;
+
+  color: var(--title);
 }
 
-/* ===== GAME PAGE ===== */
 
-.game-page {
-  background: linear-gradient(135deg, #07141c, #0d2c3d);
+/* =========================================
+   SETTINGS OVERLAY
+========================================= */
+
+.settings-overlay {
+  position: fixed;
+
+  inset: 0;
+
+  background: rgba(0, 0, 0, 0.55);
+
+  backdrop-filter: blur(5px);
+
+  display: none;
+
+  justify-content: center;
+  align-items: center;
+
+  z-index: 9999;
+
+  padding: 20px;
 }
 
-/* ===== HEADER ===== */
 
-.site-header {
+.settings-overlay.open {
   display: flex;
+}
+
+
+/* =========================================
+   SETTINGS WINDOW
+========================================= */
+
+.settings-window {
+  width: 100%;
+
+  max-width: 460px;
+
+  background: var(--header);
+
+  border:
+    1px solid
+    var(--accent);
+
+  border-radius: 20px;
+
+  padding: 25px;
+
+  box-shadow:
+    0 0 35px var(--shadow);
+
+  backdrop-filter: blur(15px);
+
+  animation:
+    settingsOpen 0.2s ease;
+}
+
+
+@keyframes settingsOpen {
+
+  from {
+    opacity: 0;
+    transform: scale(0.9);
+  }
+
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+
+}
+
+
+/* =========================================
+   SETTINGS HEADER
+========================================= */
+
+.settings-header {
+  display: flex;
+
   justify-content: space-between;
   align-items: center;
-  padding: 18px 30px;
 
-  background: rgba(10, 25, 35, 0.9);
-  border-bottom: 1px solid rgba(0,255,255,0.3);
+  margin-bottom: 20px;
 }
 
-.site-header h1 {
+
+.settings-header h2 {
   margin: 0;
+}
+
+
+.close-settings {
+  border: none;
+
+  background: transparent;
+
+  color: var(--text);
+
   font-size: 22px;
+
+  cursor: pointer;
+
+  transition: 0.2s;
 }
 
-.site-header a {
-  color: #00e5ff;
-  text-decoration: none;
+
+.close-settings:hover {
+  color: var(--accent);
+
+  transform: scale(1.2);
+}
+
+
+/* =========================================
+   SETTINGS SECTION
+========================================= */
+
+.settings-section {
+  text-align: left;
+}
+
+
+.settings-section h3 {
+  margin-bottom: 5px;
+}
+
+
+.settings-description {
+  margin-top: 0;
+
+  color: var(--accent-light);
+
+  font-size: 14px;
+}
+
+
+/* =========================================
+   THEME GRID
+========================================= */
+
+.theme-grid {
+  display: grid;
+
+  grid-template-columns:
+    repeat(3, 1fr);
+
+  gap: 10px;
+
+  margin-top: 20px;
+}
+
+
+.theme-option {
+  border: 1px solid transparent;
+
+  border-radius: 12px;
+
+  padding: 12px 8px;
+
+  background: var(--card);
+
+  color: var(--text);
+
+  cursor: pointer;
+
+  display: flex;
+
+  flex-direction: column;
+
+  align-items: center;
+
+  gap: 7px;
+
+  transition: all 0.2s ease;
+}
+
+
+.theme-option:hover {
+  transform: translateY(-3px);
+
+  border-color: var(--accent);
+
+  box-shadow:
+    0 0 12px var(--shadow);
+}
+
+
+.theme-option.active {
+  border-color: var(--accent);
+
+  box-shadow:
+    0 0 15px var(--glow);
+}
+
+
+.theme-preview {
+  width: 35px;
+  height: 35px;
+
+  border-radius: 50%;
+
+  background: var(--preview-color);
+
+  box-shadow:
+    0 0 12px var(--preview-color);
+}
+
+
+/* =========================================
+   CUSTOM COLOR
+========================================= */
+
+.custom-theme {
+  margin-top: 25px;
+
+  padding-top: 20px;
+
+  border-top:
+    1px solid
+    rgba(255,255,255,0.1);
+}
+
+
+.custom-theme label {
+  display: block;
+
   font-weight: bold;
+
+  margin-bottom: 10px;
 }
 
-.site-header a:hover {
-  text-decoration: underline;
+
+.custom-color-row {
+  display: flex;
+
+  align-items: center;
+
+  gap: 12px;
 }
 
-/* ===== GAME LAYOUT ===== */
+
+#customColor {
+  width: 55px;
+  height: 40px;
+
+  border: none;
+
+  border-radius: 8px;
+
+  background: transparent;
+
+  cursor: pointer;
+}
+
+
+#customColorText {
+  font-family: monospace;
+
+  color: var(--accent-light);
+}
+
+
+/* =========================================
+   RESET
+========================================= */
+
+.reset-theme {
+  width: 100%;
+
+  margin-top: 20px;
+
+  padding: 12px;
+
+  border: none;
+
+  border-radius: 10px;
+
+  background: var(--accent);
+
+  color: #001018;
+
+  font-weight: bold;
+
+  cursor: pointer;
+
+  transition: 0.2s;
+}
+
+
+.reset-theme:hover {
+  transform: translateY(-2px);
+
+  box-shadow:
+    0 0 15px var(--glow);
+}
+
+
+/* =========================================
+   GAME PAGE
+========================================= */
+
+.game-page {
+  background:
+    linear-gradient(
+      135deg,
+      var(--background-1),
+      var(--background-2)
+    );
+}
+
+
+/* =========================================
+   GAME LAYOUT
+========================================= */
 
 .game-layout {
   padding: 20px;
 }
 
+
 #game {
   display: flex;
+
   width: 100%;
 }
 
-/* ===== MOBILE ===== */
+
+/* =========================================
+   MOBILE
+========================================= */
 
 @media (max-width: 900px) {
+
   #left-panel {
     width: 100%;
   }
+
+}
+
+
+@media (max-width: 500px) {
+
+  .site-header {
+    padding: 15px;
+  }
+
+
+  .theme-grid {
+    grid-template-columns:
+      repeat(2, 1fr);
+  }
+
 }

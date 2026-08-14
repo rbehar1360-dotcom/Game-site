@@ -1,67 +1,191 @@
 <!doctype html>
 <html lang="en">
+
 <head>
+
     <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <meta name="theme-color" content="#ffffff">
-    <meta name="description" content="A free and easy to use Calculator app.">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1"
+    >
+
+    <meta
+        name="theme-color"
+        content="#ffffff"
+    >
+
+    <meta
+        name="description"
+        content="A free and easy to use Calculator app."
+    >
+
     <title>Calc</title>
 
 
-<link rel="stylesheet" href="../css/calc.css">
+    <!-- Theme system -->
+    <script src="../js/theme.js"></script>
 
+    <!-- Calculator styling -->
+    <link
+        rel="stylesheet"
+        href="../css/calc.css"
+    >
 
-
-   
 </head>
+
+
 <body>
+
     <div id="Calc">
-    <input id="display" readonly>
 
-    <div id="keys">
+        <input
+            id="display"
+            readonly
+        >
 
-        <!-- Top scientific row -->
-        <button onclick="appendFunction('sin(')">sin</button>
-        <button onclick="appendFunction('cos(')">cos</button>
-        <button onclick="appendFunction('tan(')">tan</button>
-        <button onclick="appendConstant('pi')">π</button>
 
-        <button onclick="appendFunction('sqrt(')">√</button>
-        <button onclick="appendOperator('^')">xʸ</button>
-        <button onclick="appendFunction('log(')">log</button>
-        <button onclick="appendConstant('e')">e</button>
+        <div id="keys">
 
-        <!-- Normal buttons -->
-        <button onclick="appendOperator('+')">+</button>
-        <button onclick="appendToDisplay('7')">7</button>
-        <button onclick="appendToDisplay('8')">8</button>
-        <button onclick="appendToDisplay('9')">9</button>
+            <!-- Scientific buttons -->
 
-        <button onclick="appendOperator('-')">-</button>
-        <button onclick="appendToDisplay('4')">4</button>
-        <button onclick="appendToDisplay('5')">5</button>
-        <button onclick="appendToDisplay('6')">6</button>
+            <button onclick="appendFunction('sin(')">
+                sin
+            </button>
 
-        <button onclick="appendOperator('*')">*</button>
-        <button onclick="appendToDisplay('1')">1</button>
-        <button onclick="appendToDisplay('2')">2</button>
-        <button onclick="appendToDisplay('3')">3</button>
+            <button onclick="appendFunction('cos(')">
+                cos
+            </button>
 
-        <button onclick="appendOperator('/')">/</button>
-        <button onclick="appendToDisplay('0')">0</button>
-        <button onclick="appendToDisplay('.')">.</button>
-        <button onclick="calculate()">=</button>
+            <button onclick="appendFunction('tan(')">
+                tan
+            </button>
 
-        <button onclick="appendToDisplay('(')">(</button>
-        <button onclick="appendToDisplay(')')">)</button>
-        <button onclick="deleteLast()">⌫</button>
-        <button onclick="clearDisplay()">C</button>
+            <button onclick="appendConstant('pi')">
+                π
+            </button>
 
-        <button onclick="toggleMode()" id="mode">DEG</button>
+
+            <button onclick="appendFunction('sqrt(')">
+                √
+            </button>
+
+            <button onclick="appendOperator('^')">
+                xʸ
+            </button>
+
+            <button onclick="appendFunction('log(')">
+                log
+            </button>
+
+            <button onclick="appendConstant('e')">
+                e
+            </button>
+
+
+            <!-- Normal buttons -->
+
+            <button onclick="appendOperator('+')">
+                +
+            </button>
+
+            <button onclick="appendToDisplay('7')">
+                7
+            </button>
+
+            <button onclick="appendToDisplay('8')">
+                8
+            </button>
+
+            <button onclick="appendToDisplay('9')">
+                9
+            </button>
+
+
+            <button onclick="appendOperator('-')">
+                -
+            </button>
+
+            <button onclick="appendToDisplay('4')">
+                4
+            </button>
+
+            <button onclick="appendToDisplay('5')">
+                5
+            </button>
+
+            <button onclick="appendToDisplay('6')">
+                6
+            </button>
+
+
+            <button onclick="appendOperator('*')">
+                *
+            </button>
+
+            <button onclick="appendToDisplay('1')">
+                1
+            </button>
+
+            <button onclick="appendToDisplay('2')">
+                2
+            </button>
+
+            <button onclick="appendToDisplay('3')">
+                3
+            </button>
+
+
+            <button onclick="appendOperator('/')">
+                /
+            </button>
+
+            <button onclick="appendToDisplay('0')">
+                0
+            </button>
+
+            <button onclick="appendToDisplay('.')">
+                .
+            </button>
+
+            <button onclick="calculate()">
+                =
+            </button>
+
+
+            <button onclick="appendToDisplay('(')">
+                (
+            </button>
+
+            <button onclick="appendToDisplay(')')">
+                )
+            </button>
+
+            <button onclick="deleteLast()">
+                ⌫
+            </button>
+
+            <button onclick="clearDisplay()">
+                C
+            </button>
+
+
+            <button
+                onclick="toggleMode()"
+                id="mode"
+            >
+                DEG
+            </button>
+
+        </div>
 
     </div>
-</div>
+
+
+    <!-- Calculator JavaScript -->
+
     <script src="../js/Calc.js"></script>
 
 </body>
+
 </html>

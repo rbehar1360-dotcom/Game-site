@@ -1,17 +1,171 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Ralphs Unblocked games - Play Unblocked Games Online</title>
+  <title>Ralphs Unblocked Games - Play Unblocked Games Online</title>
+
   <link rel="stylesheet" href="css/style.css">
+
+  <!-- Theme system -->
+  <script src="js/theme.js"></script>
+
+  <!-- Game search -->
   <script src="js/Script.js"></script>
 </head>
+
 <body>
 
-  <h1>🎮 Game Hub</h1>
-  <p>Select a game to play</p>
+  <!-- HEADER -->
+  <header class="site-header">
+    <div>
+      <h1>🎮 Game Hub</h1>
+      <p>Select a game to play</p>
+    </div>
+
+    <button id="settingsButton" class="settings-button">
+      ⚙️
+    </button>
+  </header>
 
 
-  <input type="text" id="searchInput" class="searchInput" placeholder="Search games..." onkeyup="FilterGames()">
+  <!-- SETTINGS WINDOW -->
+  <div id="settingsOverlay" class="settings-overlay">
+
+    <div class="settings-window">
+
+      <div class="settings-header">
+        <h2>⚙️ Settings</h2>
+
+        <button id="closeSettings" class="close-settings">
+          ✕
+        </button>
+      </div>
+
+
+      <div class="settings-section">
+
+        <h3>🎨 Theme</h3>
+
+        <p class="settings-description">
+          Choose a theme for the Game Hub.
+        </p>
+
+
+        <!-- PRESET THEMES -->
+
+        <div class="theme-grid">
+
+          <button
+            class="theme-option"
+            data-theme="blue"
+            style="--preview-color: #00e5ff;"
+          >
+            <span class="theme-preview"></span>
+            <span>Cyber Blue</span>
+          </button>
+
+
+          <button
+            class="theme-option"
+            data-theme="purple"
+            style="--preview-color: #b84dff;"
+          >
+            <span class="theme-preview"></span>
+            <span>Galaxy</span>
+          </button>
+
+
+          <button
+            class="theme-option"
+            data-theme="red"
+            style="--preview-color: #ff4d6d;"
+          >
+            <span class="theme-preview"></span>
+            <span>Crimson</span>
+          </button>
+
+
+          <button
+            class="theme-option"
+            data-theme="green"
+            style="--preview-color: #00ff88;"
+          >
+            <span class="theme-preview"></span>
+            <span>Matrix</span>
+          </button>
+
+
+          <button
+            class="theme-option"
+            data-theme="orange"
+            style="--preview-color: #ff9d00;"
+          >
+            <span class="theme-preview"></span>
+            <span>Sunset</span>
+          </button>
+
+
+          <button
+            class="theme-option"
+            data-theme="pink"
+            style="--preview-color: #ff4dcc;"
+          >
+            <span class="theme-preview"></span>
+            <span>Pink</span>
+          </button>
+
+        </div>
+
+
+        <!-- CUSTOM COLOR -->
+
+        <div class="custom-theme">
+
+          <label for="customColor">
+            🌈 Custom Color
+          </label>
+
+          <div class="custom-color-row">
+
+            <input
+              type="color"
+              id="customColor"
+              value="#00e5ff"
+            >
+
+            <span id="customColorText">
+              #00e5ff
+            </span>
+
+          </div>
+
+        </div>
+
+
+        <!-- RESET -->
+
+        <button id="resetTheme" class="reset-theme">
+          ↩ Reset Theme
+        </button>
+
+      </div>
+
+    </div>
+
+  </div>
+
+
+  <!-- SEARCH -->
+
+  <input
+    type="text"
+    id="searchInput"
+    class="searchInput"
+    placeholder="Search games..."
+    onkeyup="FilterGames()"
+  >
+
+
+  <!-- GAME GRID -->
 
   <div class="game-grid">
 
@@ -21,141 +175,184 @@
         <div class="title">How many digits of pi can you name?</div>
       </div>
     </a>
-     <a href="games/snake.html" class="game-link">
+
+
+    <a href="games/snake.html" class="game-link">
       <div class="game-card">
         <img class="icon" src="Game Images/Snake-Game.jpg" alt="Game Icon">
         <div class="title">Snake Game!</div>
       </div>
     </a>
-    
-       <a href="games/Iframetester.html" class="game-link">
+
+
+    <a href="games/Iframetester.html" class="game-link">
       <div class="game-card">
         <img class="icon" src="Game Images/Imainary-I.jpg" alt="Game Icon">
         <div class="title">Iframe Tester</div>
       </div>
     </a>
-    
-   
-     <a href="games/calc.html" class="game-link">
+
+
+    <a href="games/calc.html" class="game-link">
       <div class="game-card">
         <img class="icon" src="Game Images/Calc-Image.png" alt="Game Icon">
         <div class="title">Calculator!</div>
       </div>
     </a>
+
+
     <a href="games/GeometryDash.html" class="game-link">
       <div class="game-card">
         <img class="icon" src="Game Images/Geo-Dash2-img.jpg" alt="Game Icon">
         <div class="title">Geometry Dash</div>
       </div>
     </a>
+
+
     <a href="games/BasketBallLegends2020.html" class="game-link">
       <div class="game-card">
         <img class="icon" src="Game Images/Basket-Legends-Img.jpg" alt="Game Icon">
         <div class="title">Basketball Legends 2020</div>
       </div>
     </a>
-     <a href="games/cookieclicker.html" class="game-link">
+
+
+    <a href="games/cookieclicker.html" class="game-link">
       <div class="game-card">
         <img class="icon" src="Game Images/Cookie-Clicker-Img.jpg" alt="Game Icon">
         <div class="title">Cookie Clicker!</div>
       </div>
     </a>
+
+
     <a href="games/EaglerCraft.html" class="game-link">
       <div class="game-card">
         <img class="icon" src="Game Images/Eagler-Img.jpg" alt="Game Icon">
         <div class="title">Eagler Craft</div>
       </div>
     </a>
+
+
     <a href="games/Chess.html" class="game-link">
       <div class="game-card">
         <img class="icon" src="Game Images/Chess.png" alt="Game Icon">
         <div class="title">Chess!</div>
       </div>
     </a>
-     <a href="games/Snowball.html" class="game-link">
+
+
+    <a href="games/Snowball.html" class="game-link">
       <div class="game-card">
         <img class="icon" src="Game Images/SnowBall.jpg" alt="Game Icon">
         <div class="title">SnowBall.io</div>
       </div>
     </a>
+
+
     <a href="games/SpaceWaves.html" class="game-link">
       <div class="game-card">
         <img class="icon" src="Game Images/space-waves.png" alt="Game Icon">
         <div class="title">Space Waves</div>
       </div>
     </a>
+
+
     <a href="games/Raffle.html" class="game-link">
       <div class="game-card">
         <img class="icon" src="Game Images/Gift2.png" alt="Game Icon">
         <div class="title">Raffle</div>
       </div>
     </a>
+
+
     <a href="games/PressTheButton.html" class="game-link">
       <div class="game-card">
         <img class="icon" src="Game Images/Button.jpg" alt="Game Icon">
         <div class="title">Press The Button!</div>
       </div>
     </a>
+
+
     <a href="games/SlimeRancher.html" class="game-link">
       <div class="game-card">
         <img class="icon" src="Game Images/Slime-Rancher.jpg" alt="Game Icon">
         <div class="title">Slime Rancher!</div>
       </div>
     </a>
-     <a href="games/MineCraftIo.html" class="game-link">
+
+
+    <a href="games/MineCraftIo.html" class="game-link">
       <div class="game-card">
         <img class="icon" src="Game Images/Mine-Craft.io.jpg" alt="Game Icon">
         <div class="title">Mine-Craft.io!</div>
       </div>
     </a>
+
+
     <a href="games/Stickmanhook.html" class="game-link">
       <div class="game-card">
         <img class="icon" src="Game Images/StickMan-hook.jpg" alt="Game Icon">
         <div class="title">Stickman Hook!</div>
       </div>
     </a>
+
+
     <a href="games/Slope.html" class="game-link">
       <div class="game-card">
         <img class="icon" src="Game Images/Slope.webp" alt="Game Icon">
         <div class="title">Slope!</div>
       </div>
     </a>
-     <a href="games/Wordcounter.html" class="game-link">
+
+
+    <a href="games/Wordcounter.html" class="game-link">
       <div class="game-card">
         <img class="icon" src="Game Images/Word-counter.jpg" alt="Game Icon">
         <div class="title">Essay Word Counter!</div>
       </div>
     </a>
+
+
     <a href="https://ralphsportfoliosite.netlify.app" class="game-link">
       <div class="game-card">
         <img class="icon" src="Game Images/Portfolio.jpg" alt="Game Icon">
         <div class="title">Check out my portfolio site!</div>
       </div>
     </a>
+
+
     <a href="games/Motom.html" class="game-link">
       <div class="game-card">
         <img class="icon" src="Game Images/Moto-X3m.jpg" alt="Game Icon">
         <div class="title">Moto 3xm!</div>
       </div>
     </a>
-     <a href="games/SuperMario.html" class="game-link">
+
+
+    <a href="games/SuperMario.html" class="game-link">
       <div class="game-card">
         <img class="icon" src="Game Images/Super-Mario-64.webp" alt="Game Icon">
         <div class="title">Super Mario 64!</div>
       </div>
     </a>
+
+
     <a href="games/LearnHowToFly3.html" class="game-link">
       <div class="game-card">
         <img class="icon" src="Game Images/LearnFly3.ico" alt="Game Icon">
         <div class="title">Learn How to Fly 3!</div>
       </div>
     </a>
+
+
     <a href="games/SansFight.html" class="game-link">
       <div class="game-card">
         <img class="icon" src="Game Images/SansFight.png" alt="Game Icon">
         <div class="title">Undertale Sans Fight!</div>
       </div>
     </a>
+
   </div>
+
 </body>
 </html>

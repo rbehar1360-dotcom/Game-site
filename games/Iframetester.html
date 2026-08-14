@@ -1,65 +1,220 @@
+```html
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+
     <title>Iframe Test Site</title>
+
+    <!-- Game Hub Theme -->
+    <script src="../js/theme.js"></script>
+
     <style>
+
+        /* =========================================
+           PAGE
+        ========================================= */
+
         body {
             margin: 0;
+
             font-family: Arial, sans-serif;
-            background-color: #111;
-            color: white;
+
+            background:
+                linear-gradient(
+                    135deg,
+                    var(--background-1),
+                    var(--background-2),
+                    var(--background-3)
+                );
+
+            color: var(--text);
+
             text-align: center;
+
+            min-height: 100vh;
+
+            transition:
+                background 0.4s ease,
+                color 0.4s ease;
         }
+
+
+        /* =========================================
+           TITLE
+        ========================================= */
 
         h1 {
             margin-top: 20px;
+
+            color: var(--title);
+
+            text-shadow:
+                0 0 10px var(--shadow);
         }
+
+
+        /* =========================================
+           INPUT CONTAINER
+        ========================================= */
 
         .input-container {
             margin: 20px;
         }
 
+
+        /* =========================================
+           INPUT
+        ========================================= */
+
         input {
             width: 60%;
+
             padding: 10px;
+
             font-size: 16px;
+
+            border: 1px solid var(--accent);
+
+            border-radius: 8px;
+
+            background: var(--card);
+
+            color: var(--text);
+
+            box-shadow:
+                0 0 10px var(--shadow);
+
+            transition:
+                border-color 0.25s ease,
+                box-shadow 0.25s ease,
+                background 0.25s ease;
         }
+
+
+        input::placeholder {
+            color: var(--accent-light);
+        }
+
+
+        input:focus {
+            outline: none;
+
+            border-color: var(--accent);
+
+            box-shadow:
+                0 0 15px var(--glow);
+        }
+
+
+        /* =========================================
+           BUTTON
+        ========================================= */
 
         button {
             padding: 10px 15px;
+
             font-size: 16px;
+
             cursor: pointer;
-            background-color: #4CAF50;
+
+            background: var(--accent);
+
             border: none;
-            color: white;
+
+            border-radius: 8px;
+
+            color: #001018;
+
+            font-weight: bold;
+
+            transition:
+                transform 0.2s ease,
+                box-shadow 0.2s ease;
         }
+
+
+        button:hover {
+            transform: translateY(-2px);
+
+            box-shadow:
+                0 0 15px var(--glow);
+        }
+
+
+        /* =========================================
+           IFRAME
+        ========================================= */
 
         iframe {
             width: 90%;
+
             height: 600px;
-            border: 2px solid white;
+
+            border:
+                2px solid
+                var(--accent);
+
+            border-radius: 10px;
+
             margin-top: 20px;
+
+            background: var(--card);
+
+            box-shadow:
+                0 0 20px var(--shadow);
+
+            transition:
+                border-color 0.3s ease,
+                box-shadow 0.3s ease;
         }
+
     </style>
 </head>
+
 <body>
 
     <h1>Iframe Embed Tester</h1>
 
     <div class="input-container">
-        <input type="text" id="urlInput" placeholder="Paste game URL here...">
-        <button onclick="loadGame()">Load</button>
+
+        <input
+            type="text"
+            id="urlInput"
+            placeholder="Paste game URL here..."
+        >
+
+        <button onclick="loadGame()">
+            Load
+        </button>
+
     </div>
 
-    <iframe id="gameFrame"></iframe>
+
+    <iframe
+        id="gameFrame"
+        title="Game Preview"
+    ></iframe>
+
 
     <script>
+
         function loadGame() {
-            const url = document.getElementById("urlInput").value;
-            document.getElementById("gameFrame").src = url;
+
+            const url =
+                document
+                    .getElementById("urlInput")
+                    .value
+                    .trim();
+
+            document
+                .getElementById("gameFrame")
+                .src = url;
+
         }
+
     </script>
 
 </body>
 </html>
+```
