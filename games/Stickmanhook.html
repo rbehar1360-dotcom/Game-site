@@ -6,13 +6,11 @@
 <meta charset="UTF-8">
 
 <meta
-  name="viewport"
-  content="width=device-width, initial-scale=1.0"
+    name="viewport"
+    content="width=device-width, initial-scale=1.0"
 >
 
-<!-- Theme MUST load before the page is displayed -->
 <script src="../js/theme.js"></script>
-
 <script src="../js/Iframes.js"></script>
 
 <title>Stickman Hook</title>
@@ -45,6 +43,7 @@ body {
     transition:
         background 0.4s ease,
         color 0.4s ease;
+
 }
 
 
@@ -126,7 +125,8 @@ body {
     overflow: hidden;
 
     box-shadow:
-        0 10px 30px var(--shadow);
+        0 10px 30px
+        var(--shadow);
 
 }
 
@@ -193,7 +193,8 @@ iframe {
     transform: translateY(-2px);
 
     box-shadow:
-        0 0 15px var(--glow);
+        0 0 15px
+        var(--glow);
 
 }
 
@@ -283,7 +284,7 @@ function goFullscreen() {
 
 
 /* =========================================
-   LOADING SCREEN
+   REMOVE LOADING SCREEN
 ========================================= */
 
 function gameLoaded() {
@@ -319,7 +320,7 @@ function gameLoaded() {
 
 
 <!-- =========================================
-     GAME
+     GAME AREA
 ========================================= -->
 
 <div class="game-wrapper">
@@ -336,7 +337,7 @@ function gameLoaded() {
 
         <iframe
             id="gameFrame"
-            src="${StickmanHookURL}"
+            src="${BasketBallLegends2020URL}"
             allowfullscreen
             onload="gameLoaded()">
         </iframe>
@@ -346,7 +347,8 @@ function gameLoaded() {
 
             document
                 .getElementById("gameFrame")
-                .src = StickmanHookURL;
+                .src =
+                StickmanHookURL;
 
         </script>
 

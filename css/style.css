@@ -61,23 +61,26 @@ body {
    HEADER
 ========================================= */
 
-.site-header {
+.site-header,
+.header {
   display: flex;
-
   justify-content: space-between;
   align-items: center;
-
   padding: 18px 30px;
 
-  background: var(--header);
+  /* Blends dark header base into a slight hint of your accent color on the right */
+  background: linear-gradient(
+    90deg,
+    var(--header) 60%,
+    color-mix(in srgb, var(--header) 70%, var(--accent) 30%) 100%
+  );
 
-  border-bottom:
-    1px solid
-    color-mix(in srgb, var(--accent) 30%, transparent);
+  border-bottom: 
+    1px solid 
+    color-mix(in srgb, var(--accent) 40%, transparent);
 
   backdrop-filter: blur(10px);
 }
-
 
 .site-header h1 {
   margin: 0;
