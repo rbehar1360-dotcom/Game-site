@@ -63,6 +63,8 @@ body {
 
 .site-header,
 .header {
+  position: relative;
+z-index: 1000;
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -619,4 +621,482 @@ body {
       repeat(2, 1fr);
   }
 
+}
+
+/* =========================================
+   HEADER ACTIONS
+========================================= */
+
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+
+/* =========================================
+   LOGIN BUTTON
+========================================= */
+
+.login-button {
+  padding: 11px 18px;
+
+  border: 1px solid var(--accent);
+
+  border-radius: 12px;
+
+  background: var(--card);
+
+  color: var(--text);
+
+  font-size: 15px;
+  font-weight: bold;
+
+  cursor: pointer;
+
+  transition: all 0.25s ease;
+
+  box-shadow:
+    0 0 10px var(--shadow);
+}
+
+
+.login-button:hover {
+  transform: translateY(-2px);
+
+  background: var(--accent);
+
+  color: #001018;
+
+  box-shadow:
+    0 0 18px var(--glow);
+}
+
+/* =========================================
+   LOGIN OVERLAY
+========================================= */
+
+.login-overlay {
+  position: fixed;
+
+  inset: 0;
+
+  background: rgba(0, 0, 0, 0.55);
+
+  backdrop-filter: blur(5px);
+
+  display: none;
+
+  justify-content: center;
+  align-items: center;
+
+  z-index: 9999;
+
+  padding: 20px;
+}
+
+
+.login-overlay.open {
+  display: flex;
+}
+
+
+/* =========================================
+   LOGIN WINDOW
+========================================= */
+
+.login-window {
+  width: 100%;
+
+  max-width: 400px;
+
+  background: var(--header);
+
+  border: 1px solid var(--accent);
+
+  border-radius: 20px;
+
+  padding: 25px;
+
+  box-shadow:
+    0 0 35px var(--shadow);
+
+  backdrop-filter: blur(15px);
+
+  animation: loginOpen 0.2s ease;
+}
+
+
+@keyframes loginOpen {
+
+  from {
+    opacity: 0;
+    transform: scale(0.9);
+  }
+
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+
+}
+
+
+/* =========================================
+   LOGIN HEADER
+========================================= */
+
+.login-header {
+  display: flex;
+
+  justify-content: space-between;
+
+  align-items: center;
+
+  margin-bottom: 10px;
+}
+
+
+.login-header h2 {
+  margin: 0;
+}
+
+
+.close-login {
+  border: none;
+
+  background: transparent;
+
+  color: var(--text);
+
+  font-size: 22px;
+
+  cursor: pointer;
+
+  transition: 0.2s;
+}
+
+
+.close-login:hover {
+  color: var(--accent);
+
+  transform: scale(1.2);
+}
+
+
+/* =========================================
+   LOGIN DESCRIPTION
+========================================= */
+
+.login-description {
+  color: var(--accent-light);
+
+  font-size: 14px;
+
+  margin-bottom: 25px;
+}
+
+
+/* =========================================
+   LOGIN FORM
+========================================= */
+
+#loginForm {
+  display: flex;
+
+  flex-direction: column;
+
+  gap: 10px;
+
+  text-align: left;
+}
+
+
+#loginForm label {
+  font-weight: bold;
+
+  font-size: 14px;
+
+  margin-top: 5px;
+}
+
+
+#loginForm input {
+  padding: 12px;
+
+  border: 1px solid transparent;
+
+  border-radius: 10px;
+
+  background: var(--card);
+
+  color: var(--text);
+
+  font-size: 15px;
+
+  outline: none;
+
+  transition: 0.2s;
+}
+
+
+#loginForm input:focus {
+  border-color: var(--accent);
+
+  box-shadow:
+    0 0 12px var(--shadow);
+}
+
+
+#loginForm input::placeholder {
+  color: var(--accent-light);
+}
+
+
+/* =========================================
+   LOGIN SUBMIT
+========================================= */
+
+.login-submit {
+  margin-top: 15px;
+
+  padding: 12px;
+
+  border: none;
+
+  border-radius: 10px;
+
+  background: var(--accent);
+
+  color: #001018;
+
+  font-size: 15px;
+
+  font-weight: bold;
+
+  cursor: pointer;
+
+  transition: 0.2s;
+}
+
+
+.login-submit:hover {
+  transform: translateY(-2px);
+
+  box-shadow:
+    0 0 18px var(--glow);
+}
+
+
+/* =========================================
+   SIGNUP TEXT
+========================================= */
+
+.signup-text {
+  margin-top: 20px;
+
+  font-size: 14px;
+
+  color: var(--accent-light);
+}
+
+
+.signup-text button {
+  border: none;
+
+  background: transparent;
+
+  color: var(--accent);
+
+  font-weight: bold;
+
+  cursor: pointer;
+}
+
+
+.signup-text button:hover {
+  text-decoration: underline;
+}
+
+/* =========================================
+   ACCOUNT MENU
+========================================= */
+
+.account-menu {
+  position: absolute;
+
+  top: 75px;
+
+  right: 30px;
+
+  width: 240px;
+
+  background: var(--header);
+
+  border: 1px solid var(--accent);
+
+  border-radius: 16px;
+
+  padding: 15px;
+
+  box-shadow:
+    0 0 25px var(--shadow);
+
+  backdrop-filter: blur(15px);
+
+  display: none;
+
+  z-index: 10000;
+
+  text-align: left;
+
+  animation: accountMenuOpen 0.2s ease;
+}
+
+
+.account-menu.open {
+  display: block;
+}
+
+
+@keyframes accountMenuOpen {
+
+  from {
+    opacity: 0;
+    transform: translateY(-8px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+}
+
+
+.account-info {
+  padding: 5px;
+}
+
+
+.account-username {
+  font-size: 18px;
+
+  font-weight: bold;
+
+  color: var(--text);
+}
+
+
+.account-email {
+  margin-top: 4px;
+
+  font-size: 12px;
+
+  color: var(--accent-light);
+
+  word-break: break-word;
+}
+
+
+.account-menu hr {
+  border: none;
+
+  border-top:
+    1px solid
+    rgba(255,255,255,0.1);
+
+  margin: 12px 0;
+}
+
+
+.account-menu button {
+  width: 100%;
+
+  padding: 11px;
+
+  margin: 3px 0;
+
+  border: none;
+
+  border-radius: 9px;
+
+  background: transparent;
+
+  color: var(--text);
+
+  text-align: left;
+
+  font-size: 14px;
+
+  cursor: pointer;
+
+  transition: 0.2s;
+}
+
+
+.account-menu button:hover {
+  background: var(--card);
+
+  color: var(--accent);
+
+  transform: translateX(3px);
+}
+
+/* =========================================
+   GAME WRAPPER
+========================================= */
+
+.game-wrapper {
+  position: relative;
+
+  display: flex;
+
+  flex-direction: column;
+
+  align-items: center;
+}
+
+
+/* =========================================
+   LIKE BUTTON
+========================================= */
+
+.like-button {
+  margin-top: -5px;
+
+  padding: 7px 14px;
+
+  border: none;
+
+  border-radius: 20px;
+
+  background: var(--card);
+
+  color: var(--text);
+
+  font-size: 14px;
+
+  cursor: pointer;
+
+  box-shadow:
+    0 3px 10px var(--shadow);
+
+  transition: all 0.2s ease;
+}
+
+
+.like-button:hover {
+  transform: scale(1.08);
+
+  box-shadow:
+    0 0 15px var(--glow);
+}
+
+
+.like-button.liked {
+  color: var(--accent);
+
+  box-shadow:
+    0 0 15px var(--glow);
 }
