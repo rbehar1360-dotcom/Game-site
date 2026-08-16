@@ -1100,3 +1100,133 @@ z-index: 1000;
   box-shadow:
     0 0 15px var(--glow);
 }
+
+/* =========================================
+   FAVORITE BUTTON
+========================================= */
+
+.favorite-button {
+  border: none;
+
+  background: transparent;
+
+  color: var(--accent-light);
+
+  font-size: 28px;
+
+  cursor: pointer;
+
+  margin-top: 8px;
+
+  padding: 4px 8px;
+
+  border-radius: 10px;
+
+  transition: all 0.2s ease;
+}
+
+
+/* Hover */
+
+.favorite-button:hover {
+  color: var(--accent);
+
+  transform: scale(1.2);
+
+  text-shadow:
+    0 0 8px var(--glow),
+    0 0 18px var(--glow);
+}
+
+
+/* Favorited */
+
+.favorite-button.favorited {
+  color: #ffd700;
+
+  text-shadow:
+    0 0 8px #ffd700,
+    0 0 18px rgba(255, 215, 0, 0.7);
+}
+
+
+/* Click animation */
+
+.favorite-button:active {
+  transform: scale(0.9);
+}
+
+
+/* =========================================
+   LIKE + FAVORITE LAYOUT
+========================================= */
+
+.game-wrapper {
+  position: relative;
+
+  display: flex;
+
+  flex-direction: column;
+
+  align-items: center;
+}
+
+
+/* Put the buttons beside each other */
+
+.like-button,
+.favorite-button {
+  display: inline-flex;
+
+  align-items: center;
+
+  justify-content: center;
+}
+
+
+/* Button row */
+
+.game-wrapper > .favorite-button,
+.game-wrapper > .like-button {
+  margin-left: 4px;
+  margin-right: 4px;
+}
+
+
+/* =========================================
+   LIKE BUTTON
+========================================= */
+
+.like-button {
+  border: none;
+
+  background: transparent;
+
+  color: var(--text);
+
+  font-size: 15px;
+
+  cursor: pointer;
+
+  padding: 6px 10px;
+
+  border-radius: 10px;
+
+  transition: all 0.2s ease;
+}
+
+
+.like-button:hover {
+  transform: scale(1.1);
+
+  background: rgba(255,255,255,0.08);
+
+  box-shadow:
+    0 0 10px var(--shadow);
+}
+
+
+.like-button.liked {
+  text-shadow:
+    0 0 8px rgba(255, 0, 0, 0.7);
+}

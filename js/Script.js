@@ -1,7 +1,7 @@
 function FilterGames() {
     const input = document.getElementById('searchInput');
     const filter = input.value.toLowerCase().trim();
-    const gameLinks = document.getElementsByClassName('game-link');
+    const gameLinks = document.getElementsByClassName('game-wrapper');
 
     const fuzzyPattern = new RegExp(filter.split('').join('.*'), 'i');
 
@@ -175,10 +175,12 @@ loginForm.addEventListener("submit", async function(event) {
 
         console.log("Logged in:", data);
 
-        alert("Login successful! 🎉");
+alert("Login successful! 🎉");
 
-        loginOverlay.classList.remove("open");
+loginOverlay.classList.remove("open");
 
+// Immediately update the account button
+await updateAccountUI();
     }
 
 });
@@ -253,6 +255,33 @@ loginButton.addEventListener("click", async function() {
     }
 
     accountMenu.classList.toggle("open");
+
+});
+
+// =========================================
+// CLOSE ACCOUNT MENU WHEN CLICKING OUTSIDE
+// =========================================
+
+document.addEventListener("click", function(event) {
+
+    // If the menu isn't open, nothing to do
+    if (!accountMenu.classList.contains("open")) {
+        return;
+    }
+
+    // If we clicked the account button, let its own
+    // click handler handle opening/closing
+    if (loginButton.contains(event.target)) {
+        return;
+    }
+
+    // If we clicked inside the account menu, keep it open
+    if (accountMenu.contains(event.target)) {
+        return;
+    }
+
+    // Otherwise, close the menu
+    accountMenu.classList.remove("open");
 
 });
 
@@ -567,3 +596,260 @@ document.querySelectorAll(".game-link").forEach(link => {
     });
 
 });
+
+// =========================================
+// GAME FAVORITES
+// =========================================
+
+async function setupFavorites() {
+
+    const gameWrappers =
+        document.querySelectorAll(".game-wrapper");
+
+
+    for (const wrapper of gameWrappers) {
+
+        const gameId =
+            wrapper.dataset.gameId;
+
+        const favoriteButton =
+            wrapper.querySelector(".favorite-button");
+
+
+        if (!favoriteButton) {
+            continue;
+        }
+
+
+        // =========================================
+        // CHECK CURRENT USER
+        // =========================================
+
+        const { data: userData } =
+            await supabaseClient.auth.getUser();
+
+        const user = userData.user;
+
+
+        // Not logged in → leave star empty
+        if (!user) {
+            favoriteButton.textContent = "☆";
+            continue;
+        }
+
+
+        // =========================================
+        // CHECK IF ALREADY FAVORITED
+        // =========================================
+
+        const { data: existingFavorite, error } =
+            await supabaseClient
+
+                .from("favorites")
+
+                .select("id")
+
+                .eq("user_id", user.id)
+
+                .eq("game_id", gameId)
+
+                .maybeSingle();
+
+
+        if (error) {
+
+            console.error(
+                "Could not check favorite:",
+                error
+            );
+
+            continue;
+        }
+
+
+        if (existingFavorite) {
+
+    favoriteButton.textContent = "★";
+
+    favoriteButton.classList.add("favorited");
+
+} else {
+
+    favoriteButton.textContent = "☆";
+
+    favoriteButton.classList.remove("favorited");
+
+}
+
+        // =========================================
+        // FAVORITE BUTTON CLICK
+        // =========================================
+
+        favoriteButton.addEventListener(
+            "click",
+            async function(event) {
+
+                event.preventDefault();
+                event.stopPropagation();
+
+
+                // Check login again
+                const { data: currentUserData } =
+                    await supabaseClient.auth.getUser();
+
+                const currentUser =
+                    currentUserData.user;
+
+
+                if (!currentUser) {
+
+                    alert(
+                        "Please log in to favorite games! ⭐"
+                    );
+
+                    return;
+                }
+
+
+                // Check if favorite exists
+                const { data: favorite } =
+                    await supabaseClient
+
+                        .from("favorites")
+
+                        .select("id")
+
+                        .eq(
+                            "user_id",
+                            currentUser.id
+                        )
+
+                        .eq(
+                            "game_id",
+                            gameId
+                        )
+
+                        .maybeSingle();
+
+
+                // =========================================
+                // REMOVE FAVORITE
+                // =========================================
+
+                if (favorite) {
+
+    const { error } = await supabaseClient
+        .from("favorites")
+        .delete()
+        .eq("id", favorite.id);
+
+    if (error) {
+
+        console.error(
+            "Could not remove favorite:",
+            error
+        );
+
+        return;
+    }
+
+    favoriteButton.textContent = "☆";
+
+    favoriteButton.classList.remove("favorited");
+
+    await sortFavoriteGames();
+}
+
+
+                // =========================================
+                // ADD FAVORITE
+                // =========================================
+
+                // ADD FAVORITE
+else {
+
+    const { error } = await supabaseClient
+        .from("favorites")
+        .insert({
+            user_id: user.id,
+            game_id: gameId
+        });
+
+    if (error) {
+        console.error(error);
+        return;
+    }
+
+    favoriteButton.textContent = "★";
+
+    await sortFavoriteGames();
+}
+
+            }
+        );
+
+    }
+
+}
+
+
+setupFavorites();
+
+// =========================================
+// SORT FAVORITES TO TOP
+// =========================================
+
+async function sortFavoriteGames() {
+
+    const { data: userData } =
+        await supabaseClient.auth.getUser();
+
+    const user = userData.user;
+
+    if (!user) return;
+
+    const { data: favorites, error } =
+        await supabaseClient
+            .from("favorites")
+            .select("game_id")
+            .eq("user_id", user.id);
+
+    if (error) {
+        console.error("Could not get favorites:", error);
+        return;
+    }
+
+    const favoriteIds = new Set(
+        favorites.map(favorite => favorite.game_id)
+    );
+
+    const gameGrid =
+        document.querySelector(".game-grid");
+
+    const games =
+        Array.from(
+            gameGrid.querySelectorAll(".game-wrapper")
+        );
+
+    games.sort((a, b) => {
+
+        const aFavorite =
+            favoriteIds.has(a.dataset.gameId);
+
+        const bFavorite =
+            favoriteIds.has(b.dataset.gameId);
+
+        if (aFavorite && !bFavorite) return -1;
+        if (!aFavorite && bFavorite) return 1;
+
+        return 0;
+    });
+
+    games.forEach(game => {
+        gameGrid.appendChild(game);
+    });
+
+    console.log("⭐ Favorites sorted to top!");
+}
+
+sortFavoriteGames();
