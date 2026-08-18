@@ -60,21 +60,217 @@
 
       <hr>
 
-      <button id="favoritesButton">
-        ❤️ Favorites
-      </button>
+<div class="coin-balance">
 
-      <button id="statsButton">
-        📊 My Stats
-      </button>
+    <span>
+        🪙 Coins
+    </span>
 
-      <button id="logoutButton">
-        🚪 Logout
-      </button>
+    <strong id="coinBalance">
+        0
+    </strong>
+
+</div>
+
+<button id="favoritesButton">
+    ❤️ Favorites
+</button>
+
+<button id="statsButton">
+    📊 My Stats
+</button>
+
+<button id="shopButton">
+    🛒 Shop
+</button>
+
+<button id="logoutButton">
+    🚪 Logout
+</button>
 
     </div>
 
   </header>
+  <!-- =========================================
+     STATS WINDOW
+========================================== -->
+<!-- =========================================
+     SHOP WINDOW
+========================================= -->
+
+<div id="shopOverlay" class="shop-overlay">
+
+    <div class="shop-window">
+
+        <div class="shop-header">
+
+            <div>
+
+                <h2>🛒 Shop</h2>
+
+                <p>
+                    Spend your hard-earned coins!
+                </p>
+
+            </div>
+
+            <button
+                id="closeShop"
+                class="close-shop"
+            >
+                ✕
+            </button>
+
+        </div>
+
+
+        <div class="shop-balance">
+
+            🪙
+
+            <span id="shopCoinBalance">
+                0
+            </span>
+
+            coins
+
+        </div>
+
+
+        <div
+            id="shopItems"
+            class="shop-items"
+        >
+
+            <p>
+                Loading shop...
+            </p>
+
+        </div>
+
+    </div>
+
+</div>
+<div id="statsOverlay" class="stats-overlay">
+
+    <div class="stats-window">
+
+        <div class="stats-header">
+
+            <h2>📊 My Stats</h2>
+
+            <button
+                id="closeStats"
+                class="close-stats"
+            >
+                ✕
+            </button>
+
+        </div>
+
+
+        <div class="stats-content">
+
+            <!-- TOTAL PLAYTIME -->
+
+            <div class="stat-card">
+
+                <div class="stat-icon">
+                    ⏱️
+                </div>
+
+                <div>
+
+                    <div class="stat-label">
+                        Total Playtime
+                    </div>
+
+                    <div
+                        id="totalPlaytime"
+                        class="stat-value"
+                    >
+                        0m
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <!-- GAMES PLAYED -->
+
+            <div class="stat-card">
+
+                <div class="stat-icon">
+                    🎮
+                </div>
+
+                <div>
+
+                    <div class="stat-label">
+                        Games Played
+                    </div>
+
+                    <div
+                        id="gamesPlayed"
+                        class="stat-value"
+                    >
+                        0
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <!-- MOST PLAYED -->
+
+            <div class="stat-card">
+
+                <div class="stat-icon">
+                    🏆
+                </div>
+
+                <div>
+
+                    <div class="stat-label">
+                        Most Played
+                    </div>
+
+                    <div
+                        id="mostPlayed"
+                        class="stat-value"
+                    >
+                        None yet
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <!-- GAME BREAKDOWN -->
+
+            <div class="stats-games">
+
+                <h3>
+                    🎮 Game Playtime
+                </h3>
+
+                <div
+                    id="playtimeList"
+                    class="playtime-list"
+                >
+                    <p>Loading...</p>
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
 
 
   <!-- =========================================
