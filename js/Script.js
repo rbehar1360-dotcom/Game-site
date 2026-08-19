@@ -1731,6 +1731,8 @@ function addChatMessage(message) {
     messageElement.className =
         "chat-message";
 
+    messageElement.dataset.messageId = message.id;
+
 
     const currentUser =
         supabaseClient.auth.getUser();
@@ -1890,6 +1892,10 @@ const chatChannel =
 
         .channel("general-chat")
 
+        // =========================================
+        // NEW MESSAGE
+        // =========================================
+
         .on(
             "postgres_changes",
             {
@@ -1901,34 +1907,54 @@ const chatChannel =
 
             function (payload) {
 
-                // Don't add the message if
-                // chat isn't open.
-
                 if (
-                    !chatOverlay.classList.contains(
-                        "open"
-                    )
+                    !chatOverlay.classList.contains("open")
                 ) {
-
                     return;
-
                 }
 
-
-                addChatMessage(
-                    payload.new
-                );
-
+                addChatMessage(payload.new);
 
                 scrollChatToBottom();
 
             }
-
         )
 
+
+        // =========================================
+        // DELETED MESSAGE
+        // =========================================
+
+        .on(
+            "postgres_changes",
+            {
+                event: "DELETE",
+                schema: "public",
+                table: "chat_messages"
+            },
+
+            function (payload) {
+
+                const deletedMessage =
+                    document.querySelector(
+                        `[data-message-id="${payload.old.id}"]`
+                    );
+
+                if (deletedMessage) {
+
+                    deletedMessage.remove();
+
+                }
+
+            }
+        )
+
+
+        // =========================================
+        // CONNECT TO REALTIME
+        // =========================================
+
         .subscribe();
-
-
 // =========================================
 // SCROLL CHAT
 // =========================================
@@ -1939,3 +1965,4 @@ function scrollChatToBottom() {
         chatMessages.scrollHeight;
 
 }
+
