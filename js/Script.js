@@ -1584,3 +1584,358 @@ async function buyShopItem(
     await loadShop();
 
 }
+
+// =========================================
+// CHAT SYSTEM
+// =========================================
+
+const chatButton = document.getElementById("chatButton");
+const chatOverlay = document.getElementById("chatOverlay");
+const closeChat = document.getElementById("closeChat");
+
+const chatMessages = document.getElementById("chatMessages");
+const chatForm = document.getElementById("chatForm");
+const chatInput = document.getElementById("chatInput");
+
+
+// =========================================
+// OPEN CHAT
+// =========================================
+
+chatButton.addEventListener("click", async function () {
+
+    const user = await getCurrentUser();
+
+    if (!user) {
+
+        alert("Please log in to use chat! 💬");
+
+        loginOverlay.classList.add("open");
+
+        return;
+    }
+
+    chatOverlay.classList.add("open");
+
+    await loadChatMessages();
+
+    chatInput.focus();
+
+});
+
+
+// =========================================
+// CLOSE CHAT
+// =========================================
+
+closeChat.addEventListener("click", function () {
+
+    chatOverlay.classList.remove("open");
+
+});
+
+
+// =========================================
+// CLICK OUTSIDE CHAT
+// =========================================
+
+chatOverlay.addEventListener("click", function (event) {
+
+    if (event.target === chatOverlay) {
+
+        chatOverlay.classList.remove("open");
+
+    }
+
+});
+
+
+// =========================================
+// LOAD MESSAGES
+// =========================================
+
+async function loadChatMessages() {
+
+    chatMessages.innerHTML =
+        `<div class="chat-loading">
+            Loading messages...
+        </div>`;
+
+
+    const { data, error } = await supabaseClient
+
+        .from("chat_messages")
+
+        .select("*")
+
+        .eq("channel", "general")
+
+        .order("created_at", {
+            ascending: true
+        })
+
+        .limit(100);
+
+
+    if (error) {
+
+        console.error(
+            "Could not load chat:",
+            error
+        );
+
+        chatMessages.innerHTML =
+            `<div class="chat-loading">
+                Could not load messages.
+            </div>`;
+
+        return;
+    }
+
+
+    chatMessages.innerHTML = "";
+
+
+    if (!data || data.length === 0) {
+
+        chatMessages.innerHTML =
+            `<div class="chat-empty">
+                No messages yet. Be the first! 👀
+            </div>`;
+
+        return;
+    }
+
+
+    data.forEach(message => {
+
+        addChatMessage(message);
+
+    });
+
+
+    scrollChatToBottom();
+
+}
+
+
+// =========================================
+// DISPLAY MESSAGE
+// =========================================
+
+function addChatMessage(message) {
+
+    const messageElement =
+        document.createElement("div");
+
+    messageElement.className =
+        "chat-message";
+
+
+    const currentUser =
+        supabaseClient.auth.getUser();
+
+
+    // Username
+
+    const username =
+        document.createElement("div");
+
+    username.className =
+        "chat-message-username";
+
+    username.textContent =
+        message.username;
+
+
+    // Message
+
+    const content =
+        document.createElement("div");
+
+    content.className =
+        "chat-message-content";
+
+    // IMPORTANT:
+    // textContent prevents HTML injection
+
+    content.textContent =
+        message.content;
+
+
+    // Time
+
+    const time =
+        document.createElement("div");
+
+    time.className =
+        "chat-message-time";
+
+    const date =
+        new Date(message.created_at);
+
+    time.textContent =
+        date.toLocaleTimeString([], {
+            hour: "numeric",
+            minute: "2-digit"
+        });
+
+
+    messageElement.appendChild(username);
+
+    messageElement.appendChild(content);
+
+    messageElement.appendChild(time);
+
+
+    chatMessages.appendChild(
+        messageElement
+    );
+
+}
+
+
+// =========================================
+// SEND MESSAGE
+// =========================================
+
+chatForm.addEventListener(
+    "submit",
+    async function (event) {
+
+        event.preventDefault();
+
+
+        const content =
+            chatInput.value.trim();
+
+
+        if (!content) {
+            return;
+        }
+
+
+        const user =
+            await getCurrentUser();
+
+
+        if (!user) {
+
+            alert(
+                "Please log in to send messages!"
+            );
+
+            return;
+        }
+
+
+        const username =
+            user.user_metadata?.username ||
+            "User";
+
+
+        chatInput.disabled = true;
+
+
+        const { error } =
+            await supabaseClient
+
+                .from("chat_messages")
+
+                .insert({
+
+                    user_id: user.id,
+
+                    username: username,
+
+                    content: content,
+
+                    channel: "general"
+
+                });
+
+
+        if (error) {
+
+            console.error(
+                "Could not send message:",
+                error
+            );
+
+            alert(
+                "Could not send message."
+            );
+
+        } else {
+
+            chatInput.value = "";
+
+        }
+
+
+        chatInput.disabled = false;
+
+        chatInput.focus();
+
+    }
+);
+
+
+// =========================================
+// REALTIME CHAT
+// =========================================
+
+const chatChannel =
+    supabaseClient
+
+        .channel("general-chat")
+
+        .on(
+            "postgres_changes",
+            {
+                event: "INSERT",
+                schema: "public",
+                table: "chat_messages",
+                filter: "channel=eq.general"
+            },
+
+            function (payload) {
+
+                // Don't add the message if
+                // chat isn't open.
+
+                if (
+                    !chatOverlay.classList.contains(
+                        "open"
+                    )
+                ) {
+
+                    return;
+
+                }
+
+
+                addChatMessage(
+                    payload.new
+                );
+
+
+                scrollChatToBottom();
+
+            }
+
+        )
+
+        .subscribe();
+
+
+// =========================================
+// SCROLL CHAT
+// =========================================
+
+function scrollChatToBottom() {
+
+    chatMessages.scrollTop =
+        chatMessages.scrollHeight;
+
+}
