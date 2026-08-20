@@ -1700,7 +1700,7 @@ async function loadChatMessages() {
 
         chatMessages.innerHTML =
             `<div class="chat-empty">
-                No messages yet. Be the first! 👀
+              
             </div>`;
 
         return;
@@ -1904,6 +1904,7 @@ const chatChannel =
                 table: "chat_messages",
                 filter: "channel=eq.general"
             },
+
 
             function (payload) {
 
