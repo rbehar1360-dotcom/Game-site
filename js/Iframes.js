@@ -16,3 +16,4 @@ const PaperMinecraftURL = "https://scratch.mit.edu/projects/10128407/embed";
 const DinoGameURL = "https://dinosaur-game.io/";
 const ChessEngineURL = "https://ralphschessengine.netlify.app";
 const SpaceWavesURL = "https://spacewaves.io/";
+const SlimeRancherURL = "https://dev.snubby.top/play/";
