@@ -89,6 +89,10 @@
 <button id="logoutButton">
     🚪 Logout
 </button>
+<button id="messagesButton">
+    ✉️ Messages
+    <span id="unreadMessagesBadge" class="unread-messages-badge">0</span>
+</button>
 
     </div>
 
@@ -553,6 +557,146 @@
             </button>
 
         </form>
+
+    </div>
+
+</div>
+<!-- =========================================
+     PRIVATE MESSAGES / INBOX
+========================================== -->
+
+<div id="messagesOverlay" class="messages-overlay">
+
+    <div class="messages-window">
+
+        <!-- HEADER -->
+        <div class="messages-header">
+
+            <div>
+                <h2>✉️ Messages</h2>
+                <span class="messages-subtitle">
+                    Private conversations
+                </span>
+            </div>
+
+            <button
+                id="closeMessages"
+                class="close-messages"
+            >
+                ✕
+            </button>
+
+        </div>
+
+
+        <!-- MAIN CONTENT -->
+        <div class="messages-body">
+
+            <!-- CONVERSATION LIST -->
+            <div class="conversation-list">
+
+                <div class="conversation-search">
+
+    <button
+        id="newMessageButton"
+        class="new-message-button"
+    >
+        + New Message
+    </button>
+
+    <input
+        type="text"
+        id="messageUserSearch"
+        placeholder="Search conversations..."
+        autocomplete="off"
+    >
+
+</div>
+
+                <div
+                    id="conversationList"
+                    class="conversation-items"
+                >
+                    <div class="messages-loading">
+                        Loading conversations...
+                    </div>
+                </div>
+
+            </div>
+
+
+            <!-- CURRENT CONVERSATION -->
+            <div class="private-chat">
+
+                <div
+                    id="privateChatHeader"
+                    class="private-chat-header"
+                >
+                    <div class="private-chat-user">
+                        <div
+                            id="privateChatUsername"
+                            class="private-chat-username"
+                        >
+                            Select a conversation
+                        </div>
+
+                        <div
+                            id="privateChatStatus"
+                            class="private-chat-status"
+                        >
+                            Choose someone to start messaging
+                        </div>
+                    </div>
+                </div>
+
+
+                <div
+                    id="privateMessages"
+                    class="private-messages"
+                >
+                    <div class="private-empty">
+                        <div class="private-empty-icon">
+                            ✉️
+                        </div>
+
+                        <h3>Your messages</h3>
+
+                        <p>
+                            Select a conversation to view your
+                            private messages.
+                        </p>
+                    </div>
+                </div>
+
+
+                <!-- SEND -->
+                <form
+                    id="privateMessageForm"
+                    class="private-message-input"
+                >
+
+                    <input
+                        type="text"
+                        id="privateMessageInput"
+                        placeholder="Type a message..."
+                        maxlength="2000"
+                        autocomplete="off"
+                        disabled
+                    >
+
+                    <button
+                        type="submit"
+                        disabled
+                        id="privateMessageSend"
+                    >
+                        ➤
+                    </button>
+
+                </form>
+
+            </div>
+
+        </div>
 
     </div>
 
