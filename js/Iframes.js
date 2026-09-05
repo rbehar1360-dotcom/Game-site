@@ -19,3 +19,4 @@ const SpaceWavesURL = "https://spacewaves.io/";
 const SlimeRancherURL = "https://dev.snubby.top/play/";
 const PVZURL = "https://totalclick.org/games/pvz/game/index.html";
 const SubwaySurfersURL = "https://totalclick.org/games/subwaysurfers/game/index.html";
+const AntArtURL = "https://totalclick.org/games/antarttycoon/game/index.html";
