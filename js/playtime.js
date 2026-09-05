@@ -119,13 +119,26 @@
     // SAFE LOOP (Recursive setTimeout prevents overlapping calls)
     // =========================================
 
-    async function trackerLoop() {
-        if (document.visibilityState === "visible") {
-            await savePlaytime();
-        }
-        setTimeout(trackerLoop, 5000);
+    // =========================================
+// TRACKER LOOP
+// =========================================
+function isGameActive() {
+    const cssFullscreen =
+        document.querySelector(".game-container.css-fullscreen");
+
+    return (
+        document.visibilityState === "visible" ||
+        cssFullscreen !== null
+    );
+}
+async function trackerLoop() {
+
+    if (isGameActive()) {
+        await savePlaytime();
     }
 
+    setTimeout(trackerLoop, 5000);
+}
     // Start loop
     trackerLoop();
 
