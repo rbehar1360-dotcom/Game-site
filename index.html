@@ -81,7 +81,9 @@
 <button id="statsButton">
     📊 My Stats
 </button>
-
+<button id="leaderboardButton">
+    🏆 Leaderboard
+</button>
 <button id="shopButton">
     🛒 Shop
 </button>
@@ -275,9 +277,53 @@
         </div>
 
     </div>
+    
 
 </div>
+<!-- =========================================
+     PLAYTIME LEADERBOARD
+========================================= -->
 
+<div id="leaderboardOverlay" class="leaderboard-overlay">
+
+    <div class="leaderboard-window">
+
+        <div class="leaderboard-header">
+
+            <div>
+                <h2>🏆 Playtime Leaderboard</h2>
+
+                <p>
+                    Who has spent the most time gaming?
+                </p>
+            </div>
+
+            <button
+                id="closeLeaderboard"
+                class="close-leaderboard"
+            >
+                ✕
+            </button>
+
+        </div>
+
+        <select id="leaderboardGame">
+            <option value="">
+                🌎 All Games
+            </option>
+        </select>
+
+        <div id="leaderboardList">
+
+            <div class="leaderboard-loading">
+                Loading leaderboard...
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
 
   <!-- =========================================
        SETTINGS WINDOW
@@ -1547,7 +1593,79 @@
   </div>
 
 
-  <!-- UNDERTALE SANS FIGHT -->
+
+  <div class="game-wrapper" data-game-id="PVZ">
+
+    <a href="games/PVZ.html" class="game-link">
+
+      <div class="game-card">
+
+        <img
+          class="icon"
+          src="Game Images/PVZ.jpg"
+          alt="Game Icon"
+        >
+
+        <div class="title">
+          Plants vs. Zombies!
+        </div>
+
+      </div>
+
+    </a>
+
+    <div class="game-actions">
+
+      <button
+        class="favorite-button"
+        aria-label="Add Plants vs. Zombies to favorites"
+      >
+        ☆
+      </button>
+
+      <button class="like-button">
+        ❤️ <span class="like-count">0</span>
+      </button>
+
+    </div>
+
+  </div>
+  <div class="game-wrapper" data-game-id="SubwaySurfers">
+
+    <a href="games/SubwaySurfers.html" class="game-link">
+
+      <div class="game-card">
+
+        <img
+          class="icon"
+          src="Game Images/SubwaySurfers.png"
+          alt="Game Icon"
+        >
+
+        <div class="title">
+          Subway Surfers!
+        </div>
+
+      </div>
+
+    </a>
+
+    <div class="game-actions">
+
+      <button
+        class="favorite-button"
+        aria-label="Add Subway Surfers to favorites"
+      >
+        ☆
+      </button>
+
+      <button class="like-button">
+        ❤️ <span class="like-count">0</span>
+      </button>
+
+    </div>
+
+  </div>
   <div class="game-wrapper" data-game-id="sans-fight">
 
     <a href="games/SansFight.html" class="game-link">
@@ -1584,6 +1702,7 @@
     </div>
 
   </div>
+  
 <div class="game-wrapper" data-game-id="Math-IQ">
 
     <a href="https://sites.google.com/hartdistrict.org/mathc/alg-2" target="_blank" class="game-link" onclick="event.stopPropagation();">

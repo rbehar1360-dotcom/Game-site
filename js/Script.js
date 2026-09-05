@@ -2903,167 +2903,357 @@ async function setupPrivateMessageRealtime() {
 
 setupPrivateMessageRealtime();
 
+// =========================================
+// PLAYTIME LEADERBOARD
+// =========================================
+
+const leaderboardButton =
+    document.getElementById("leaderboardButton");
+
+const leaderboardOverlay =
+    document.getElementById("leaderboardOverlay");
+
+const closeLeaderboard =
+    document.getElementById("closeLeaderboard");
+
+const leaderboardList =
+    document.getElementById("leaderboardList");
+
+const leaderboardGame =
+    document.getElementById("leaderboardGame");
+
 
 // =========================================
-// NEW PRIVATE MESSAGE
+// FORMAT PLAYTIME
 // =========================================
 
-const newMessageButton =
-    document.getElementById("newMessageButton");
+function formatLeaderboardTime(seconds) {
 
-const messageUserSearch =
-    document.getElementById("messageUserSearch");
+    seconds = Number(seconds) || 0;
 
+    const days = Math.floor(seconds / 86400);
 
-newMessageButton.addEventListener(
-    "click",
-    async function () {
+    const hours = Math.floor(
+        (seconds % 86400) / 3600
+    );
 
-        const user =
-            await getCurrentUser();
+    const minutes = Math.floor(
+        (seconds % 3600) / 60
+    );
 
-        if (!user) {
-            alert("Please log in first.");
-            return;
-        }
-
-        // Change the search box into a username search
-        messageUserSearch.value = "";
-        messageUserSearch.placeholder =
-            "Enter a username...";
-
-        messageUserSearch.focus();
-
-        conversationList.innerHTML = `
-            <div class="messages-loading">
-                Search for a username above.
-            </div>
-        `;
-
+    if (days > 0) {
+        return `${days}d ${hours}h ${minutes}m`;
     }
-);
+
+    if (hours > 0) {
+        return `${hours}h ${minutes}m`;
+    }
+
+    if (minutes > 0) {
+        return `${minutes}m`;
+    }
+
+    return `${seconds}s`;
+}
 
 
 // =========================================
-// SEARCH FOR USER
+// LOAD LEADERBOARD
 // =========================================
 
-let userSearchTimeout = null;
+async function loadPlaytimeLeaderboard() {
 
-messageUserSearch.addEventListener(
-    "input",
-    function () {
+    leaderboardList.innerHTML = `
+        <div class="leaderboard-loading">
+            Loading leaderboard...
+        </div>
+    `;
 
-        clearTimeout(userSearchTimeout);
+    const gameId =
+        leaderboardGame.value || null;
 
-        const username =
-            messageUserSearch.value.trim();
-
-        if (!username) {
-
-            conversationList.innerHTML = `
-                <div class="messages-loading">
-                    Enter a username to search.
-                </div>
-            `;
-
-            return;
-        }
-
-
-        userSearchTimeout = setTimeout(
-            () => searchForMessageUser(username),
-            300
+    const { data, error } =
+        await supabaseClient.rpc(
+            "get_playtime_leaderboard",
+            {
+                p_game_id: gameId,
+                p_limit: 25
+            }
         );
 
-    }
-);
+    if (error) {
 
+        console.error(
+            "Could not load playtime leaderboard:",
+            error
+        );
 
-// =========================================
-// SEARCH USER
-// =========================================
-
-async function searchForMessageUser(username) {
-
-    const currentUser =
-        await getCurrentUser();
-
-    if (!currentUser) return;
-
-
-    conversationList.innerHTML = `
-        <div class="messages-loading">
-            Searching...
-        </div>
-    `;
-
-
-    const foundUser =
-        await findUserByUsername(username);
-
-
-    conversationList.innerHTML = "";
-
-
-    if (!foundUser) {
-
-        conversationList.innerHTML = `
-            <div class="messages-loading">
-                No user found.
+        leaderboardList.innerHTML = `
+            <div class="leaderboard-loading">
+                Could not load leaderboard.
             </div>
         `;
 
         return;
-
     }
 
 
-    // Don't allow messaging yourself
-    if (foundUser.id === currentUser.id) {
+    leaderboardList.innerHTML = "";
 
-        conversationList.innerHTML = `
-            <div class="messages-loading">
-                You can't message yourself.
+
+    if (!data || data.length === 0) {
+
+        leaderboardList.innerHTML = `
+            <div class="leaderboard-loading">
+                No playtime recorded yet.
             </div>
         `;
 
         return;
-
     }
 
 
-    const item =
-        document.createElement("div");
+    data.forEach((player, index) => {
 
-    item.className =
-        "conversation-item";
+        const row =
+            document.createElement("div");
+
+        row.className =
+            "leaderboard-row";
 
 
-    item.innerHTML = `
-        <div class="conversation-name">
-            ${escapePrivateHTML(foundUser.username)}
-        </div>
+        const rank =
+            document.createElement("div");
 
-        <div class="conversation-preview">
-            Start a conversation
-        </div>
+        rank.className =
+            "leaderboard-rank";
+
+
+        if (index === 0) {
+            rank.textContent = "🥇";
+        }
+
+        else if (index === 1) {
+            rank.textContent = "🥈";
+        }
+
+        else if (index === 2) {
+            rank.textContent = "🥉";
+        }
+
+        else {
+            rank.textContent = `#${index + 1}`;
+        }
+
+
+        const username =
+            document.createElement("div");
+
+        username.className =
+            "leaderboard-username";
+
+        username.textContent =
+            player.username || "Unknown User";
+
+
+        const time =
+            document.createElement("div");
+
+        time.className =
+            "leaderboard-time";
+
+        time.textContent =
+            formatLeaderboardTime(
+                player.playtime_seconds
+            );
+
+
+        row.appendChild(rank);
+        row.appendChild(username);
+        row.appendChild(time);
+
+        leaderboardList.appendChild(row);
+
+    });
+
+}
+
+
+// =========================================
+// POPULATE GAME SELECTOR
+// =========================================
+
+function setupLeaderboardGames() {
+
+    if (!leaderboardGame) return;
+
+    leaderboardGame.innerHTML = `
+        <option value="">
+            🌎 All Games
+        </option>
     `;
 
 
-    item.addEventListener(
+    const wrappers =
+        document.querySelectorAll(
+            ".game-wrapper[data-game-id]"
+        );
+
+
+    const games = [];
+
+
+    wrappers.forEach(wrapper => {
+
+        const gameId =
+            wrapper.dataset.gameId;
+
+        const titleElement =
+            wrapper.querySelector(".title");
+
+        if (!gameId) return;
+
+        const title =
+            titleElement
+                ? titleElement.textContent.trim()
+                : gameId;
+
+
+        if (
+            !games.some(
+                game => game.id === gameId
+            )
+        ) {
+
+            games.push({
+                id: gameId,
+                title: title
+            });
+
+        }
+
+    });
+
+
+    games
+        .sort((a, b) =>
+            a.title.localeCompare(b.title)
+        )
+        .forEach(game => {
+
+            const option =
+                document.createElement("option");
+
+            option.value =
+                game.id;
+
+            option.textContent =
+                game.title;
+
+            leaderboardGame.appendChild(
+                option
+            );
+
+        });
+
+}
+
+
+// =========================================
+// OPEN LEADERBOARD
+// =========================================
+
+// =========================================
+// OPEN LEADERBOARD
+// =========================================
+
+if (leaderboardButton) {
+
+    leaderboardButton.addEventListener(
         "click",
-        async function () {
+        async function(event) {
 
-            await openPrivateConversation(
-                foundUser.id,
-                foundUser.username
+            // Prevent the account-menu outside-click
+            // handler from interfering
+            event.preventDefault();
+            event.stopPropagation();
+
+            // Close account menu
+            accountMenu.classList.remove("open");
+
+            // Open leaderboard
+            leaderboardOverlay.classList.add("open");
+
+            // Populate game dropdown
+            setupLeaderboardGames();
+
+            // Load leaderboard data
+            await loadPlaytimeLeaderboard();
+
+        }
+    );
+
+}
+// =========================================
+// CLOSE LEADERBOARD
+// =========================================
+
+if (closeLeaderboard) {
+
+    closeLeaderboard.addEventListener(
+        "click",
+        function () {
+
+            leaderboardOverlay.classList.remove(
+                "open"
             );
 
         }
     );
 
+}
 
-    conversationList.appendChild(item);
+
+// =========================================
+// CLICK OUTSIDE
+// =========================================
+
+if (leaderboardOverlay) {
+
+    leaderboardOverlay.addEventListener(
+        "click",
+        function (event) {
+
+            if (
+                event.target ===
+                leaderboardOverlay
+            ) {
+
+                leaderboardOverlay.classList.remove(
+                    "open"
+                );
+
+            }
+
+        }
+    );
+
+}
+
+
+// =========================================
+// CHANGE GAME
+// =========================================
+
+if (leaderboardGame) {
+
+    leaderboardGame.addEventListener(
+        "change",
+        async function () {
+
+            await loadPlaytimeLeaderboard();
+
+        }
+    );
 
 }
