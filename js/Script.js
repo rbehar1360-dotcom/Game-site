@@ -591,7 +591,15 @@ document.querySelectorAll(".game-link").forEach(link => {
         }
 
         // Continue to the game
-        window.location.href = link.href;
+        // REPLACE your redirection line with this:
+const anchor = document.querySelector(`[data-game-id="${gameId}"] a`);
+if (anchor && anchor.getAttribute('target') === '_blank') {
+    // Do nothing! Let the HTML target="_blank" handle it naturally
+} else {
+    // Only redirect the main tab if it's NOT a new-tab link
+    window.location.href = gameUrl; 
+}
+
 
     });
 
@@ -3332,3 +3340,19 @@ document.addEventListener("DOMContentLoaded", () => {
         }
       });
     });
+
+
+// Inside Script.js (Look for your click/view tracking listener)
+gameCard.addEventListener('click', (event) => {
+    // ... your existing code that logs/records the view ...
+    console.log("Recording view for: " + gameId);
+
+    // FIX: Check if the clicked element (or its parent anchor) wants a new tab
+    const anchor = event.target.closest('a');
+    if (anchor && anchor.getAttribute('target') === '_blank') {
+        event.preventDefault(); // Stop the script from changing the main window location
+        window.open(anchor.href, '_blank'); // Force open in a new tab instead
+    } else if (anchor) {
+        window.location.href = anchor.href; // Standard same-tab fallback
+    }
+}, true); // Note: If this 'true' is here, it's using capturing!
