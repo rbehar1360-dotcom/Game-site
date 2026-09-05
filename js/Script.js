@@ -3257,3 +3257,78 @@ if (leaderboardGame) {
     );
 
 }
+
+document.addEventListener("DOMContentLoaded", () => {
+      const suggestButton = document.getElementById("suggestButton");
+      const suggestOverlay = document.getElementById("suggestOverlay");
+      const closeSuggest = document.getElementById("closeSuggest");
+      const suggestForm = document.getElementById("suggestForm");
+      const suggestStatus = document.getElementById("suggestStatus");
+      const submitSuggestion = document.getElementById("submitSuggestion");
+
+      function openSuggestions() {
+        suggestOverlay.classList.add("open");
+        document.getElementById("suggestGameName")?.focus();
+      }
+
+      function closeSuggestions() {
+        suggestOverlay.classList.remove("open");
+        suggestStatus.textContent = "";
+      }
+
+      suggestButton.addEventListener("click", openSuggestions);
+      closeSuggest.addEventListener("click", closeSuggestions);
+
+      suggestOverlay.addEventListener("click", (event) => {
+        if (event.target === suggestOverlay) closeSuggestions();
+      });
+
+      document.addEventListener("keydown", (event) => {
+        if (event.key === "Escape" && suggestOverlay.classList.contains("open")) {
+          closeSuggestions();
+        }
+      });
+
+      suggestForm.addEventListener("submit", async (event) => {
+        event.preventDefault();
+
+        const gameName = document.getElementById("suggestGameName").value.trim();
+        const gameUrl = document.getElementById("suggestGameUrl").value.trim();
+        const reason = document.getElementById("suggestReason").value.trim();
+
+        if (!gameName) return;
+
+        if (typeof supabaseClient === "undefined") {
+          suggestStatus.textContent = "Supabase isn't loaded. Please try again.";
+          return;
+        }
+
+        submitSuggestion.disabled = true;
+        suggestStatus.textContent = "Submitting...";
+
+        try {
+          const { data: { user } } = await supabaseClient.auth.getUser();
+
+          const { error } = await supabaseClient
+            .from("game_suggestions")
+            .insert({
+              game_name: gameName,
+              game_url: gameUrl || null,
+              reason: reason || null,
+              user_id: user?.id || null
+            });
+
+          if (error) throw error;
+
+          suggestStatus.textContent = "Suggestion submitted!";
+          suggestForm.reset();
+
+          setTimeout(closeSuggestions, 1200);
+        } catch (error) {
+          console.error("Suggestion error:", error);
+          suggestStatus.textContent = "Couldn't submit the suggestion. Please try again.";
+        } finally {
+          submitSuggestion.disabled = false;
+        }
+      });
+    });
