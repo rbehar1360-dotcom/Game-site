@@ -591,15 +591,7 @@ document.querySelectorAll(".game-link").forEach(link => {
         }
 
         // Continue to the game
-        // REPLACE your redirection line with this:
-const anchor = document.querySelector(`[data-game-id="${gameId}"] a`);
-if (anchor && anchor.getAttribute('target') === '_blank') {
-    // Do nothing! Let the HTML target="_blank" handle it naturally
-} else {
-    // Only redirect the main tab if it's NOT a new-tab link
-    window.location.href = gameUrl; 
-}
-
+        window.location.href = link.href;
 
     });
 
