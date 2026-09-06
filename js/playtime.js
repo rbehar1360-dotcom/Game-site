@@ -34,7 +34,12 @@
             "Motom.html": "moto-x3m",
             "SuperMario.html": "super-mario-64",
             "LearnHowToFly3.html": "learn-how-to-fly-3",
-            "SansFight.html": "sans-fight"
+            "SansFight.html": "sans-fight",
+            "AntArt.html": "AntArt",
+            "FireBoyandWaterGirl.html": "FireBoyWaterGirl",
+            "DriftBoss.html": "DriftBoss",
+            "PVZ.html": "PVZ",
+            "SubwaySurfers.html": "SubwaySurfers",
         };
 
         return gameMap[filename] || null;
