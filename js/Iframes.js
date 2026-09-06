@@ -20,3 +20,6 @@ const SlimeRancherURL = "https://dev.snubby.top/play/";
 const PVZURL = "https://totalclick.org/games/pvz/game/index.html";
 const SubwaySurfersURL = "https://totalclick.org/games/subwaysurfers/game/index.html";
 const AntArtURL = "https://totalclick.org/games/antarttycoon/game/index.html";
+const  FireBoyandWaterGirlURL = "https://www.friv.com/z/games/fireboyandwatergirlforest/game.html";
+const DriftBossURL = "https://cdn-consumer.marketjs.com/game/drift-boss-advanced/";
+
