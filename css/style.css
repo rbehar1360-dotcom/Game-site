@@ -3249,3 +3249,296 @@ z-index: 1000;
         0 0 18px var(--glow); }
     .suggest-submit:disabled { opacity: .6; cursor: wait; }
     .suggest-status { min-height: 20px; margin-top: 4px; font-size: 14px; }
+
+/* =========================================
+   FOOTER
+========================================= */
+
+.site-footer {
+    margin-top: 60px;
+
+    background: linear-gradient(
+        90deg,
+        var(--header) 60%,
+        color-mix(in srgb, var(--header) 70%, var(--accent) 30%) 100%
+    );
+
+    border-top: 1px solid
+        color-mix(in srgb, var(--accent) 40%, transparent);
+
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+
+    box-shadow: 0 -10px 30px rgba(0, 0, 0, 0.2);
+}
+
+.footer-container {
+    max-width: 1400px;
+    margin: auto;
+
+    padding: 45px 30px;
+
+    display: grid;
+    grid-template-columns: 2fr 1fr 1fr 1fr;
+    gap: 40px;
+}
+
+.footer-brand h2 {
+    margin: 0 0 10px;
+
+    color: var(--accent);
+    font-size: 1.5rem;
+}
+
+.footer-brand p {
+    margin: 0;
+    opacity: 0.7;
+}
+
+.footer-column {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.footer-column h3 {
+    margin: 0 0 8px;
+
+    color: var(--accent);
+    font-size: 1rem;
+}
+
+.footer-column a,
+.footer-bottom a {
+    color: inherit;
+    text-decoration: none;
+
+    opacity: 0.7;
+
+    transition:
+        color 0.2s ease,
+        opacity 0.2s ease,
+        transform 0.2s ease;
+}
+
+.footer-column a:hover,
+.footer-bottom a:hover {
+    color: var(--accent);
+    opacity: 1;
+    transform: translateX(3px);
+}
+
+.footer-bottom {
+    max-width: 1400px;
+    margin: auto;
+
+    padding: 18px 30px;
+
+    border-top: 1px solid rgba(255, 255, 255, 0.08);
+
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+
+    font-size: 0.85rem;
+    opacity: 0.75;
+}
+
+.footer-bottom-links {
+    display: flex;
+    gap: 20px;
+}
+
+
+/* =========================================
+   LEGAL MODAL
+========================================= */
+
+.legal-modal {
+    position: fixed;
+    inset: 0;
+
+    z-index: 10000;
+
+    display: none;
+    align-items: center;
+    justify-content: center;
+
+    padding: 20px;
+
+    background: rgba(0, 0, 0, 0.7);
+
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+}
+
+.legal-modal.active {
+    display: flex;
+}
+
+.legal-modal-box {
+    width: min(900px, 100%);
+    max-height: 85vh;
+
+    display: flex;
+    flex-direction: column;
+
+    background: var(--header);
+
+    border: 1px solid
+        color-mix(in srgb, var(--accent) 40%, transparent);
+
+    border-radius: 16px;
+
+    box-shadow:
+        0 25px 80px rgba(0, 0, 0, 0.5),
+        0 0 30px color-mix(in srgb, var(--accent) 15%, transparent);
+
+    overflow: hidden;
+
+    animation: legalModalIn 0.2s ease;
+}
+
+@keyframes legalModalIn {
+    from {
+        opacity: 0;
+        transform: translateY(15px) scale(0.98);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+.legal-modal-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    padding: 20px 24px;
+
+    background: linear-gradient(
+        90deg,
+        var(--header),
+        color-mix(in srgb, var(--header) 75%, var(--accent) 25%)
+    );
+
+    border-bottom: 1px solid
+        color-mix(in srgb, var(--accent) 30%, transparent);
+}
+
+.legal-modal-header h2 {
+    margin: 0;
+
+    color: var(--accent);
+    font-size: 1.35rem;
+}
+
+.legal-close {
+    width: 36px;
+    height: 36px;
+
+    border: none;
+    border-radius: 8px;
+
+    background: transparent;
+    color: inherit;
+
+    font-size: 28px;
+    line-height: 1;
+
+    cursor: pointer;
+
+    transition: 0.2s ease;
+}
+
+.legal-close:hover {
+    background: color-mix(in srgb, var(--accent) 15%, transparent);
+    color: var(--accent);
+}
+
+.legal-modal-content {
+    padding: 28px;
+
+    overflow-y: auto;
+
+    line-height: 1.7;
+
+    font-size: 0.95rem;
+}
+
+.legal-modal-content h3 {
+    margin: 25px 0 8px;
+
+    color: var(--accent);
+}
+
+.legal-modal-content h3:first-child {
+    margin-top: 0;
+}
+
+.legal-modal-content p {
+    margin: 0 0 14px;
+
+    opacity: 0.85;
+}
+
+.legal-modal-content ul {
+    margin-top: 5px;
+    margin-bottom: 18px;
+
+    padding-left: 25px;
+}
+
+.legal-modal-content li {
+    margin-bottom: 6px;
+    opacity: 0.85;
+}
+
+
+/* =========================================
+   MOBILE
+========================================= */
+
+@media (max-width: 750px) {
+
+    .footer-container {
+        grid-template-columns: 1fr 1fr;
+        gap: 30px;
+    }
+
+    .footer-brand {
+        grid-column: 1 / -1;
+    }
+
+    .footer-bottom {
+        flex-direction: column;
+        gap: 12px;
+        text-align: center;
+    }
+}
+
+@media (max-width: 500px) {
+
+    .footer-container {
+        grid-template-columns: 1fr;
+    }
+
+    .footer-brand {
+        grid-column: auto;
+    }
+
+    .legal-modal {
+        padding: 10px;
+    }
+
+    .legal-modal-box {
+        max-height: 90vh;
+        border-radius: 12px;
+    }
+
+    .legal-modal-content {
+        padding: 20px;
+    }
+}

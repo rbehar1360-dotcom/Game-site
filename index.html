@@ -1800,7 +1800,7 @@
 
       <button
         class="favorite-button"
-        aria-label="Add Subway Surfers to favorites"
+        aria-label="Add Fire Boy and Water Girl to favorites"
       >
         ☆
       </button>
@@ -1812,7 +1812,42 @@
     </div>
 
   </div>
+  <div class="game-wrapper" data-game-id="FridayNightFunkin">
 
+    <a href="games/FridayNightFunkin.html" class="game-link">
+
+      <div class="game-card">
+
+        <img
+          class="icon"
+          src="Game Images/FridayNightFunkin.avif"
+          alt="Game Icon"
+        >
+
+        <div class="title">
+          Friday Night Funkin'!
+        </div>
+
+      </div>
+
+    </a>
+
+    <div class="game-actions">
+
+      <button
+        class="favorite-button"
+        aria-label="Add Friday Night Funkin' to favorites"
+      >
+        ☆
+      </button>
+
+      <button class="like-button">
+        ❤️ <span class="like-count">0</span>
+      </button>
+
+    </div>
+
+  </div>
   <div class="game-wrapper" data-game-id="AntArt">
 
     <a href="games/AntArt.html" class="game-link">
@@ -1885,7 +1920,75 @@
 
 
 
+<footer class="site-footer">
+    <div class="footer-container">
 
+        <div class="footer-brand">
+            <h2>Ralph's Games</h2>
+            <p>Free games. No nonsense.</p>
+        </div>
+
+        <div class="footer-column">
+            <h3>Explore</h3>
+            <a href="/">Home</a>
+            <a href="#games">Games</a>
+            <a href="#favorites">Favorites</a>
+            <a href="#stats">My Stats</a>
+        </div>
+
+        <div class="footer-column">
+            <h3>Community</h3>
+            <a href="#" data-legal="guidelines">Community Guidelines</a>
+            <a href="#" data-legal="contact">Contact</a>
+            <a href="#" data-legal="suggest">Suggest a Game</a>
+        </div>
+
+        <div class="footer-column">
+            <h3>Legal</h3>
+            <a href="#" data-legal="terms">Terms of Service</a>
+            <a href="#" data-legal="privacy">Privacy Policy</a>
+            <a href="#" data-legal="dmca">Copyright / DMCA</a>
+            <a href="#" data-legal="cookies">Cookie Policy</a>
+        </div>
+
+    </div>
+
+    <div class="footer-bottom">
+        <span>
+            © <span id="footerYear"></span> Ralph's Games
+        </span>
+
+        <div class="footer-bottom-links">
+            <a href="#" data-legal="terms">Terms</a>
+            <a href="#" data-legal="privacy">Privacy</a>
+        </div>
+    </div>
+</footer>
+
+
+<!-- ========================================
+     LEGAL MODAL
+======================================== -->
+
+<div id="legalModal" class="legal-modal">
+
+    <div class="legal-modal-box">
+
+        <div class="legal-modal-header">
+            <h2 id="legalModalTitle">Terms of Service</h2>
+
+            <button id="closeLegalModal" class="legal-close">
+                &times;
+            </button>
+        </div>
+
+        <div id="legalModalContent" class="legal-modal-content">
+            <!-- Content gets inserted by JavaScript -->
+        </div>
+
+    </div>
+
+</div>
 
 </body>
 </html>

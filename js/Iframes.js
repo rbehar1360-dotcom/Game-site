@@ -22,4 +22,4 @@ const SubwaySurfersURL = "https://totalclick.org/games/subwaysurfers/game/index.
 const AntArtURL = "https://totalclick.org/games/antarttycoon/game/index.html";
 const  FireBoyandWaterGirlURL = "https://www.friv.com/z/games/fireboyandwatergirlforest/game.html";
 const DriftBossURL = "https://cdn-consumer.marketjs.com/game/drift-boss-advanced/";
-
+const FridayNightFunkinURL = "https://totalclick.org/games/fnf/game/index.html";

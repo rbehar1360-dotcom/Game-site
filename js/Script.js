@@ -3348,3 +3348,291 @@ gameCard.addEventListener('click', (event) => {
         window.location.href = anchor.href; // Standard same-tab fallback
     }
 }, true); // Note: If this 'true' is here, it's using capturing!
+
+
+// =========================================
+// LEGAL / INFORMATION MODALS
+// =========================================
+
+(function () {
+
+    const modal = document.getElementById("legalModal");
+    const modalTitle = document.getElementById("legalModalTitle");
+    const modalContent = document.getElementById("legalModalContent");
+    const closeButton = document.getElementById("closeLegalModal");
+
+    if (!modal || !modalTitle || !modalContent || !closeButton) {
+        return;
+    }
+
+    const legalPages = {
+
+        terms: {
+            title: "Terms of Service",
+
+            content: `
+                <h3>1. Acceptance of Terms</h3>
+                <p>
+                    By accessing or using Ralph's Games, you agree to
+                    these Terms of Service.
+                </p>
+
+                <h3>2. Using the Website</h3>
+                <p>
+                    You agree to use the website responsibly and not
+                    attempt to disrupt, damage, or gain unauthorized
+                    access to the website or its systems.
+                </p>
+
+                <h3>3. User Accounts</h3>
+                <p>
+                    If you create an account, you are responsible for
+                    maintaining the security of your account.
+                </p>
+
+                <h3>4. Prohibited Activities</h3>
+                <ul>
+                    <li>Attempting to access accounts that do not belong to you</li>
+                    <li>Attempting to damage or disrupt the website</li>
+                    <li>Spamming or abusing website features</li>
+                    <li>Impersonating other users</li>
+                    <li>Uploading malicious content</li>
+                </ul>
+
+                <h3>5. Changes to the Service</h3>
+                <p>
+                    Ralph's Games may modify, suspend, or discontinue
+                    features of the website at any time.
+                </p>
+
+                <h3>6. Changes to These Terms</h3>
+                <p>
+                    These Terms of Service may be updated from time
+                    to time. Continued use of the website after changes
+                    are published constitutes acceptance of the updated terms.
+                </p>
+            `
+        },
+
+        privacy: {
+            title: "Privacy Policy",
+
+            content: `
+                <h3>1. Information We Collect</h3>
+                <p>
+                    Ralph's Games may collect information necessary
+                    to provide website functionality, including account
+                    information and information generated through use
+                    of the website.
+                </p>
+
+                <h3>2. Account Information</h3>
+                <p>
+                    When creating an account, information such as your
+                    username and email address may be stored.
+                </p>
+
+                <h3>3. Website Usage</h3>
+                <p>
+                    Certain gameplay statistics and preferences may be
+                    stored to provide features such as favorites,
+                    likes, and statistics.
+                </p>
+
+                <h3>4. How Information Is Used</h3>
+                <p>
+                    Information may be used to operate, maintain,
+                    secure, and improve the website.
+                </p>
+
+                <h3>5. Data Storage</h3>
+                <p>
+                    Some information may be stored using third-party
+                    services that help operate the website.
+                </p>
+            `
+        },
+
+        guidelines: {
+            title: "Community Guidelines",
+
+            content: `
+                <h3>Keep It Respectful</h3>
+                <p>
+                    Ralph's Games is intended to be a place where
+                    users can enjoy games and interact with the community.
+                </p>
+
+                <h3>Do Not</h3>
+                <ul>
+                    <li>Harass or threaten other users</li>
+                    <li>Spam messages</li>
+                    <li>Impersonate other users</li>
+                    <li>Share another person's private information</li>
+                    <li>Abuse bugs or vulnerabilities</li>
+                    <li>Attempt to disrupt the website</li>
+                </ul>
+
+                <h3>Moderation</h3>
+                <p>
+                    Content or accounts that violate these guidelines
+                    may be removed or restricted.
+                </p>
+            `
+        },
+
+        dmca: {
+            title: "Copyright / DMCA",
+
+            content: `
+                <h3>Copyright</h3>
+                <p>
+                    Ralph's Games respects the intellectual property
+                    rights of others.
+                </p>
+
+                <h3>Copyright Concerns</h3>
+                <p>
+                    If you believe that material available through the
+                    website infringes your copyright, please contact
+                    us with enough information to identify the material
+                    and explain your claim.
+                </p>
+
+                <h3>Review Process</h3>
+                <p>
+                    Copyright complaints may be reviewed and appropriate
+                    action may be taken when warranted.
+                </p>
+            `
+        },
+
+        cookies: {
+            title: "Cookie Policy",
+
+            content: `
+                <h3>Cookies and Local Storage</h3>
+                <p>
+                    Ralph's Games may use cookies, local storage, or
+                    similar browser technologies to provide website
+                    functionality and remember preferences.
+                </p>
+
+                <h3>Why We Use Them</h3>
+                <ul>
+                    <li>Remembering preferences</li>
+                    <li>Providing account functionality</li>
+                    <li>Security</li>
+                    <li>Website functionality</li>
+                </ul>
+            `
+        },
+
+        contact: {
+            title: "Contact",
+
+            content: `
+                <h3>Contact Ralph's Games</h3>
+                <p>
+                    Have a question, issue, or concern?
+                </p>
+
+                <p>
+                    Contact information will be added here.
+                </p>
+            `
+        },
+
+        suggest: {
+            title: "Suggest a Game",
+
+            content: `
+                <h3>Suggest a Game</h3>
+                <p>
+                    Think a game should be added to Ralph's Games?
+                    Send us a suggestion.
+                </p>
+
+                <p>
+                    The game suggestion system will be available here.
+                </p>
+            `
+        }
+
+    };
+
+
+    // =========================================
+    // OPEN MODAL
+    // =========================================
+
+    document.querySelectorAll("[data-legal]").forEach(link => {
+
+        link.addEventListener("click", function (event) {
+
+            event.preventDefault();
+
+            const page = this.dataset.legal;
+            const data = legalPages[page];
+
+            if (!data) {
+                return;
+            }
+
+            modalTitle.textContent = data.title;
+            modalContent.innerHTML = data.content;
+
+            modal.classList.add("active");
+
+            document.body.style.overflow = "hidden";
+        });
+
+    });
+
+
+    // =========================================
+    // CLOSE MODAL
+    // =========================================
+
+    function closeLegalModal() {
+
+        modal.classList.remove("active");
+
+        document.body.style.overflow = "";
+
+    }
+
+    closeButton.addEventListener("click", closeLegalModal);
+
+
+    // Click outside the box
+    modal.addEventListener("click", function (event) {
+
+        if (event.target === modal) {
+            closeLegalModal();
+        }
+
+    });
+
+
+    // ESC key
+    document.addEventListener("keydown", function (event) {
+
+        if (event.key === "Escape" && modal.classList.contains("active")) {
+            closeLegalModal();
+        }
+
+    });
+
+
+    // =========================================
+    // FOOTER YEAR
+    // =========================================
+
+    const footerYear = document.getElementById("footerYear");
+
+    if (footerYear) {
+        footerYear.textContent = new Date().getFullYear();
+    }
+
+})();
