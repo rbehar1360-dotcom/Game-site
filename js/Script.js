@@ -251,10 +251,14 @@ loginButton.addEventListener("click", async function() {
         loginOverlay.classList.add("open");
 
         return;
-
     }
 
     accountMenu.classList.toggle("open");
+
+    // Refresh coin balance whenever account menu opens
+    if (accountMenu.classList.contains("open")) {
+        await loadCoinBalance();
+    }
 
 });
 
@@ -3276,7 +3280,17 @@ document.addEventListener("DOMContentLoaded", () => {
         suggestStatus.textContent = "";
       }
 
-      suggestButton.addEventListener("click", openSuggestions);
+      suggestButton.addEventListener("click", async function () {
+    const user = await getCurrentUser();
+
+    if (!user) {
+        alert("Please log in to suggest a game!");
+        loginOverlay.classList.add("open");
+        return;
+    }
+
+    openSuggestions();
+});
       closeSuggest.addEventListener("click", closeSuggestions);
 
       suggestOverlay.addEventListener("click", (event) => {
