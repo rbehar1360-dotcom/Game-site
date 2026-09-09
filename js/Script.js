@@ -3650,3 +3650,4 @@ gameCard.addEventListener('click', (event) => {
     }
 
 })();
+
