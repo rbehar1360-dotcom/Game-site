@@ -14,6 +14,359 @@
 
   <!-- Game / account / likes system -->
   <script src="js/Script.js" defer></script>
+
+  <style>
+    .leaderboard-row {
+      cursor: pointer;
+    }
+
+    .leaderboard-row:focus {
+      outline: 2px solid var(--accent);
+      outline-offset: 2px;
+    }
+
+    .leaderboard-username {
+      flex: 1;
+      min-width: 0;
+      font-weight: 700;
+      color: var(--title);
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .profile-overlay {
+      position: fixed;
+      inset: 0;
+      z-index: 10000;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      background: rgba(0, 0, 0, 0.72);
+      backdrop-filter: blur(8px);
+      opacity: 0;
+      visibility: hidden;
+      pointer-events: none;
+      transition: opacity 0.2s ease, visibility 0.2s ease;
+    }
+
+    .profile-overlay.open {
+      opacity: 1;
+      visibility: visible;
+      pointer-events: auto;
+    }
+
+    .profile-window {
+      width: min(900px, 100%);
+      max-height: min(900px, calc(100vh - 40px));
+      overflow-y: auto;
+      background: var(--card);
+      color: var(--text);
+      border: 1px solid var(--accent);
+      border-radius: 18px;
+      box-shadow: var(--shadow), var(--glow);
+      padding: 24px;
+    }
+
+    .profile-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      margin-bottom: 18px;
+    }
+
+    .profile-header-user {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      min-width: 0;
+    }
+
+    .profile-avatar {
+      width: 58px;
+      height: 58px;
+      flex: 0 0 58px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 50%;
+      background: var(--header);
+      border: 1px solid var(--accent);
+      font-size: 27px;
+    }
+
+    .profile-username {
+      font-size: 28px;
+      line-height: 1.1;
+      font-weight: 800;
+      color: var(--title);
+      overflow-wrap: anywhere;
+    }
+
+    .profile-badge {
+      display: inline-flex;
+      margin-top: 6px;
+      padding: 4px 9px;
+      border-radius: 999px;
+      background: var(--header);
+      border: 1px solid var(--accent);
+      color: var(--accent-light);
+      font-size: 12px;
+      font-weight: 700;
+    }
+
+    .profile-badge.owner {
+      color: #ffd700;
+      border-color: #d4a900;
+    }
+
+    .profile-close {
+      width: 40px;
+      height: 40px;
+      border: 0;
+      border-radius: 10px;
+      background: var(--header);
+      color: var(--text);
+      cursor: pointer;
+      font-size: 18px;
+    }
+
+    .profile-close:hover {
+      background: var(--accent);
+      color: var(--background-1);
+    }
+
+    .profile-actions {
+      display: flex;
+      justify-content: flex-end;
+      margin-bottom: 18px;
+    }
+
+    .profile-message-button {
+      border: 1px solid var(--accent);
+      border-radius: 10px;
+      background: var(--accent);
+      color: var(--background-1);
+      padding: 10px 16px;
+      font-weight: 800;
+      cursor: pointer;
+    }
+
+    .profile-message-button:hover:not(:disabled) {
+      filter: brightness(1.1);
+      transform: translateY(-1px);
+    }
+
+    .profile-message-button:disabled {
+      opacity: 0.55;
+      cursor: not-allowed;
+    }
+
+    .profile-stats-grid {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 12px;
+      margin-bottom: 18px;
+    }
+
+    .profile-stat-card {
+      display: flex;
+      align-items: center;
+      gap: 11px;
+      min-width: 0;
+      padding: 15px;
+      border-radius: 13px;
+      background: var(--header);
+      border: 1px solid rgba(128, 128, 128, 0.25);
+    }
+
+    .profile-stat-icon {
+      font-size: 22px;
+    }
+
+    .profile-stat-card > div {
+      min-width: 0;
+    }
+
+    .profile-stat-label {
+      display: block;
+      font-size: 11px;
+      opacity: 0.72;
+      margin-bottom: 4px;
+    }
+
+    .profile-stat-card strong {
+      display: block;
+      color: var(--title);
+      font-size: 16px;
+      overflow-wrap: anywhere;
+    }
+
+    .profile-section {
+      padding: 17px;
+      border-radius: 14px;
+      background: var(--header);
+      border: 1px solid rgba(128, 128, 128, 0.25);
+      margin-bottom: 14px;
+    }
+
+    .profile-section-title {
+      color: var(--title);
+      font-size: 16px;
+      font-weight: 800;
+      margin-bottom: 12px;
+    }
+
+    .profile-playtime-list,
+    .profile-recent-list {
+      display: flex;
+      flex-direction: column;
+      gap: 7px;
+    }
+
+    .profile-playtime-row,
+    .profile-recent-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 15px;
+      padding: 10px 12px;
+      border-radius: 9px;
+      background: var(--card);
+    }
+
+    .profile-game-name {
+      min-width: 0;
+      color: var(--text);
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .profile-game-time {
+      flex: 0 0 auto;
+      color: var(--accent-light);
+      font-weight: 700;
+    }
+
+    .profile-recent-date {
+      flex: 0 0 auto;
+      color: var(--text);
+      opacity: 0.65;
+      font-size: 12px;
+    }
+
+    .profile-empty-row,
+    .profile-no-achievements {
+      padding: 12px;
+      text-align: center;
+      opacity: 0.7;
+    }
+
+    .profile-two-column {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px;
+    }
+
+    .profile-two-column .profile-section {
+      margin-bottom: 0;
+    }
+
+    .profile-last-active {
+      margin-top: 12px;
+      font-size: 12px;
+      opacity: 0.7;
+    }
+
+    .profile-achievements {
+      display: grid;
+      gap: 8px;
+    }
+
+    .profile-achievement {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px;
+      border-radius: 10px;
+      background: var(--card);
+    }
+
+    .profile-achievement-icon {
+      width: 34px;
+      height: 34px;
+      flex: 0 0 34px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 9px;
+      background: var(--header);
+      font-size: 18px;
+    }
+
+    .profile-achievement strong,
+    .profile-achievement span {
+      display: block;
+    }
+
+    .profile-achievement strong {
+      color: var(--title);
+      font-size: 13px;
+    }
+
+    .profile-achievement span {
+      margin-top: 2px;
+      font-size: 11px;
+      opacity: 0.65;
+    }
+
+    @media (max-width: 760px) {
+      .profile-window {
+        padding: 17px;
+      }
+
+      .profile-stats-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+
+      .profile-two-column {
+        grid-template-columns: 1fr;
+      }
+
+      .profile-two-column .profile-section {
+        margin-bottom: 14px;
+      }
+
+      .profile-username {
+        font-size: 23px;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .profile-overlay {
+        padding: 10px;
+      }
+
+      .profile-window {
+        max-height: calc(100vh - 20px);
+      }
+
+      .profile-stats-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .profile-playtime-row,
+      .profile-recent-row {
+        align-items: flex-start;
+        flex-direction: column;
+        gap: 4px;
+      }
+    }
+  </style>
+
 </head>
 
 <body>
@@ -2013,6 +2366,125 @@
     </div>
 </footer>
 
+
+<!-- =========================================
+     USER PROFILE
+========================================= -->
+
+<div id="profileOverlay" class="profile-overlay">
+
+  <div class="profile-window">
+
+    <div class="profile-header">
+      <div class="profile-header-user">
+        <div class="profile-avatar">👤</div>
+
+        <div>
+          <div id="profileUsername" class="profile-username">
+            User
+          </div>
+
+          <div id="profileBadge" class="profile-badge">
+            Game Hub Member
+          </div>
+        </div>
+      </div>
+
+      <button id="closeProfile" class="profile-close" type="button">
+        ✕
+      </button>
+    </div>
+
+    <div class="profile-actions">
+      <button id="profileMessageButton" class="profile-message-button" type="button">
+        ✉️ Message
+      </button>
+    </div>
+
+    <div class="profile-stats-grid">
+
+      <div class="profile-stat-card">
+        <span class="profile-stat-icon">🏆</span>
+        <div>
+          <span class="profile-stat-label">Overall Rank</span>
+          <strong id="profileRank">—</strong>
+        </div>
+      </div>
+
+      <div class="profile-stat-card">
+        <span class="profile-stat-icon">⏱️</span>
+        <div>
+          <span class="profile-stat-label">Total Playtime</span>
+          <strong id="profileTotalPlaytime">—</strong>
+        </div>
+      </div>
+
+      <div class="profile-stat-card">
+        <span class="profile-stat-icon">🎮</span>
+        <div>
+          <span class="profile-stat-label">Games Played</span>
+          <strong id="profileGamesPlayed">—</strong>
+        </div>
+      </div>
+
+      <div class="profile-stat-card">
+        <span class="profile-stat-icon">🔥</span>
+        <div>
+          <span class="profile-stat-label">Most Played</span>
+          <strong id="profileMostPlayed">—</strong>
+        </div>
+      </div>
+
+    </div>
+
+    <div class="profile-section">
+      <div class="profile-section-title">
+        🎮 Game Playtime
+      </div>
+
+      <div id="profilePlaytimeList" class="profile-playtime-list">
+        <div class="profile-empty-row">
+          Loading playtime...
+        </div>
+      </div>
+    </div>
+
+    <div class="profile-two-column">
+
+      <div class="profile-section">
+        <div class="profile-section-title">
+          🕘 Recent Activity
+        </div>
+
+        <div id="profileRecentList" class="profile-recent-list">
+          <div class="profile-empty-row">
+            Loading activity...
+          </div>
+        </div>
+
+        <div class="profile-last-active">
+          Last active:
+          <strong id="profileLastActive">—</strong>
+        </div>
+      </div>
+
+      <div class="profile-section">
+        <div class="profile-section-title">
+          🏅 Achievements
+        </div>
+
+        <div id="profileAchievements" class="profile-achievements">
+          <div class="profile-empty-row">
+            Loading achievements...
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+  </div>
+
+</div>
 
 <!-- ========================================
      LEGAL MODAL

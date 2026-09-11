@@ -1770,7 +1770,31 @@ function addChatMessage(message) {
 
 
     // Time
+   
 
+username.className =
+    "leaderboard-username";
+
+const playerUsername =
+    player.username ||
+    player.display_name ||
+    "User";
+
+username.textContent =
+    playerUsername;
+
+const profileUserId =
+    player.user_id ||
+    player.id ||
+    null;
+
+username.dataset.userId =
+    profileUserId || "";
+
+username.dataset.username =
+    playerUsername;
+
+username.classList.add("clickable-profile");
     const time =
         document.createElement("div");
 
@@ -3050,14 +3074,7 @@ async function loadPlaytimeLeaderboard() {
         }
 
 
-        const username =
-            document.createElement("div");
-
-        username.className =
-            "leaderboard-username";
-
-        username.textContent =
-            player.username || "Unknown User";
+        
 
 
         const time =
@@ -3071,12 +3088,61 @@ async function loadPlaytimeLeaderboard() {
                 player.playtime_seconds
             );
 
+const username = document.createElement("div");
+username.className = "leaderboard-username";
 
+const playerUsername =
+    player.username ||
+    player.display_name ||
+    "User";
+
+username.textContent = playerUsername;
+
+const profileUserId =
+    player.user_id ||
+    player.id ||
+    null;
+
+username.dataset.userId = profileUserId || "";
+username.dataset.username = playerUsername;
+username.classList.add("clickable-profile");
         row.appendChild(rank);
-        row.appendChild(username);
-        row.appendChild(time);
+row.appendChild(username);
+row.appendChild(time);
 
-        leaderboardList.appendChild(row);
+row.dataset.userId =
+    profileUserId || "";
+
+row.dataset.username =
+    playerUsername;
+
+row.classList.add("clickable-profile");
+
+row.setAttribute("role", "button");
+row.setAttribute("tabindex", "0");
+
+row.addEventListener("click", function () {
+    openUserProfile(
+        profileUserId,
+        playerUsername
+    );
+});
+
+row.addEventListener("keydown", function (event) {
+    if (
+        event.key === "Enter" ||
+        event.key === " "
+    ) {
+        event.preventDefault();
+
+        openUserProfile(
+            profileUserId,
+            playerUsername
+        );
+    }
+});
+
+leaderboardList.appendChild(row);
 
     });
 
@@ -4021,6 +4087,151 @@ function attachOwnerActions() {
 // ADJUST COINS
 // =========================================
 
+// =========================================
+// CUSTOM COIN CONFIRMATION
+// =========================================
+
+function showCoinConfirmation(action, amount, username) {
+
+    return new Promise(resolve => {
+
+        const existing =
+            document.getElementById("coinConfirmOverlay");
+
+        if (existing) {
+            existing.remove();
+        }
+
+        const overlay =
+            document.createElement("div");
+
+        overlay.id =
+            "coinConfirmOverlay";
+
+        overlay.className =
+            "coin-confirm-overlay";
+
+        const actionText =
+            action === "give"
+                ? "Give"
+                : "Take";
+
+        const actionColor =
+            action === "give"
+                ? "success"
+                : "error";
+
+        overlay.innerHTML = `
+            <div class="coin-confirm-modal">
+
+                <div class="coin-confirm-icon ${actionColor}">
+                    ${action === "give" ? "+" : "−"}
+                </div>
+
+                <h2>
+                    ${actionText} Coins
+                </h2>
+
+                <p class="coin-confirm-text">
+                    Are you sure you want to
+                    <strong>${actionText.toLowerCase()}</strong>
+                    <span>${amount.toLocaleString()} coins</span>
+                    ${action === "give" ? "to" : "from"}
+                    <strong>${escapeOwnerHTML(username)}</strong>?
+                </p>
+
+                <div class="coin-confirm-actions">
+
+                    <button
+                        type="button"
+                        class="coin-confirm-cancel"
+                        id="coinConfirmCancel"
+                    >
+                        Cancel
+                    </button>
+
+                    <button
+                        type="button"
+                        class="coin-confirm-yes ${actionColor}"
+                        id="coinConfirmYes"
+                    >
+                        ${actionText} Coins
+                    </button>
+
+                </div>
+
+            </div>
+        `;
+
+        document.body.appendChild(overlay);
+
+        requestAnimationFrame(() => {
+            overlay.classList.add("open");
+        });
+
+        const closeModal = result => {
+
+            overlay.classList.remove("open");
+
+            setTimeout(() => {
+                overlay.remove();
+            }, 200);
+
+            resolve(result);
+        };
+
+        document
+            .getElementById("coinConfirmCancel")
+            .addEventListener(
+                "click",
+                () => closeModal(false)
+            );
+
+        document
+            .getElementById("coinConfirmYes")
+            .addEventListener(
+                "click",
+                () => closeModal(true)
+            );
+
+        overlay.addEventListener(
+            "click",
+            event => {
+
+                if (
+                    event.target === overlay
+                ) {
+                    closeModal(false);
+                }
+
+            }
+        );
+
+        const escapeHandler = event => {
+
+            if (event.key === "Escape") {
+
+                document.removeEventListener(
+                    "keydown",
+                    escapeHandler
+                );
+
+                closeModal(false);
+            }
+        };
+
+        document.addEventListener(
+            "keydown",
+            escapeHandler
+        );
+    });
+}
+
+
+// =========================================
+// ADJUST COINS
+// =========================================
+
 async function adjustUserCoins(
     userId,
     direction
@@ -4074,19 +4285,13 @@ async function adjustUserCoins(
         return;
     }
 
-    const action =
-        direction > 0
-            ? "Give"
-            : "Take";
-
-    const actionWord =
-        direction > 0
-            ? "to"
-            : "from";
-
     const confirmed =
-        confirm(
-            `${action} ${amount.toLocaleString()} coins ${actionWord} ${user.username}?`
+        await showCoinConfirmation(
+            direction > 0
+                ? "give"
+                : "take",
+            amount,
+            user.username
         );
 
     if (!confirmed) {
@@ -4135,8 +4340,6 @@ async function adjustUserCoins(
         "success"
     );
 }
-
-
 // =========================================
 // OPEN OWNER PANEL
 // =========================================
@@ -4297,6 +4500,37 @@ document.addEventListener(
     }
 );
 
+// =========================================
+// UPDATE OWNER PANEL AFTER LOGIN
+// =========================================
+
+supabaseClient.auth.onAuthStateChange(
+    async function(event, session) {
+
+        if (
+            event === "SIGNED_IN" ||
+            event === "INITIAL_SESSION"
+        ) {
+            await checkAdmin();
+        }
+
+        if (
+            event === "SIGNED_OUT"
+        ) {
+            if (ownerPanelButton) {
+                ownerPanelButton.style.display =
+                    "none";
+            }
+
+            if (ownerOverlay) {
+                ownerOverlay.classList.remove(
+                    "open"
+                );
+            }
+        }
+    }
+);
+
 
 // =========================================
 // HTML ESCAPE
@@ -4313,7 +4547,755 @@ function escapeOwnerHTML(text) {
     return div.innerHTML;
 }
 
+// =========================================
+// USER PROFILE SYSTEM
+// =========================================
 
+const profileOverlay =
+    document.getElementById("profileOverlay");
+
+const closeProfile =
+    document.getElementById("closeProfile");
+
+const profileUsername =
+    document.getElementById("profileUsername");
+
+const profileBadge =
+    document.getElementById("profileBadge");
+
+const profileRank =
+    document.getElementById("profileRank");
+
+const profileTotalPlaytime =
+    document.getElementById("profileTotalPlaytime");
+
+const profileGamesPlayed =
+    document.getElementById("profileGamesPlayed");
+
+const profileMostPlayed =
+    document.getElementById("profileMostPlayed");
+
+const profileLastActive =
+    document.getElementById("profileLastActive");
+
+const profilePlaytimeList =
+    document.getElementById("profilePlaytimeList");
+
+const profileRecentList =
+    document.getElementById("profileRecentList");
+
+const profileAchievements =
+    document.getElementById("profileAchievements");
+
+const profileMessageButton =
+    document.getElementById("profileMessageButton");
+
+let currentProfileUser = null;
+
+
+// =========================================
+// GET GAME TITLE
+// =========================================
+
+function getProfileGameTitle(gameId) {
+
+    const wrapper =
+        document.querySelector(
+            `.game-wrapper[data-game-id="${CSS.escape(gameId)}"]`
+        );
+
+    return (
+        wrapper
+            ?.querySelector(".title")
+            ?.textContent
+            ?.trim()
+        || gameId
+    );
+}
+
+
+// =========================================
+// FORMAT PROFILE DATE
+// =========================================
+
+function formatProfileDate(date) {
+
+    if (!date) {
+        return "Never";
+    }
+
+    const parsed =
+        new Date(date);
+
+    if (Number.isNaN(parsed.getTime())) {
+        return "Unknown";
+    }
+
+    return parsed.toLocaleDateString(
+        [],
+        {
+            month: "short",
+            day: "numeric",
+            year: "numeric"
+        }
+    );
+}
+
+
+// =========================================
+// RENDER ACHIEVEMENTS
+// =========================================
+
+function renderProfileAchievements(profile) {
+
+    if (!profileAchievements) {
+        return;
+    }
+
+    profileAchievements.innerHTML = "";
+
+    const totalSeconds =
+        Number(profile.total_playtime || 0);
+
+    const gamesPlayed =
+        Number(profile.games_played || 0);
+
+    const achievements = [];
+
+    if (gamesPlayed >= 1) {
+        achievements.push({
+            icon: "🎮",
+            title: "First Game",
+            description: "Played your first game."
+        });
+    }
+
+    if (gamesPlayed >= 5) {
+        achievements.push({
+            icon: "🕹️",
+            title: "Game Explorer",
+            description: "Played 5 different games."
+        });
+    }
+
+    if (gamesPlayed >= 10) {
+        achievements.push({
+            icon: "🔥",
+            title: "Game Addict",
+            description: "Played 10 different games."
+        });
+    }
+
+    if (totalSeconds >= 3600) {
+        achievements.push({
+            icon: "⏱️",
+            title: "One Hour",
+            description: "Played for at least one hour."
+        });
+    }
+
+    if (totalSeconds >= 36000) {
+        achievements.push({
+            icon: "🏆",
+            title: "Dedicated",
+            description: "Played for at least 10 hours."
+        });
+    }
+
+    if (profile.overall_rank === 1) {
+        achievements.push({
+            icon: "👑",
+            title: "Top Player",
+            description: "Currently #1 on the leaderboard."
+        });
+    }
+
+    if (achievements.length === 0) {
+
+        profileAchievements.innerHTML = `
+            <div class="profile-empty">
+                No achievements yet.
+            </div>
+        `;
+
+        return;
+    }
+
+    achievements.forEach(achievement => {
+
+        const item =
+            document.createElement("div");
+
+        item.className =
+            "profile-achievement";
+
+        item.innerHTML = `
+            <div class="profile-achievement-icon">
+                ${achievement.icon}
+            </div>
+
+            <div class="profile-achievement-info">
+                <div class="profile-achievement-title">
+                    ${achievement.title}
+                </div>
+
+                <div class="profile-achievement-description">
+                    ${achievement.description}
+                </div>
+            </div>
+        `;
+
+        profileAchievements.appendChild(item);
+
+    });
+}
+
+
+// =========================================
+// RENDER PLAYTIME
+// =========================================
+
+function renderProfilePlaytime(playtime) {
+
+    if (!profilePlaytimeList) {
+        return;
+    }
+
+    profilePlaytimeList.innerHTML = "";
+
+    if (!playtime || playtime.length === 0) {
+
+        profilePlaytimeList.innerHTML = `
+            <div class="profile-empty">
+                No playtime recorded yet.
+            </div>
+        `;
+
+        return;
+    }
+
+    playtime.forEach(game => {
+
+        const row =
+            document.createElement("div");
+
+        row.className =
+            "profile-playtime-row";
+
+        const title =
+            getProfileGameTitle(
+                game.game_id
+            );
+
+        row.innerHTML = `
+            <div class="profile-playtime-game">
+                ${escapeOwnerHTML(title)}
+            </div>
+
+            <div class="profile-playtime-time">
+                ${formatPlaytime(
+                    game.playtime_seconds
+                )}
+            </div>
+        `;
+
+        profilePlaytimeList.appendChild(row);
+
+    });
+}
+
+
+// =========================================
+// RENDER RECENT ACTIVITY
+// =========================================
+
+function renderProfileRecent(recentGames) {
+
+    if (!profileRecentList) {
+        return;
+    }
+
+    profileRecentList.innerHTML = "";
+
+    if (
+        !recentGames ||
+        recentGames.length === 0
+    ) {
+
+        profileRecentList.innerHTML = `
+            <div class="profile-empty">
+                No recent activity.
+            </div>
+        `;
+
+        return;
+    }
+
+    recentGames.forEach(game => {
+
+        const item =
+            document.createElement("div");
+
+        item.className =
+            "profile-recent-item";
+
+        const title =
+            getProfileGameTitle(
+                game.game_id
+            );
+
+        item.innerHTML = `
+            <div>
+                <div class="profile-recent-game">
+                    ${escapeOwnerHTML(title)}
+                </div>
+
+                <div class="profile-recent-time">
+                    ${formatPlaytime(
+                        game.playtime_seconds
+                    )}
+                    played
+                </div>
+            </div>
+
+            <div class="profile-recent-date">
+                ${formatProfileDate(
+                    game.last_played
+                )}
+            </div>
+        `;
+
+        profileRecentList.appendChild(item);
+
+    });
+}
+
+
+// =========================================
+// OPEN USER PROFILE
+// =========================================
+
+async function openUserProfile(
+    userId,
+    username
+) {
+
+    if (!profileOverlay) {
+        console.error(
+            "Profile overlay was not found."
+        );
+
+        return;
+    }
+
+    currentProfileUser = {
+        id: userId,
+        username: username
+    };
+
+    profileOverlay.classList.add("open");
+
+    if (profileUsername) {
+        profileUsername.textContent =
+            username || "User";
+    }
+
+    if (profileBadge) {
+        profileBadge.textContent = "";
+    }
+
+    if (profileRank) {
+        profileRank.textContent = "Loading...";
+    }
+
+    if (profileTotalPlaytime) {
+        profileTotalPlaytime.textContent =
+            "Loading...";
+    }
+
+    if (profileGamesPlayed) {
+        profileGamesPlayed.textContent =
+            "Loading...";
+    }
+
+    if (profileMostPlayed) {
+        profileMostPlayed.textContent =
+            "Loading...";
+    }
+
+    if (profileLastActive) {
+        profileLastActive.textContent =
+            "Loading...";
+    }
+
+    if (profilePlaytimeList) {
+        profilePlaytimeList.innerHTML = `
+            <div class="profile-loading">
+                Loading playtime...
+            </div>
+        `;
+    }
+
+    if (profileRecentList) {
+        profileRecentList.innerHTML = `
+            <div class="profile-loading">
+                Loading activity...
+            </div>
+        `;
+    }
+
+    if (profileAchievements) {
+        profileAchievements.innerHTML = `
+            <div class="profile-loading">
+                Loading achievements...
+            </div>
+        `;
+    }
+
+    // If leaderboard did not provide the UUID,
+    // try finding the user by username.
+    if (!userId && username) {
+
+        const foundUser =
+            await findUserByUsername(username);
+
+        if (foundUser) {
+
+            userId =
+                foundUser.user_id ||
+                foundUser.id;
+
+            currentProfileUser.id =
+                userId;
+
+        }
+
+    }
+
+    if (!userId) {
+
+        if (profileRank) {
+            profileRank.textContent = "—";
+        }
+
+        if (profileTotalPlaytime) {
+            profileTotalPlaytime.textContent = "—";
+        }
+
+        if (profileGamesPlayed) {
+            profileGamesPlayed.textContent = "—";
+        }
+
+        if (profileMostPlayed) {
+            profileMostPlayed.textContent = "—";
+        }
+
+        if (profileLastActive) {
+            profileLastActive.textContent = "—";
+        }
+
+        return;
+    }
+
+    const { data, error } =
+        await supabaseClient.rpc(
+            "get_public_user_profile",
+            {
+                target_user_id: userId
+            }
+        );
+
+    if (error) {
+
+        console.error(
+            "Could not load profile:",
+            error
+        );
+
+        if (profileRank) {
+            profileRank.textContent = "—";
+        }
+
+        if (profileTotalPlaytime) {
+            profileTotalPlaytime.textContent = "Could not load";
+        }
+
+        if (profileGamesPlayed) {
+            profileGamesPlayed.textContent = "—";
+        }
+
+        if (profileMostPlayed) {
+            profileMostPlayed.textContent = "—";
+        }
+
+        if (profileLastActive) {
+            profileLastActive.textContent = "—";
+        }
+
+        return;
+    }
+
+    if (!data) {
+        return;
+    }
+
+    currentProfileUser = {
+        id: data.user_id,
+        username:
+            data.username ||
+            username ||
+            "User"
+    };
+
+    if (profileUsername) {
+        profileUsername.textContent =
+            currentProfileUser.username;
+    }
+
+    // Owner badge
+    if (
+        currentProfileUser.username
+            .toLowerCase() === "ralph"
+    ) {
+
+        if (profileBadge) {
+            profileBadge.textContent =
+                "👑 Owner";
+        }
+
+    }
+
+    if (profileRank) {
+
+        profileRank.textContent =
+            data.overall_rank
+                ? `#${data.overall_rank}`
+                : "Unranked";
+
+    }
+
+    if (profileTotalPlaytime) {
+
+        profileTotalPlaytime.textContent =
+            formatPlaytime(
+                data.total_playtime
+            );
+
+    }
+
+    if (profileGamesPlayed) {
+
+        profileGamesPlayed.textContent =
+            data.games_played || 0;
+
+    }
+
+    if (profileMostPlayed) {
+
+        profileMostPlayed.textContent =
+            data.most_played_game_id
+                ? getProfileGameTitle(
+                    data.most_played_game_id
+                )
+                : "None yet";
+
+    }
+
+    const recentGames =
+        data.recent_games || [];
+
+    if (profileLastActive) {
+
+        profileLastActive.textContent =
+            recentGames.length > 0
+                ? formatProfileDate(
+                    recentGames[0].last_played
+                )
+                : "Never";
+
+    }
+
+    renderProfilePlaytime(
+        data.playtime || []
+    );
+
+    renderProfileRecent(
+        recentGames
+    );
+
+    renderProfileAchievements(
+        data
+    );
+
+    const currentUser =
+        await getCurrentUser();
+
+    if (profileMessageButton) {
+
+        if (
+            currentUser &&
+            currentUser.id === data.user_id
+        ) {
+
+            profileMessageButton.style.display =
+                "none";
+
+        } else {
+
+            profileMessageButton.style.display =
+                "block";
+
+        }
+
+    }
+
+}
+
+
+// =========================================
+// CLOSE PROFILE
+// =========================================
+
+function closeUserProfile() {
+
+    if (!profileOverlay) {
+        return;
+    }
+
+    profileOverlay.classList.remove(
+        "open"
+    );
+
+    currentProfileUser = null;
+}
+
+
+if (closeProfile) {
+
+    closeProfile.addEventListener(
+        "click",
+        closeUserProfile
+    );
+
+}
+
+
+if (profileOverlay) {
+
+    profileOverlay.addEventListener(
+        "click",
+        function(event) {
+
+            if (
+                event.target ===
+                profileOverlay
+            ) {
+
+                closeUserProfile();
+
+            }
+
+        }
+    );
+
+}
+
+
+// =========================================
+// ESCAPE PROFILE
+// =========================================
+
+document.addEventListener(
+    "keydown",
+    function(event) {
+
+        if (
+            event.key === "Escape" &&
+            profileOverlay &&
+            profileOverlay.classList.contains("open")
+        ) {
+
+            closeUserProfile();
+
+        }
+
+    }
+);
+
+
+// =========================================
+// MESSAGE FROM PROFILE
+// =========================================
+
+if (profileMessageButton) {
+
+    profileMessageButton.addEventListener(
+        "click",
+        async function() {
+
+            if (!currentProfileUser) {
+                return;
+            }
+
+            const user =
+                await getCurrentUser();
+
+            if (!user) {
+
+                closeUserProfile();
+
+                if (loginOverlay) {
+                    loginOverlay.classList.add("open");
+                }
+
+                return;
+            }
+
+            if (
+                user.id ===
+                currentProfileUser.id
+            ) {
+                return;
+            }
+
+            const targetUser =
+                currentProfileUser;
+
+            closeUserProfile();
+
+            if (leaderboardOverlay) {
+                leaderboardOverlay.classList.remove(
+                    "open"
+                );
+            }
+
+            if (accountMenu) {
+                accountMenu.classList.remove(
+                    "open"
+                );
+            }
+
+            if (messagesOverlay) {
+
+                messagesOverlay.classList.add(
+                    "open"
+                );
+
+                await loadConversations();
+
+                await openPrivateConversation(
+                    targetUser.id,
+                    targetUser.username
+                );
+
+                await updateUnreadCount();
+
+            }
+
+        }
+    );
+
+}
 // =========================================
 // INITIAL ADMIN CHECK
 // =========================================
