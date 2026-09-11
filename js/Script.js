@@ -3638,7 +3638,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
 })();
 
-
 // =========================================
 // OWNER PANEL
 // =========================================
@@ -3665,20 +3664,134 @@ let ownerUsers = [];
 
 
 // =========================================
+// OWNER NOTIFICATIONS
+// =========================================
+
+function showOwnerNotification(message, type = "info") {
+
+    let container =
+        document.getElementById(
+            "ownerNotificationContainer"
+        );
+
+    if (!container) {
+
+        container =
+            document.createElement("div");
+
+        container.id =
+            "ownerNotificationContainer";
+
+        container.className =
+            "owner-notification-container";
+
+        document.body.appendChild(container);
+    }
+
+    const notification =
+        document.createElement("div");
+
+    notification.className =
+        `owner-notification ${type}`;
+
+    const icons = {
+        success: "✓",
+        error: "✕",
+        info: "ⓘ"
+    };
+
+    notification.innerHTML = `
+        <div class="owner-notification-icon">
+            ${icons[type] || icons.info}
+        </div>
+
+        <div class="owner-notification-message">
+            ${escapeOwnerHTML(message)}
+        </div>
+
+        <button
+            class="owner-notification-close"
+            type="button"
+        >
+            ×
+        </button>
+    `;
+
+    container.appendChild(notification);
+
+    requestAnimationFrame(() => {
+        notification.classList.add("show");
+    });
+
+    const removeNotification = () => {
+
+        if (!notification.isConnected) {
+            return;
+        }
+
+        notification.classList.remove("show");
+
+        setTimeout(() => {
+
+            if (notification.isConnected) {
+                notification.remove();
+            }
+
+            if (
+                container.isConnected &&
+                container.children.length === 0
+            ) {
+                container.remove();
+            }
+
+        }, 250);
+    };
+
+    const closeButton =
+        notification.querySelector(
+            ".owner-notification-close"
+        );
+
+    if (closeButton) {
+
+        closeButton.addEventListener(
+            "click",
+            removeNotification
+        );
+    }
+
+    setTimeout(
+        removeNotification,
+        3500
+    );
+}
+
+
+// =========================================
 // CHECK ADMIN
 // =========================================
 
 async function checkAdmin() {
 
-    const user = await getCurrentUser();
+    if (!ownerPanelButton) {
+        return false;
+    }
+
+    const user =
+        await getCurrentUser();
 
     if (!user) {
-        ownerPanelButton.style.display = "none";
+
+        ownerPanelButton.style.display =
+            "none";
+
         return false;
     }
 
     const { data, error } =
-        await supabaseClient.rpc("is_admin");
+        await supabaseClient.rpc(
+            "is_admin"
+        );
 
     if (error) {
 
@@ -3687,19 +3800,22 @@ async function checkAdmin() {
             error
         );
 
-        ownerPanelButton.style.display = "none";
+        ownerPanelButton.style.display =
+            "none";
 
         return false;
     }
 
     if (data === true) {
 
-        ownerPanelButton.style.display = "block";
+        ownerPanelButton.style.display =
+            "block";
 
         return true;
     }
 
-    ownerPanelButton.style.display = "none";
+    ownerPanelButton.style.display =
+        "none";
 
     return false;
 }
@@ -3710,6 +3826,10 @@ async function checkAdmin() {
 // =========================================
 
 async function loadOwnerUsers() {
+
+    if (!ownerUserList) {
+        return;
+    }
 
     ownerUserList.innerHTML = `
         <p class="owner-loading">
@@ -3735,10 +3855,18 @@ async function loadOwnerUsers() {
             </p>
         `;
 
+        showOwnerNotification(
+            "Could not load users.",
+            "error"
+        );
+
         return;
     }
 
-    ownerUsers = data || [];
+    ownerUsers =
+        Array.isArray(data)
+            ? data
+            : [];
 
     renderOwnerUsers();
 }
@@ -3750,17 +3878,25 @@ async function loadOwnerUsers() {
 
 function renderOwnerUsers() {
 
+    if (!ownerUserList || !ownerUserSearch) {
+        return;
+    }
+
     const search =
         ownerUserSearch.value
             .toLowerCase()
             .trim();
 
     const filteredUsers =
-        ownerUsers.filter(user =>
-            user.username
-                .toLowerCase()
-                .includes(search)
-        );
+        ownerUsers.filter(user => {
+
+            const username =
+                String(
+                    user.username || ""
+                ).toLowerCase();
+
+            return username.includes(search);
+        });
 
     if (filteredUsers.length === 0) {
 
@@ -3780,17 +3916,22 @@ function renderOwnerUsers() {
         const row =
             document.createElement("div");
 
-        row.className = "owner-user-row";
+        row.className =
+            "owner-user-row";
 
         row.innerHTML = `
             <div class="owner-user-info">
 
                 <div class="owner-username">
-                    ${escapeOwnerHTML(user.username)}
+                    ${escapeOwnerHTML(
+                        user.username || "Unknown User"
+                    )}
                 </div>
 
                 <div class="owner-coins">
-                    🪙 ${Number(user.coins).toLocaleString()} coins
+                    🪙 ${Number(
+                        user.coins || 0
+                    ).toLocaleString()} coins
                 </div>
 
             </div>
@@ -3807,6 +3948,7 @@ function renderOwnerUsers() {
                 >
 
                 <button
+                    type="button"
                     class="owner-give"
                     data-user-id="${user.user_id}"
                 >
@@ -3814,6 +3956,7 @@ function renderOwnerUsers() {
                 </button>
 
                 <button
+                    type="button"
                     class="owner-take"
                     data-user-id="${user.user_id}"
                 >
@@ -3854,7 +3997,6 @@ function attachOwnerActions() {
 
         });
 
-
     document
         .querySelectorAll(".owner-take")
         .forEach(button => {
@@ -3872,7 +4014,6 @@ function attachOwnerActions() {
             );
 
         });
-
 }
 
 
@@ -3890,21 +4031,33 @@ async function adjustUserCoins(
             `.owner-amount[data-user-id="${userId}"]`
         );
 
-    const amount =
-        Number(amountInput.value);
-
-    if (!Number.isInteger(amount) || amount <= 0) {
+    if (!amountInput) {
 
         showOwnerNotification(
-            "Enter a valid whole number.",
+            "Could not find the amount field.",
             "error"
         );
 
         return;
     }
 
-    const finalAmount =
-        amount * direction;
+    const amount =
+        Number(amountInput.value);
+
+    if (
+        !Number.isInteger(amount) ||
+        amount <= 0
+    ) {
+
+        showOwnerNotification(
+            "Enter a valid whole number.",
+            "error"
+        );
+
+        amountInput.focus();
+
+        return;
+    }
 
     const user =
         ownerUsers.find(
@@ -3912,22 +4065,36 @@ async function adjustUserCoins(
         );
 
     if (!user) {
+
+        showOwnerNotification(
+            "User could not be found.",
+            "error"
+        );
+
         return;
     }
 
     const action =
         direction > 0
-            ? "give"
-            : "take";
+            ? "Give"
+            : "Take";
+
+    const actionWord =
+        direction > 0
+            ? "to"
+            : "from";
 
     const confirmed =
         confirm(
-            `${action === "give" ? "Give" : "Take"} ${amount.toLocaleString()} coins ${action === "give" ? "to" : "from"} ${user.username}?`
+            `${action} ${amount.toLocaleString()} coins ${actionWord} ${user.username}?`
         );
 
     if (!confirmed) {
         return;
     }
+
+    const finalAmount =
+        amount * direction;
 
     const { data, error } =
         await supabaseClient.rpc(
@@ -3946,21 +4113,25 @@ async function adjustUserCoins(
         );
 
         showOwnerNotification(
-            error.message || "Could not change coins.",
+            error.message ||
+            "Could not change coins.",
             "error"
         );
 
         return;
     }
 
-    user.coins = data;
+    user.coins =
+        Number(data) || 0;
 
     amountInput.value = "";
 
     renderOwnerUsers();
 
     showOwnerNotification(
-        `${user.username} now has ${Number(data).toLocaleString()} coins.`,
+        `${user.username} now has ${Number(
+            data
+        ).toLocaleString()} coins.`,
         "success"
     );
 }
@@ -3970,89 +4141,137 @@ async function adjustUserCoins(
 // OPEN OWNER PANEL
 // =========================================
 
-ownerPanelButton.addEventListener(
-    "click",
-    async function(event) {
+if (ownerPanelButton) {
 
-        event.preventDefault();
-        event.stopPropagation();
+    ownerPanelButton.addEventListener(
+        "click",
+        async function(event) {
 
-        const isAdmin =
-            await checkAdmin();
+            event.preventDefault();
+            event.stopPropagation();
 
-        if (!isAdmin) {
+            const isAdmin =
+                await checkAdmin();
 
-            alert(
-                "You don't have permission to access this."
-            );
+            if (!isAdmin) {
 
-            return;
+                showOwnerNotification(
+                    "You don't have permission to access this.",
+                    "error"
+                );
+
+                return;
+            }
+
+            if (
+                typeof accountMenu !==
+                "undefined" &&
+                accountMenu
+            ) {
+
+                accountMenu.classList.remove(
+                    "open"
+                );
+            }
+
+            if (ownerOverlay) {
+
+                ownerOverlay.classList.add(
+                    "open"
+                );
+
+                await loadOwnerUsers();
+            }
+
         }
-
-        accountMenu.classList.remove("open");
-
-        ownerOverlay.classList.add("open");
-
-        await loadOwnerUsers();
-
-    }
-);
+    );
+}
 
 
 // =========================================
 // CLOSE OWNER PANEL
 // =========================================
 
-closeOwnerPanel.addEventListener(
-    "click",
-    function() {
+if (closeOwnerPanel) {
 
-        ownerOverlay.classList.remove("open");
+    closeOwnerPanel.addEventListener(
+        "click",
+        function() {
 
-    }
-);
+            if (ownerOverlay) {
 
-
-ownerOverlay.addEventListener(
-    "click",
-    function(event) {
-
-        if (event.target === ownerOverlay) {
-
-            ownerOverlay.classList.remove("open");
+                ownerOverlay.classList.remove(
+                    "open"
+                );
+            }
 
         }
+    );
+}
 
-    }
-);
+
+// =========================================
+// CLOSE WHEN CLICKING OUTSIDE
+// =========================================
+
+if (ownerOverlay) {
+
+    ownerOverlay.addEventListener(
+        "click",
+        function(event) {
+
+            if (
+                event.target ===
+                ownerOverlay
+            ) {
+
+                ownerOverlay.classList.remove(
+                    "open"
+                );
+            }
+
+        }
+    );
+}
 
 
 // =========================================
 // SEARCH USERS
 // =========================================
 
-ownerUserSearch.addEventListener(
-    "input",
-    function() {
+if (ownerUserSearch) {
 
-        renderOwnerUsers();
+    ownerUserSearch.addEventListener(
+        "input",
+        function() {
 
-    }
-);
+            renderOwnerUsers();
+
+        }
+    );
+}
 
 
 // =========================================
-// REFRESH
+// REFRESH USERS
 // =========================================
 
-refreshOwnerUsers.addEventListener(
-    "click",
-    async function() {
+if (refreshOwnerUsers) {
 
-        await loadOwnerUsers();
+    refreshOwnerUsers.addEventListener(
+        "click",
+        async function() {
 
-    }
-);
+            await loadOwnerUsers();
+
+            showOwnerNotification(
+                "User list refreshed.",
+                "success"
+            );
+
+        }
+    );
+}
 
 
 // =========================================
@@ -4065,10 +4284,13 @@ document.addEventListener(
 
         if (
             event.key === "Escape" &&
+            ownerOverlay &&
             ownerOverlay.classList.contains("open")
         ) {
 
-            ownerOverlay.classList.remove("open");
+            ownerOverlay.classList.remove(
+                "open"
+            );
 
         }
 
@@ -4085,7 +4307,8 @@ function escapeOwnerHTML(text) {
     const div =
         document.createElement("div");
 
-    div.textContent = text;
+    div.textContent =
+        String(text ?? "");
 
     return div.innerHTML;
 }
@@ -4096,61 +4319,3 @@ function escapeOwnerHTML(text) {
 // =========================================
 
 checkAdmin();
-
-/* =========================================
-   OWNER NOTIFICATIONS
-========================================= */
-
-function showOwnerNotification(message, type = "info") {
-    let container = document.getElementById("ownerNotificationContainer");
-
-    if (!container) {
-        container = document.createElement("div");
-        container.id = "ownerNotificationContainer";
-        container.className = "owner-notification-container";
-        document.body.appendChild(container);
-    }
-
-    const notification = document.createElement("div");
-    notification.className = `owner-notification ${type}`;
-
-    const icons = {
-        success: "✓",
-        error: "✕",
-        info: "ⓘ"
-    };
-
-    notification.innerHTML = `
-        <div class="owner-notification-icon">
-            ${icons[type] || icons.info}
-        </div>
-        <div class="owner-notification-message">
-            ${escapeOwnerHTML(message)}
-        </div>
-        <button class="owner-notification-close">×</button>
-    `;
-
-    container.appendChild(notification);
-
-    requestAnimationFrame(() => {
-        notification.classList.add("show");
-    });
-
-    const removeNotification = () => {
-        notification.classList.remove("show");
-
-        setTimeout(() => {
-            notification.remove();
-
-            if (container.children.length === 0) {
-                container.remove();
-            }
-        }, 250);
-    };
-
-    notification
-        .querySelector(".owner-notification-close")
-        .addEventListener("click", removeNotification);
-
-    setTimeout(removeNotification, 3500);
-}
