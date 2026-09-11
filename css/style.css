@@ -3542,3 +3542,254 @@ z-index: 1000;
         padding: 20px;
     }
 }
+/* =========================================
+   OWNER PANEL
+========================================= */
+
+.owner-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.7);
+    backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(6px);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 10000;
+    padding: 20px;
+}
+
+.owner-overlay.open {
+    display: flex;
+}
+
+.owner-window {
+    width: min(900px, 100%);
+    max-height: 85vh;
+    overflow: hidden;
+    background: var(--header);
+    color: var(--text);
+    border: 1px solid var(--accent);
+    border-radius: 18px;
+    box-shadow:
+        0 20px 60px rgba(0, 0, 0, 0.5),
+        0 0 25px var(--shadow);
+    backdrop-filter: blur(15px);
+    -webkit-backdrop-filter: blur(15px);
+}
+
+.owner-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.owner-header h2 {
+    margin: 0;
+    color: var(--accent);
+}
+
+.owner-header p {
+    margin: 5px 0 0;
+    color: var(--text);
+    opacity: 0.65;
+}
+
+.close-owner {
+    width: 34px;
+    height: 34px;
+    border: none;
+    border-radius: 8px;
+    background: transparent;
+    color: var(--text);
+    font-size: 22px;
+    cursor: pointer;
+    transition: 0.2s ease;
+}
+
+.close-owner:hover {
+    color: var(--accent);
+    background: rgba(255, 255, 255, 0.06);
+    transform: scale(1.05);
+}
+
+.owner-toolbar {
+    display: flex;
+    gap: 10px;
+    padding: 15px 20px;
+}
+
+.owner-toolbar input {
+    flex: 1;
+    padding: 11px 13px;
+    border-radius: 9px;
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    background: var(--card);
+    color: var(--text);
+    outline: none;
+    transition: 0.2s ease;
+}
+
+.owner-toolbar input::placeholder {
+    color: var(--accent-light);
+}
+
+.owner-toolbar input:focus {
+    border-color: var(--accent);
+    box-shadow: 0 0 12px var(--shadow);
+}
+
+.owner-toolbar button {
+    padding: 10px 16px;
+    border: none;
+    border-radius: 9px;
+    cursor: pointer;
+    background: var(--accent);
+    color: #001018;
+    font-weight: bold;
+    transition: 0.2s ease;
+}
+
+.owner-toolbar button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 0 15px var(--glow);
+}
+
+.owner-user-list {
+    padding: 0 20px 20px;
+    max-height: 60vh;
+    overflow-y: auto;
+}
+
+.owner-user-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 20px;
+    padding: 14px 16px;
+    margin-bottom: 8px;
+    border-radius: 12px;
+    background: var(--card);
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    transition:
+        transform 0.2s ease,
+        border-color 0.2s ease,
+        box-shadow 0.2s ease;
+}
+
+.owner-user-row:hover {
+    transform: translateY(-2px);
+    border-color: var(--accent);
+    box-shadow: 0 0 12px var(--shadow);
+}
+
+.owner-user-info {
+    min-width: 0;
+    text-align: left;
+    flex: 1;
+}
+
+.owner-username {
+    font-weight: 600;
+    font-size: 16px;
+    color: var(--text);
+}
+
+.owner-coins {
+    margin-top: 3px;
+    font-size: 13px;
+    color: var(--accent);
+    opacity: 0.85;
+}
+
+.owner-actions {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.owner-amount {
+    width: 90px;
+    padding: 9px 10px;
+    border-radius: 8px;
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    background: var(--header);
+    color: var(--text);
+    outline: none;
+    transition: 0.2s ease;
+}
+
+.owner-amount:focus {
+    border-color: var(--accent);
+    box-shadow: 0 0 10px var(--shadow);
+}
+
+.owner-actions button {
+    border: none;
+    border-radius: 8px;
+    padding: 9px 12px;
+    cursor: pointer;
+    color: #fff;
+    font-weight: 600;
+    transition: 0.2s ease;
+}
+
+.owner-actions button:hover {
+    transform: translateY(-1px);
+    filter: brightness(1.12);
+}
+
+.owner-give {
+    background: #168a4a;
+}
+
+.owner-take {
+    background: #a83232;
+}
+
+.owner-loading,
+.owner-error {
+    text-align: center;
+    padding: 30px;
+    color: var(--text);
+    opacity: 0.7;
+}
+
+.owner-error {
+    color: var(--accent-light);
+}
+
+.owner-user-list::-webkit-scrollbar {
+    width: 7px;
+}
+
+.owner-user-list::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.owner-user-list::-webkit-scrollbar-thumb {
+    background: var(--accent);
+    border-radius: 10px;
+    box-shadow: 0 0 8px var(--glow);
+}
+
+@media (max-width: 650px) {
+    .owner-user-row {
+        align-items: flex-start;
+        flex-direction: column;
+    }
+
+    .owner-user-info {
+        width: 100%;
+    }
+
+    .owner-actions {
+        width: 100%;
+    }
+
+    .owner-amount {
+        flex: 1;
+    }
+}

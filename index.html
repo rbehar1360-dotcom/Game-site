@@ -90,6 +90,9 @@
 <button id="leaderboardButton">
     🏆 Leaderboard
 </button>
+      <button id="ownerPanelButton" style="display: none;">
+    👑 Owner Panel
+</button>
 <button id="shopButton">
     🛒 Shop
 </button>
@@ -111,7 +114,52 @@
 <!-- =========================================
      SHOP WINDOW
 ========================================= -->
+<!-- =========================================
+     OWNER PANEL
+========================================= -->
 
+<div id="ownerOverlay" class="owner-overlay">
+
+    <div class="owner-window">
+
+        <div class="owner-header">
+
+            <div>
+                <h2>👑 Owner Panel</h2>
+                <p>Manage users and rewards</p>
+            </div>
+
+            <button id="closeOwnerPanel" class="close-owner">
+                ✕
+            </button>
+
+        </div>
+
+        <div class="owner-toolbar">
+
+            <input
+                type="text"
+                id="ownerUserSearch"
+                placeholder="Search users..."
+            >
+
+            <button id="refreshOwnerUsers">
+                ↻ Refresh
+            </button>
+
+        </div>
+
+        <div id="ownerUserList" class="owner-user-list">
+
+            <p class="owner-loading">
+                Loading users...
+            </p>
+
+        </div>
+
+    </div>
+
+</div>
 <div id="shopOverlay" class="shop-overlay">
 
     <div class="shop-window">

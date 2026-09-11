@@ -3349,19 +3349,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
 // Inside Script.js (Look for your click/view tracking listener)
-gameCard.addEventListener('click', (event) => {
-    // ... your existing code that logs/records the view ...
-    console.log("Recording view for: " + gameId);
-
-    // FIX: Check if the clicked element (or its parent anchor) wants a new tab
-    const anchor = event.target.closest('a');
-    if (anchor && anchor.getAttribute('target') === '_blank') {
-        event.preventDefault(); // Stop the script from changing the main window location
-        window.open(anchor.href, '_blank'); // Force open in a new tab instead
-    } else if (anchor) {
-        window.location.href = anchor.href; // Standard same-tab fallback
-    }
-}, true); // Note: If this 'true' is here, it's using capturing!
 
 
 // =========================================
@@ -3651,3 +3638,519 @@ gameCard.addEventListener('click', (event) => {
 
 })();
 
+
+// =========================================
+// OWNER PANEL
+// =========================================
+
+const ownerPanelButton =
+    document.getElementById("ownerPanelButton");
+
+const ownerOverlay =
+    document.getElementById("ownerOverlay");
+
+const closeOwnerPanel =
+    document.getElementById("closeOwnerPanel");
+
+const ownerUserList =
+    document.getElementById("ownerUserList");
+
+const ownerUserSearch =
+    document.getElementById("ownerUserSearch");
+
+const refreshOwnerUsers =
+    document.getElementById("refreshOwnerUsers");
+
+let ownerUsers = [];
+
+
+// =========================================
+// CHECK ADMIN
+// =========================================
+
+async function checkAdmin() {
+
+    const user = await getCurrentUser();
+
+    if (!user) {
+        ownerPanelButton.style.display = "none";
+        return false;
+    }
+
+    const { data, error } =
+        await supabaseClient.rpc("is_admin");
+
+    if (error) {
+
+        console.error(
+            "Could not check admin status:",
+            error
+        );
+
+        ownerPanelButton.style.display = "none";
+
+        return false;
+    }
+
+    if (data === true) {
+
+        ownerPanelButton.style.display = "block";
+
+        return true;
+    }
+
+    ownerPanelButton.style.display = "none";
+
+    return false;
+}
+
+
+// =========================================
+// LOAD USERS
+// =========================================
+
+async function loadOwnerUsers() {
+
+    ownerUserList.innerHTML = `
+        <p class="owner-loading">
+            Loading users...
+        </p>
+    `;
+
+    const { data, error } =
+        await supabaseClient.rpc(
+            "admin_list_users"
+        );
+
+    if (error) {
+
+        console.error(
+            "Could not load users:",
+            error
+        );
+
+        ownerUserList.innerHTML = `
+            <p class="owner-error">
+                You don't have permission to view users.
+            </p>
+        `;
+
+        return;
+    }
+
+    ownerUsers = data || [];
+
+    renderOwnerUsers();
+}
+
+
+// =========================================
+// RENDER USERS
+// =========================================
+
+function renderOwnerUsers() {
+
+    const search =
+        ownerUserSearch.value
+            .toLowerCase()
+            .trim();
+
+    const filteredUsers =
+        ownerUsers.filter(user =>
+            user.username
+                .toLowerCase()
+                .includes(search)
+        );
+
+    if (filteredUsers.length === 0) {
+
+        ownerUserList.innerHTML = `
+            <p class="owner-loading">
+                No users found.
+            </p>
+        `;
+
+        return;
+    }
+
+    ownerUserList.innerHTML = "";
+
+    filteredUsers.forEach(user => {
+
+        const row =
+            document.createElement("div");
+
+        row.className = "owner-user-row";
+
+        row.innerHTML = `
+            <div class="owner-user-info">
+
+                <div class="owner-username">
+                    ${escapeOwnerHTML(user.username)}
+                </div>
+
+                <div class="owner-coins">
+                    🪙 ${Number(user.coins).toLocaleString()} coins
+                </div>
+
+            </div>
+
+            <div class="owner-actions">
+
+                <input
+                    type="number"
+                    min="1"
+                    step="1"
+                    placeholder="Amount"
+                    class="owner-amount"
+                    data-user-id="${user.user_id}"
+                >
+
+                <button
+                    class="owner-give"
+                    data-user-id="${user.user_id}"
+                >
+                    + Give
+                </button>
+
+                <button
+                    class="owner-take"
+                    data-user-id="${user.user_id}"
+                >
+                    − Take
+                </button>
+
+            </div>
+        `;
+
+        ownerUserList.appendChild(row);
+    });
+
+    attachOwnerActions();
+}
+
+
+// =========================================
+// OWNER ACTION BUTTONS
+// =========================================
+
+function attachOwnerActions() {
+
+    document
+        .querySelectorAll(".owner-give")
+        .forEach(button => {
+
+            button.addEventListener(
+                "click",
+                async function() {
+
+                    await adjustUserCoins(
+                        this.dataset.userId,
+                        1
+                    );
+
+                }
+            );
+
+        });
+
+
+    document
+        .querySelectorAll(".owner-take")
+        .forEach(button => {
+
+            button.addEventListener(
+                "click",
+                async function() {
+
+                    await adjustUserCoins(
+                        this.dataset.userId,
+                        -1
+                    );
+
+                }
+            );
+
+        });
+
+}
+
+
+// =========================================
+// ADJUST COINS
+// =========================================
+
+async function adjustUserCoins(
+    userId,
+    direction
+) {
+
+    const amountInput =
+        document.querySelector(
+            `.owner-amount[data-user-id="${userId}"]`
+        );
+
+    const amount =
+        Number(amountInput.value);
+
+    if (!Number.isInteger(amount) || amount <= 0) {
+
+        showOwnerNotification(
+            "Enter a valid whole number.",
+            "error"
+        );
+
+        return;
+    }
+
+    const finalAmount =
+        amount * direction;
+
+    const user =
+        ownerUsers.find(
+            u => u.user_id === userId
+        );
+
+    if (!user) {
+        return;
+    }
+
+    const action =
+        direction > 0
+            ? "give"
+            : "take";
+
+    const confirmed =
+        confirm(
+            `${action === "give" ? "Give" : "Take"} ${amount.toLocaleString()} coins ${action === "give" ? "to" : "from"} ${user.username}?`
+        );
+
+    if (!confirmed) {
+        return;
+    }
+
+    const { data, error } =
+        await supabaseClient.rpc(
+            "admin_adjust_coins",
+            {
+                target_user_id: userId,
+                amount: finalAmount
+            }
+        );
+
+    if (error) {
+
+        console.error(
+            "Coin adjustment failed:",
+            error
+        );
+
+        showOwnerNotification(
+            error.message || "Could not change coins.",
+            "error"
+        );
+
+        return;
+    }
+
+    user.coins = data;
+
+    amountInput.value = "";
+
+    renderOwnerUsers();
+
+    showOwnerNotification(
+        `${user.username} now has ${Number(data).toLocaleString()} coins.`,
+        "success"
+    );
+}
+
+
+// =========================================
+// OPEN OWNER PANEL
+// =========================================
+
+ownerPanelButton.addEventListener(
+    "click",
+    async function(event) {
+
+        event.preventDefault();
+        event.stopPropagation();
+
+        const isAdmin =
+            await checkAdmin();
+
+        if (!isAdmin) {
+
+            alert(
+                "You don't have permission to access this."
+            );
+
+            return;
+        }
+
+        accountMenu.classList.remove("open");
+
+        ownerOverlay.classList.add("open");
+
+        await loadOwnerUsers();
+
+    }
+);
+
+
+// =========================================
+// CLOSE OWNER PANEL
+// =========================================
+
+closeOwnerPanel.addEventListener(
+    "click",
+    function() {
+
+        ownerOverlay.classList.remove("open");
+
+    }
+);
+
+
+ownerOverlay.addEventListener(
+    "click",
+    function(event) {
+
+        if (event.target === ownerOverlay) {
+
+            ownerOverlay.classList.remove("open");
+
+        }
+
+    }
+);
+
+
+// =========================================
+// SEARCH USERS
+// =========================================
+
+ownerUserSearch.addEventListener(
+    "input",
+    function() {
+
+        renderOwnerUsers();
+
+    }
+);
+
+
+// =========================================
+// REFRESH
+// =========================================
+
+refreshOwnerUsers.addEventListener(
+    "click",
+    async function() {
+
+        await loadOwnerUsers();
+
+    }
+);
+
+
+// =========================================
+// ESCAPE
+// =========================================
+
+document.addEventListener(
+    "keydown",
+    function(event) {
+
+        if (
+            event.key === "Escape" &&
+            ownerOverlay.classList.contains("open")
+        ) {
+
+            ownerOverlay.classList.remove("open");
+
+        }
+
+    }
+);
+
+
+// =========================================
+// HTML ESCAPE
+// =========================================
+
+function escapeOwnerHTML(text) {
+
+    const div =
+        document.createElement("div");
+
+    div.textContent = text;
+
+    return div.innerHTML;
+}
+
+
+// =========================================
+// INITIAL ADMIN CHECK
+// =========================================
+
+checkAdmin();
+
+/* =========================================
+   OWNER NOTIFICATIONS
+========================================= */
+
+function showOwnerNotification(message, type = "info") {
+    let container = document.getElementById("ownerNotificationContainer");
+
+    if (!container) {
+        container = document.createElement("div");
+        container.id = "ownerNotificationContainer";
+        container.className = "owner-notification-container";
+        document.body.appendChild(container);
+    }
+
+    const notification = document.createElement("div");
+    notification.className = `owner-notification ${type}`;
+
+    const icons = {
+        success: "✓",
+        error: "✕",
+        info: "ⓘ"
+    };
+
+    notification.innerHTML = `
+        <div class="owner-notification-icon">
+            ${icons[type] || icons.info}
+        </div>
+        <div class="owner-notification-message">
+            ${escapeOwnerHTML(message)}
+        </div>
+        <button class="owner-notification-close">×</button>
+    `;
+
+    container.appendChild(notification);
+
+    requestAnimationFrame(() => {
+        notification.classList.add("show");
+    });
+
+    const removeNotification = () => {
+        notification.classList.remove("show");
+
+        setTimeout(() => {
+            notification.remove();
+
+            if (container.children.length === 0) {
+                container.remove();
+            }
+        }, 250);
+    };
+
+    notification
+        .querySelector(".owner-notification-close")
+        .addEventListener("click", removeNotification);
+
+    setTimeout(removeNotification, 3500);
+}
