@@ -323,17 +323,25 @@ async function setupLikes() {
     const gameWrappers =
         document.querySelectorAll(".game-wrapper");
 
-
     for (const wrapper of gameWrappers) {
 
         const gameId =
             wrapper.dataset.gameId;
+
+        if (!gameId) {
+            continue;
+        }
 
         const likeButton =
             wrapper.querySelector(".like-button");
 
         const likeCount =
             wrapper.querySelector(".like-count");
+
+        // Skip cards that do not have the complete like system
+        if (!likeButton || !likeCount) {
+            continue;
+        }
 
 
         // -----------------------------------------
@@ -342,14 +350,11 @@ async function setupLikes() {
 
         const { count, error: countError } =
             await supabaseClient
-
                 .from("likes")
-
                 .select("*", {
                     count: "exact",
                     head: true
                 })
-
                 .eq("game_id", gameId);
 
 
@@ -364,7 +369,8 @@ async function setupLikes() {
         }
 
 
-        likeCount.textContent = count || 0;
+        likeCount.textContent =
+            count || 0;
 
 
         // -----------------------------------------
@@ -374,28 +380,26 @@ async function setupLikes() {
         const { data: userData } =
             await supabaseClient.auth.getUser();
 
-        const user = userData.user;
+        const user =
+            userData.user;
 
 
         if (user) {
 
             const { data: existingLike } =
                 await supabaseClient
-
                     .from("likes")
-
                     .select("id")
-
                     .eq("user_id", user.id)
-
                     .eq("game_id", gameId)
-
                     .maybeSingle();
 
 
             if (existingLike) {
 
-                likeButton.classList.add("liked");
+                likeButton.classList.add(
+                    "liked"
+                );
 
             }
 
@@ -411,16 +415,14 @@ async function setupLikes() {
             async function(event) {
 
                 event.preventDefault();
-
                 event.stopPropagation();
 
-
-                // Check login
 
                 const { data: userData } =
                     await supabaseClient.auth.getUser();
 
-                const user = userData.user;
+                const user =
+                    userData.user;
 
 
                 if (!user) {
@@ -437,15 +439,10 @@ async function setupLikes() {
 
                 const { data: existingLike } =
                     await supabaseClient
-
                         .from("likes")
-
                         .select("id")
-
                         .eq("user_id", user.id)
-
                         .eq("game_id", gameId)
-
                         .maybeSingle();
 
 
@@ -457,17 +454,20 @@ async function setupLikes() {
 
                     const { error } =
                         await supabaseClient
-
                             .from("likes")
-
                             .delete()
-
-                            .eq("id", existingLike.id);
+                            .eq(
+                                "id",
+                                existingLike.id
+                            );
 
 
                     if (error) {
 
-                        console.error(error);
+                        console.error(
+                            "Could not remove like:",
+                            error
+                        );
 
                         return;
                     }
@@ -481,11 +481,13 @@ async function setupLikes() {
                     likeCount.textContent =
                         Math.max(
                             0,
-                            Number(likeCount.textContent) - 1
+                            Number(
+                                likeCount.textContent
+                            ) - 1
                         );
 
-
                 }
+
 
                 // -----------------------------------------
                 // ADD LIKE
@@ -495,21 +497,19 @@ async function setupLikes() {
 
                     const { error } =
                         await supabaseClient
-
                             .from("likes")
-
                             .insert({
-
                                 user_id: user.id,
-
                                 game_id: gameId
-
                             });
 
 
                     if (error) {
 
-                        console.error(error);
+                        console.error(
+                            "Could not add like:",
+                            error
+                        );
 
                         return;
                     }
@@ -536,6 +536,9 @@ async function setupLikes() {
 
 
 setupLikes();
+
+
+
 // =========================================
 // GAME VIEW TRACKING
 // =========================================
@@ -865,12 +868,13 @@ async function toggleFavorite(button) {
             }
 
             setFavoriteButton(button, true);
+            
         }
 
         // Reload from Supabase so the UI and database
         // are guaranteed to be synchronized.
         await loadFavorites(user);
-
+        checkAchievements();
     }
 
     finally {
@@ -1607,15 +1611,11 @@ const chatInput = document.getElementById("chatInput");
 // =========================================
 
 chatButton.addEventListener("click", async function () {
-
     const user = await getCurrentUser();
 
     if (!user) {
-
-        alert("Please log in to use chat! 💬");
-
+        alert("Please log in to use chat!");
         loginOverlay.classList.add("open");
-
         return;
     }
 
@@ -1624,7 +1624,6 @@ chatButton.addEventListener("click", async function () {
     await loadChatMessages();
 
     chatInput.focus();
-
 });
 
 
@@ -1633,9 +1632,7 @@ chatButton.addEventListener("click", async function () {
 // =========================================
 
 closeChat.addEventListener("click", function () {
-
     chatOverlay.classList.remove("open");
-
 });
 
 
@@ -1644,13 +1641,9 @@ closeChat.addEventListener("click", function () {
 // =========================================
 
 chatOverlay.addEventListener("click", function (event) {
-
     if (event.target === chatOverlay) {
-
         chatOverlay.classList.remove("open");
-
     }
-
 });
 
 
@@ -1659,67 +1652,50 @@ chatOverlay.addEventListener("click", function (event) {
 // =========================================
 
 async function loadChatMessages() {
-
-    chatMessages.innerHTML =
-        `<div class="chat-loading">
+    chatMessages.innerHTML = `
+        <div class="chat-loading">
             Loading messages...
-        </div>`;
-
+        </div>
+    `;
 
     const { data, error } = await supabaseClient
-
         .from("chat_messages")
-
         .select("*")
-
         .eq("channel", "general")
-
         .order("created_at", {
             ascending: true
         })
-
         .limit(100);
 
-
     if (error) {
+        console.error("Could not load chat:", error);
 
-        console.error(
-            "Could not load chat:",
-            error
-        );
-
-        chatMessages.innerHTML =
-            `<div class="chat-loading">
+        chatMessages.innerHTML = `
+            <div class="chat-loading">
                 Could not load messages.
-            </div>`;
+            </div>
+        `;
 
         return;
     }
-
 
     chatMessages.innerHTML = "";
 
-
     if (!data || data.length === 0) {
-
-        chatMessages.innerHTML =
-            `<div class="chat-empty">
-              
-            </div>`;
+        chatMessages.innerHTML = `
+            <div class="chat-empty">
+                No messages yet.
+            </div>
+        `;
 
         return;
     }
 
-
     data.forEach(message => {
-
         addChatMessage(message);
-
     });
 
-
     scrollChatToBottom();
-
 }
 
 
@@ -1728,100 +1704,51 @@ async function loadChatMessages() {
 // =========================================
 
 function addChatMessage(message) {
+    const messageElement = document.createElement("div");
 
-    const messageElement =
-        document.createElement("div");
-
-    messageElement.className =
-        "chat-message";
-
+    messageElement.className = "chat-message";
     messageElement.dataset.messageId = message.id;
 
-
-    const currentUser =
-        supabaseClient.auth.getUser();
-
-
     // Username
+    const username = document.createElement("div");
 
-    const username =
-        document.createElement("div");
+    username.className = "leaderboard-username";
 
-    username.className =
-        "chat-message-username";
+    const playerUsername =
+        message.username ||
+        "User";
 
-    username.textContent =
-        message.username;
+    username.textContent = playerUsername;
 
+    username.dataset.userId = message.user_id || "";
+    username.dataset.username = playerUsername;
 
-    // Message
+    username.classList.add("clickable-profile");
 
-    const content =
-        document.createElement("div");
+    // Message content
+    const content = document.createElement("div");
 
-    content.className =
-        "chat-message-content";
+    content.className = "chat-message-content";
 
-    // IMPORTANT:
-    // textContent prevents HTML injection
-
-    content.textContent =
-        message.content;
-
+    content.textContent = message.content;
 
     // Time
-   
+    const time = document.createElement("div");
 
-username.className =
-    "leaderboard-username";
+    time.className = "chat-message-time";
 
-const playerUsername =
-    player.username ||
-    player.display_name ||
-    "User";
+    const date = new Date(message.created_at);
 
-username.textContent =
-    playerUsername;
-
-const profileUserId =
-    player.user_id ||
-    player.id ||
-    null;
-
-username.dataset.userId =
-    profileUserId || "";
-
-username.dataset.username =
-    playerUsername;
-
-username.classList.add("clickable-profile");
-    const time =
-        document.createElement("div");
-
-    time.className =
-        "chat-message-time";
-
-    const date =
-        new Date(message.created_at);
-
-    time.textContent =
-        date.toLocaleTimeString([], {
-            hour: "numeric",
-            minute: "2-digit"
-        });
-
+    time.textContent = date.toLocaleTimeString([], {
+        hour: "numeric",
+        minute: "2-digit"
+    });
 
     messageElement.appendChild(username);
-
     messageElement.appendChild(content);
-
     messageElement.appendChild(time);
 
-
-    chatMessages.appendChild(
-        messageElement
-    );
-
+    chatMessages.appendChild(messageElement);
 }
 
 
@@ -1829,172 +1756,104 @@ username.classList.add("clickable-profile");
 // SEND MESSAGE
 // =========================================
 
-chatForm.addEventListener(
-    "submit",
-    async function (event) {
+chatForm.addEventListener("submit", async function (event) {
+    event.preventDefault();
 
-        event.preventDefault();
+    const content = chatInput.value.trim();
 
-
-        const content =
-            chatInput.value.trim();
-
-
-        if (!content) {
-            return;
-        }
-
-
-        const user =
-            await getCurrentUser();
-
-
-        if (!user) {
-
-            alert(
-                "Please log in to send messages!"
-            );
-
-            return;
-        }
-
-
-        const username =
-            user.user_metadata?.username ||
-            "User";
-
-
-        chatInput.disabled = true;
-
-
-        const { error } =
-            await supabaseClient
-
-                .from("chat_messages")
-
-                .insert({
-
-                    user_id: user.id,
-
-                    username: username,
-
-                    content: content,
-
-                    channel: "general"
-
-                });
-
-
-        if (error) {
-
-            console.error(
-                "Could not send message:",
-                error
-            );
-
-            alert(
-                "Could not send message."
-            );
-
-        } else {
-
-            chatInput.value = "";
-
-        }
-
-
-        chatInput.disabled = false;
-
-        chatInput.focus();
-
+    if (!content) {
+        return;
     }
-);
+
+    const user = await getCurrentUser();
+
+    if (!user) {
+        alert("Please log in to send messages!");
+        return;
+    }
+
+    const username =
+        user.user_metadata?.username ||
+        user.user_metadata?.display_name ||
+        user.email?.split("@")[0] ||
+        "User";
+
+    chatInput.disabled = true;
+
+    const { error } = await supabaseClient
+        .from("chat_messages")
+        .insert({
+            user_id: user.id,
+            username: username,
+            content: content,
+            channel: "general"
+        });
+
+    if (error) {
+        console.error("Could not send message:", error);
+        alert("Could not send message.");
+    } else {
+        chatInput.value = "";
+    }
+
+    chatInput.disabled = false;
+    chatInput.focus();
+});
 
 
 // =========================================
 // REALTIME CHAT
 // =========================================
 
-const chatChannel =
-    supabaseClient
+const chatChannel = supabaseClient
+    .channel("general-chat")
 
-        .channel("general-chat")
-
-        // =========================================
-        // NEW MESSAGE
-        // =========================================
-
-        .on(
-            "postgres_changes",
-            {
-                event: "INSERT",
-                schema: "public",
-                table: "chat_messages",
-                filter: "channel=eq.general"
-            },
-
-
-            function (payload) {
-
-                if (
-                    !chatOverlay.classList.contains("open")
-                ) {
-                    return;
-                }
-
-                addChatMessage(payload.new);
-
-                scrollChatToBottom();
-
+    .on(
+        "postgres_changes",
+        {
+            event: "INSERT",
+            schema: "public",
+            table: "chat_messages",
+            filter: "channel=eq.general"
+        },
+        function (payload) {
+            if (!chatOverlay.classList.contains("open")) {
+                return;
             }
-        )
 
+            addChatMessage(payload.new);
+            scrollChatToBottom();
+        }
+    )
 
-        // =========================================
-        // DELETED MESSAGE
-        // =========================================
+    .on(
+        "postgres_changes",
+        {
+            event: "DELETE",
+            schema: "public",
+            table: "chat_messages"
+        },
+        function (payload) {
+            const deletedMessage = document.querySelector(
+                `[data-message-id="${payload.old.id}"]`
+            );
 
-        .on(
-            "postgres_changes",
-            {
-                event: "DELETE",
-                schema: "public",
-                table: "chat_messages"
-            },
-
-            function (payload) {
-
-                const deletedMessage =
-                    document.querySelector(
-                        `[data-message-id="${payload.old.id}"]`
-                    );
-
-                if (deletedMessage) {
-
-                    deletedMessage.remove();
-
-                }
-
+            if (deletedMessage) {
+                deletedMessage.remove();
             }
-        )
+        }
+    )
+
+    .subscribe();
 
 
-        // =========================================
-        // CONNECT TO REALTIME
-        // =========================================
-
-        .subscribe();
 // =========================================
 // SCROLL CHAT
 // =========================================
 
 function scrollChatToBottom() {
-
-    chatMessages.scrollTop =
-        chatMessages.scrollHeight;
-
+    chatMessages.scrollTop = chatMessages.scrollHeight;
 }
-
 // =========================================
 // PRIVATE MESSAGES / INBOX
 // =========================================
@@ -4646,110 +4505,6 @@ function formatProfileDate(date) {
 // RENDER ACHIEVEMENTS
 // =========================================
 
-function renderProfileAchievements(profile) {
-
-    if (!profileAchievements) {
-        return;
-    }
-
-    profileAchievements.innerHTML = "";
-
-    const totalSeconds =
-        Number(profile.total_playtime || 0);
-
-    const gamesPlayed =
-        Number(profile.games_played || 0);
-
-    const achievements = [];
-
-    if (gamesPlayed >= 1) {
-        achievements.push({
-            icon: "🎮",
-            title: "First Game",
-            description: "Played your first game."
-        });
-    }
-
-    if (gamesPlayed >= 5) {
-        achievements.push({
-            icon: "🕹️",
-            title: "Game Explorer",
-            description: "Played 5 different games."
-        });
-    }
-
-    if (gamesPlayed >= 10) {
-        achievements.push({
-            icon: "🔥",
-            title: "Game Addict",
-            description: "Played 10 different games."
-        });
-    }
-
-    if (totalSeconds >= 3600) {
-        achievements.push({
-            icon: "⏱️",
-            title: "One Hour",
-            description: "Played for at least one hour."
-        });
-    }
-
-    if (totalSeconds >= 36000) {
-        achievements.push({
-            icon: "🏆",
-            title: "Dedicated",
-            description: "Played for at least 10 hours."
-        });
-    }
-
-    if (profile.overall_rank === 1) {
-        achievements.push({
-            icon: "👑",
-            title: "Top Player",
-            description: "Currently #1 on the leaderboard."
-        });
-    }
-
-    if (achievements.length === 0) {
-
-        profileAchievements.innerHTML = `
-            <div class="profile-empty">
-                No achievements yet.
-            </div>
-        `;
-
-        return;
-    }
-
-    achievements.forEach(achievement => {
-
-        const item =
-            document.createElement("div");
-
-        item.className =
-            "profile-achievement";
-
-        item.innerHTML = `
-            <div class="profile-achievement-icon">
-                ${achievement.icon}
-            </div>
-
-            <div class="profile-achievement-info">
-                <div class="profile-achievement-title">
-                    ${achievement.title}
-                </div>
-
-                <div class="profile-achievement-description">
-                    ${achievement.description}
-                </div>
-            </div>
-        `;
-
-        profileAchievements.appendChild(item);
-
-    });
-}
-
 
 // =========================================
 // RENDER PLAYTIME
@@ -4944,13 +4699,7 @@ async function openUserProfile(
         `;
     }
 
-    if (profileAchievements) {
-        profileAchievements.innerHTML = `
-            <div class="profile-loading">
-                Loading achievements...
-            </div>
-        `;
-    }
+    
 
     // If leaderboard did not provide the UUID,
     // try finding the user by username.
@@ -5123,9 +4872,7 @@ async function openUserProfile(
         recentGames
     );
 
-    renderProfileAchievements(
-        data
-    );
+   
 
     const currentUser =
         await getCurrentUser();
@@ -5297,7 +5044,669 @@ if (profileMessageButton) {
 
 }
 // =========================================
-// INITIAL ADMIN CHECK
+// ACHIEVEMENTS SYSTEM
+// =========================================
+console.log("ACHIEVEMENTS SYSTEM LOADED");
+console.log(
+    "Achievements button:",
+    document.getElementById("achievementsButton")
+);
+const achievementsOverlay =
+    document.getElementById("achievementsOverlay");
+
+const closeAchievements =
+    document.getElementById("closeAchievements");
+
+const achievementsButton =
+    document.getElementById("achievementsButton");
+
+const profileAchievementsButton =
+    document.getElementById("profileAchievementsButton");
+
+const achievementsSubtitle =
+    document.getElementById("achievementsSubtitle");
+
+const achievementsProgressText =
+    document.getElementById("achievementsProgressText");
+
+const achievementsProgressFill =
+    document.getElementById("achievementsProgressFill");
+
+const achievementsList =
+    document.getElementById("achievementsList");
+
+let currentAchievementsUser = null;
+
+
+// =========================================
+// FORMAT ACHIEVEMENT DATE
 // =========================================
 
+function formatAchievementDate(date) {
+
+    if (!date) {
+        return "Unknown date";
+    }
+
+    const parsed = new Date(date);
+
+    if (Number.isNaN(parsed.getTime())) {
+        return "Unknown date";
+    }
+
+    return parsed.toLocaleDateString([], {
+        month: "short",
+        day: "numeric",
+        year: "numeric"
+    });
+}
+
+
+// =========================================
+// FORMAT ACHIEVEMENT PROGRESS
+// =========================================
+
+function formatAchievementProgress(
+    current,
+    required
+) {
+
+    current = Number(current || 0);
+    required = Number(required || 0);
+
+    if (required <= 0) {
+        return "Complete";
+    }
+
+    if (current > required) {
+        current = required;
+    }
+
+    return `${current.toLocaleString()} / ${required.toLocaleString()}`;
+}
+
+
+// =========================================
+// GET ACHIEVEMENT PERCENTAGE
+// =========================================
+
+function getAchievementPercentage(
+    current,
+    required
+) {
+
+    current = Number(current || 0);
+    required = Number(required || 0);
+
+    if (required <= 0) {
+        return 100;
+    }
+
+    return Math.min(
+        100,
+        Math.max(
+            0,
+            (current / required) * 100
+        )
+    );
+}
+
+
+// =========================================
+// RENDER ACHIEVEMENTS
+// =========================================
+
+function renderAchievements(data) {
+
+    if (!achievementsList) {
+        return;
+    }
+
+    achievementsList.innerHTML = "";
+
+    const achievements =
+        data?.achievements || [];
+
+    const unlockedCount =
+        achievements.filter(
+            achievement => achievement.unlocked
+        ).length;
+
+    const totalCount =
+        achievements.length;
+
+    const percentage =
+        totalCount > 0
+            ? Math.round(
+                (unlockedCount / totalCount) * 100
+            )
+            : 0;
+
+    if (achievementsProgressText) {
+
+        achievementsProgressText.textContent =
+            `${unlockedCount} / ${totalCount}`;
+
+    }
+
+    if (achievementsProgressFill) {
+
+        achievementsProgressFill.style.width =
+            `${percentage}%`;
+
+    }
+
+    if (achievements.length === 0) {
+
+        achievementsList.innerHTML = `
+            <div class="achievements-empty">
+                No achievements are available yet.
+            </div>
+        `;
+
+        return;
+    }
+
+    achievements.forEach(achievement => {
+
+        const unlocked =
+            Boolean(achievement.unlocked);
+
+        const current =
+            Number(
+                achievement.progress_current || 0
+            );
+
+        const required =
+            Number(
+                achievement.progress_required || 0
+            );
+
+        const progressPercentage =
+            getAchievementPercentage(
+                current,
+                required
+            );
+
+        const card =
+            document.createElement("div");
+
+        card.className =
+            unlocked
+                ? "achievement-card unlocked"
+                : "achievement-card locked";
+
+        const status =
+            unlocked
+                ? "Unlocked"
+                : "Locked";
+
+        const progressText =
+            unlocked
+                ? "Complete"
+                : formatAchievementProgress(
+                    current,
+                    required
+                );
+
+        const unlockedDate =
+            unlocked
+                ? `
+                    <div class="achievement-unlocked-date">
+                        Unlocked ${formatAchievementDate(
+                            achievement.unlocked_at
+                        )}
+                    </div>
+                `
+                : "";
+
+        card.innerHTML = `
+
+            <div class="achievement-icon">
+                ${achievement.icon || "🏅"}
+            </div>
+
+            <div class="achievement-content">
+
+                <div class="achievement-top">
+
+                    <div class="achievement-name">
+                        ${escapeOwnerHTML(
+                            achievement.name ||
+                            "Achievement"
+                        )}
+                    </div>
+
+                    <div class="achievement-status">
+                        ${status}
+                    </div>
+
+                </div>
+
+                <div class="achievement-description">
+                    ${escapeOwnerHTML(
+                        achievement.description ||
+                        ""
+                    )}
+                </div>
+
+                <div class="achievement-progress">
+
+                    <div class="achievement-progress-top">
+
+                        <span>
+                            ${progressText}
+                        </span>
+
+                        <span>
+                            ${Math.round(
+                                progressPercentage
+                            )}%
+                        </span>
+
+                    </div>
+
+                    <div class="achievement-progress-bar">
+
+                        <div
+                            class="achievement-progress-fill"
+                            style="width: ${progressPercentage}%"
+                        ></div>
+
+                    </div>
+
+                </div>
+
+                ${unlockedDate}
+
+                ${
+                    achievement.category
+                        ? `
+                            <div class="achievement-category">
+                                ${escapeOwnerHTML(
+                                    achievement.category
+                                )}
+                            </div>
+                        `
+                        : ""
+                }
+
+            </div>
+        `;
+
+        achievementsList.appendChild(card);
+
+    });
+}
+
+
+// =========================================
+// LOAD ACHIEVEMENTS
+// =========================================
+
+async function loadAchievements(
+    userId
+) {
+
+    if (!achievementsList) {
+        return;
+    }
+
+    achievementsList.innerHTML = `
+        <div class="achievements-loading">
+            Loading achievements...
+        </div>
+    `;
+
+    if (!userId) {
+
+        achievementsList.innerHTML = `
+            <div class="achievements-empty">
+                Could not identify this user.
+            </div>
+        `;
+
+        return;
+    }
+
+    const {
+        data,
+        error
+    } = await supabaseClient.rpc(
+        "get_user_achievements",
+        {
+            target_user_id: userId
+        }
+    );
+
+    if (error) {
+
+        console.error(
+            "Could not load achievements:",
+            error
+        );
+
+        achievementsList.innerHTML = `
+            <div class="achievements-empty">
+                Could not load achievements.
+            </div>
+        `;
+
+        if (achievementsProgressText) {
+            achievementsProgressText.textContent =
+                "—";
+        }
+
+        if (achievementsProgressFill) {
+            achievementsProgressFill.style.width =
+                "0%";
+        }
+
+        return;
+    }
+
+    renderAchievements(data);
+}
+
+
+// =========================================
+// OPEN ACHIEVEMENTS
+// =========================================
+
+async function openAchievements(userId, username) {
+
+    console.log(
+        "OPEN ACHIEVEMENTS:",
+        userId,
+        username
+    );
+
+    if (!achievementsOverlay) {
+
+        console.error(
+            "Achievements overlay was not found."
+        );
+
+        return;
+    }
+
+    if (!userId) {
+
+        console.error(
+            "No achievement user ID."
+        );
+
+        return;
+    }
+
+    currentAchievementsUser = {
+        id: userId,
+        username: username || "User"
+    };
+
+    // Open the modal immediately
+    achievementsOverlay.classList.add("open");
+
+    console.log(
+        "Achievements modal opened."
+    );
+
+    if (achievementsSubtitle) {
+
+        const {
+            data: userData
+        } = await supabaseClient.auth.getUser();
+
+        const isOwnProfile =
+            userData?.user?.id === userId;
+
+        achievementsSubtitle.textContent =
+            isOwnProfile
+                ? "Track your Game Hub achievements"
+                : `${username || "User"}'s achievements`;
+
+    }
+
+    if (achievementsProgressText) {
+
+        achievementsProgressText.textContent =
+            "Loading...";
+
+    }
+
+    if (achievementsProgressFill) {
+
+        achievementsProgressFill.style.width =
+            "0%";
+
+    }
+
+    if (achievementsList) {
+
+        achievementsList.innerHTML = `
+            <div class="achievements-loading">
+                Loading achievements...
+            </div>
+        `;
+
+    }
+
+    console.log(
+        "Loading achievement data..."
+    );
+
+    await loadAchievements(userId);
+
+    console.log(
+        "Achievement data loaded."
+    );
+}
+
+
+// =========================================
+// CLOSE ACHIEVEMENTS
+// =========================================
+
+function closeAchievementsModal() {
+
+    if (!achievementsOverlay) {
+        return;
+    }
+
+    achievementsOverlay.classList.remove("open");
+
+    currentAchievementsUser = null;
+}
+
+
+// =========================================
+// MY ACHIEVEMENTS BUTTON
+// =========================================
+
+if (achievementsButton) {
+
+    achievementsButton.addEventListener(
+        "click",
+        async function(event) {
+
+            console.log("ACHIEVEMENTS BUTTON CLICKED");
+
+            event.preventDefault();
+            event.stopPropagation();
+
+            const {
+                data: userData,
+                error
+            } = await supabaseClient.auth.getUser();
+
+            console.log("Supabase user result:", userData);
+            console.log("Supabase user error:", error);
+
+            const user =
+                userData?.user;
+
+            if (!user) {
+
+                console.log(
+                    "No logged-in user."
+                );
+
+                if (loginOverlay) {
+                    loginOverlay.classList.add("open");
+                }
+
+                return;
+            }
+
+            console.log(
+                "Opening achievements for:",
+                user.id
+            );
+
+            if (accountMenu) {
+                accountMenu.classList.remove("open");
+            }
+
+            const username =
+                user.user_metadata?.username ||
+                "You";
+
+            await openAchievements(
+                user.id,
+                username
+            );
+
+        }
+    );
+
+} else {
+
+    console.error(
+        "Achievements button was not found."
+    );
+
+}
+
+// =========================================
+// PROFILE ACHIEVEMENTS BUTTON
+// =========================================
+
+if (profileAchievementsButton) {
+
+    profileAchievementsButton.addEventListener(
+        "click",
+        async function() {
+
+            if (!currentProfileUser) {
+                return;
+            }
+
+            await openAchievements(
+                currentProfileUser.id,
+                currentProfileUser.username
+            );
+
+        }
+    );
+
+}
+
+
+// =========================================
+// CLOSE BUTTON
+// =========================================
+
+if (closeAchievements) {
+
+    closeAchievements.addEventListener(
+        "click",
+        closeAchievementsModal
+    );
+
+}
+
+
+// =========================================
+// CLICK OUTSIDE
+// =========================================
+
+if (achievementsOverlay) {
+
+    achievementsOverlay.addEventListener(
+        "click",
+        function(event) {
+
+            if (
+                event.target ===
+                achievementsOverlay
+            ) {
+
+                closeAchievementsModal();
+
+            }
+
+        }
+    );
+
+}
+
+
+// =========================================
+// ESCAPE ACHIEVEMENTS
+// =========================================
+
+document.addEventListener(
+    "keydown",
+    function(event) {
+
+        if (
+            event.key === "Escape" &&
+            achievementsOverlay &&
+            achievementsOverlay.classList.contains("open")
+        ) {
+
+            closeAchievementsModal();
+
+        }
+
+    }
+);
+// =========================================
+// INITIAL ADMIN CHECK
+// =========================================
+async function checkAchievements() {
+    const { data: { user }, error: userError } =
+        await supabaseClient.auth.getUser();
+
+    if (userError || !user) return;
+
+    const { data, error } = await supabaseClient.rpc(
+        "check_and_unlock_achievements",
+        {
+            target_user_id: user.id
+        }
+    );
+
+    if (error) {
+        console.error("Achievement check failed:", error);
+        return;
+    }
+
+    if (Array.isArray(data) && data.length > 0) {
+        data.forEach(achievement => {
+            console.log(
+                `${achievement.icon} Achievement unlocked: ${achievement.name}`
+            );
+        });
+    }
+
+    if (
+        typeof currentAchievementsUser !== "undefined" &&
+        currentAchievementsUser === user.id &&
+        typeof loadAchievements === "function"
+    ) {
+        await loadAchievements(user.id);
+    }
+}
+checkAchievements();
 checkAdmin();
