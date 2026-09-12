@@ -40,7 +40,8 @@
             "DriftBoss.html": "DriftBoss",
             "PVZ.html": "PVZ",
             "SubwaySurfers.html": "SubwaySurfers",
-            "FridayNightFunkin.html": "FridayNightFunkin"
+            "FridayNightFunkin.html": "FridayNightFunkin",
+            "StreetRacer.html": "StreetRacer"
         };
 
         return gameMap[filename] || null;
