@@ -1521,7 +1521,92 @@ async function loadShop() {
 
 }
 
+const openSupportModal = document.getElementById("openSupportModal");
+const closeSupportModal = document.getElementById("closeSupportModal");
+const supportOverlay = document.getElementById("supportOverlay");
 
+const amountOptions = document.querySelectorAll(".amount-option");
+const customSupportAmount = document.getElementById("customSupportAmount");
+const selectedSupportAmount = document.getElementById("selectedSupportAmount");
+const paypalPlaceholder = document.getElementById("paypalPlaceholder");
+
+let currentSupportAmount = 5;
+
+function updateSupportAmount(amount) {
+    currentSupportAmount = Number(amount);
+
+    selectedSupportAmount.textContent =
+        `$${currentSupportAmount.toFixed(2)}`;
+}
+
+openSupportModal.addEventListener("click", () => {
+    supportOverlay.classList.add("active");
+    document.body.style.overflow = "hidden";
+});
+
+function closeSupportWindow() {
+    supportOverlay.classList.remove("active");
+    document.body.style.overflow = "";
+}
+
+closeSupportModal.addEventListener("click", closeSupportWindow);
+
+supportOverlay.addEventListener("click", (event) => {
+    if (event.target === supportOverlay) {
+        closeSupportWindow();
+    }
+});
+
+document.addEventListener("keydown", (event) => {
+    if (event.key === "Escape") {
+        closeSupportWindow();
+    }
+});
+
+amountOptions.forEach((button) => {
+    button.addEventListener("click", () => {
+        amountOptions.forEach((option) => {
+            option.classList.remove("selected");
+        });
+
+        button.classList.add("selected");
+
+        customSupportAmount.value = "";
+
+        updateSupportAmount(button.dataset.amount);
+    });
+});
+
+customSupportAmount.addEventListener("input", () => {
+    const amount = Number(customSupportAmount.value);
+
+    amountOptions.forEach((option) => {
+        option.classList.remove("selected");
+    });
+
+    if (amount >= 1 && amount <= 500) {
+        updateSupportAmount(amount);
+    } else {
+        selectedSupportAmount.textContent = "$0.00";
+    }
+});
+
+paypalPlaceholder.addEventListener("click", () => {
+    if (
+        !currentSupportAmount ||
+        currentSupportAmount < 1 ||
+        currentSupportAmount > 500
+    ) {
+        alert("Please enter a valid amount between $1 and $500.");
+        return;
+    }
+
+    alert(
+        `PayPal integration is not active yet.\n\n` +
+        `Selected donation: $${currentSupportAmount.toFixed(2)}\n\n` +
+        `A parent-managed PayPal account can be connected here later.`
+    );
+});
 // =========================================
 // BUY ITEM
 // =========================================

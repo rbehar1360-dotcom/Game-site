@@ -1421,7 +1421,9 @@
     </span>
 
     <div class="footer-bottom-links">
-
+      <button class="support-button" id="openSupportModal">
+    ☕ Support the Site
+</button>
       <a href="#" data-legal="terms">
         Terms
       </a>
@@ -1655,7 +1657,91 @@
 
 </div>
 
+<div class="support-overlay" id="supportOverlay">
+    <div class="support-modal">
 
+        <button class="support-close" id="closeSupportModal">&times;</button>
+
+        <div class="support-heading">
+            <div class="support-icon">☕</div>
+
+            <div>
+                <h2>Support Ralphs Unblocked Games</h2>
+                <p>Help keep the games running and the community growing.</p>
+            </div>
+        </div>
+
+        <div class="support-benefits">
+            <div>
+                <span>🎮</span>
+                <strong>Keep it online</strong>
+                <small>Help cover hosting costs.</small>
+            </div>
+
+            <div>
+                <span>⚡</span>
+                <strong>Add more games</strong>
+                <small>Support future updates.</small>
+            </div>
+
+            <div>
+                <span>💙</span>
+                <strong>Support development</strong>
+                <small>Every contribution helps.</small>
+            </div>
+        </div>
+
+        <h3>Choose an amount</h3>
+
+        <div class="support-amounts">
+            <button class="amount-option" data-amount="1">$1</button>
+            <button class="amount-option" data-amount="3">$3</button>
+            <button class="amount-option selected" data-amount="5">
+                <span class="popular-label">Most Popular</span>
+                $5
+            </button>
+            <button class="amount-option" data-amount="10">$10</button>
+        </div>
+
+        <div class="custom-amount-wrapper">
+            <span>$</span>
+            <input
+                type="number"
+                id="customSupportAmount"
+                min="1"
+                max="500"
+                step="1"
+                placeholder="Enter custom amount"
+            >
+            <span class="currency-label">USD</span>
+        </div>
+
+        <div class="selected-support-amount">
+            Selected amount:
+            <strong id="selectedSupportAmount">$5.00</strong>
+        </div>
+
+        <button class="paypal-placeholder" id="paypalPlaceholder">
+            <span class="paypal-logo">P</span>
+
+            <span class="paypal-text">
+                <strong>Continue with PayPal</strong>
+                <small>Payment integration coming soon</small>
+            </span>
+
+            <span class="paypal-arrow">→</span>
+        </button>
+
+        <p class="support-disclaimer">
+            This is currently a preview of the future donation system.
+            No payment information is collected or processed.
+        </p>
+
+        <div class="support-thanks">
+            💙 Thank you for supporting Ralphs Unblocked Games.
+        </div>
+    </div>
+</div>
 <!-- =========================================
      ACHIEVEMENTS MODAL
 ========================================= -->
