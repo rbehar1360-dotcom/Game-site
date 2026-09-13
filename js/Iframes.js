@@ -12,7 +12,7 @@ const SuperMarioURL = "https://3xpsmjs.pages.dev/start";
 const LearnHowToFly3URL = "https://pinkdev.d13qic2f6zga3.amplifyapp.com/games/cllearntofly3.html";
 const SansFightURL = "https://turbowarp.org/332288529/embed";
 const BasketBrosURL = "https://basketbros.io/";
-const PaperMinecraftURL = "https://sdn4v0u2xl7bmk4j.whm.086whm.make-by-vann-dont-steal-it-gooners-3351dcb3.nip.io/games/204.html";
+const GrindCraftURL = "https://grindcraft.com/game/index.html";
 const DinoGameURL = "https://dinosaur-game.io/";
 const ChessEngineURL = "https://ralphschessengine.netlify.app";
 const SpaceWavesURL = "https://totalclick.org/games/spacewaves/game/index.html";
@@ -24,3 +24,4 @@ const  FireBoyandWaterGirlURL = "https://www.friv.com/z/games/fireboyandwatergir
 const DriftBossURL = "https://cdn-consumer.marketjs.com/game/drift-boss-advanced/";
 const FridayNightFunkinURL = "https://totalclick.org/games/fnf/game/index.html";
 const StreetRacerURL = "https://html5.gamedistribution.com/rvvASMiM/4e4987a162a143e8a55edde45a9eb3bf/index.html?gd_sdk_referrer_url=https%3A%2F%2Fgamessayarat.com&gd_zone_config=eyJwYXJlbnRVUkwiOiJodHRwczovL2dhbWVzc2F5YXJhdC5jb20iLCJwYXJlbnREb21haW4iOiJnYW1lc3NheWFyYXQuY29tIiwidG9wRG9tYWluIjoiZ2FtZXNyaXguY29tIiwiaGFzSW1wcmVzc2lvbiI6ZmFsc2UsImxvYWRlckVuYWJsZWQiOnRydWUsImhvc3QiOiJodG1sNS5nYW1lZGlzdHJpYnV0aW9uLmNvbSIsInZlcnNpb24iOiIxLjUuMTgifQ%253D%253D";
+const TagURL = "https://tag-game.imrazi222.workers.dev/";

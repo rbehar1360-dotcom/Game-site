@@ -27,7 +27,7 @@
             "Raffle.html": "raffle",
             "PressTheButton.html": "press-the-button",
             "SlimeRancher.html": "slime-rancher",
-            "PaperMinecraft.html": "paper-minecraft",
+            "GrindCraft.html": "GrindCraft",
             "Stickmanhook.html": "stickman-hook",
             "Slope.html": "slope",
             "Wordcounter.html": "word-counter",
@@ -41,7 +41,8 @@
             "PVZ.html": "PVZ",
             "SubwaySurfers.html": "SubwaySurfers",
             "FridayNightFunkin.html": "FridayNightFunkin",
-            "StreetRacer.html": "StreetRacer"
+            "StreetRacer.html": "StreetRacer",
+            "Tag.html": "Tag",
         };
 
         return gameMap[filename] || null;
