@@ -5767,3 +5767,514 @@ z-index: 1000;
     color: var(--text);
     opacity: 0.7;
 }
+
+/* =========================================
+   EMOJI PICKER
+========================================= */
+
+.emoji-wrapper {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.emoji-picker-toggle {
+    border: none;
+    background: transparent;
+    font-size: 22px;
+    cursor: pointer;
+    padding: 8px;
+}
+
+.emoji-picker {
+    position: absolute;
+    bottom: 48px;
+    left: 0;
+    width: 280px;
+    max-height: 220px;
+    overflow-y: auto;
+    display: grid;
+    grid-template-columns: repeat(6, 1fr);
+    gap: 5px;
+    padding: 12px;
+    background: var(--card);
+    border: 1px solid var(--accent);
+    border-radius: 12px;
+    box-shadow: var(--shadow);
+    z-index: 1000;
+}
+
+.emoji-picker[hidden] {
+    display: none;
+}
+
+.emoji-choice {
+    border: none;
+    background: transparent;
+    font-size: 23px;
+    padding: 6px;
+    border-radius: 6px;
+    cursor: pointer;
+}
+
+.emoji-choice:hover {
+    background: var(--accent);
+}
+
+/* =========================================
+   PRIVATE MESSAGES - THEME SUPPORT
+========================================= */
+
+.messages-overlay {
+    background: rgba(0, 0, 0, 0.7);
+}
+
+.messages-window {
+    background: var(--background-1);
+    color: var(--text);
+    border: 1px solid var(--accent);
+    box-shadow: 0 0 30px var(--glow);
+}
+
+/* Header */
+
+.messages-header {
+    background: var(--header);
+    color: var(--text);
+    border-bottom: 1px solid var(--accent);
+}
+
+.messages-header h2 {
+    color: var(--title);
+}
+
+.messages-subtitle {
+    color: var(--text);
+}
+
+.close-messages {
+    color: var(--text);
+    background: transparent;
+}
+
+.close-messages:hover {
+    background: var(--accent);
+    color: var(--background-1);
+}
+
+/* Conversation sidebar */
+
+.conversation-list {
+    background: var(--background-2);
+    border-right: 1px solid var(--accent);
+}
+
+.conversation-search {
+    background: var(--background-2);
+}
+
+.conversation-search input {
+    background: var(--card);
+    color: var(--text);
+    border: 1px solid var(--accent);
+}
+
+.conversation-search input::placeholder {
+    color: var(--text);
+    opacity: 0.6;
+}
+
+.new-message-button {
+    background: var(--accent);
+    color: var(--background-1);
+    border: none;
+}
+
+.new-message-button:hover {
+    background: var(--accent-light);
+}
+
+/* Conversation items */
+
+.conversation-item {
+    background: transparent;
+    color: var(--text);
+    border-bottom: 1px solid var(--background-3);
+}
+
+.conversation-item:hover {
+    background: var(--card);
+}
+
+.conversation-item.active {
+    background: var(--accent);
+    color: var(--background-1);
+}
+
+.conversation-name {
+    color: inherit;
+}
+
+.conversation-preview {
+    color: var(--text);
+    opacity: 0.7;
+}
+
+.conversation-item.active .conversation-preview {
+    color: var(--background-1);
+    opacity: 0.8;
+}
+
+.conversation-unread {
+    background: var(--accent);
+    color: var(--background-1);
+}
+
+/* Private chat area */
+
+.private-chat {
+    background: var(--background-1);
+    color: var(--text);
+}
+
+.private-chat-header {
+    background: var(--header);
+    border-bottom: 1px solid var(--accent);
+}
+
+.private-chat-username {
+    color: var(--title);
+}
+
+.private-chat-status {
+    color: var(--text);
+    opacity: 0.7;
+}
+
+/* Messages */
+
+.private-messages {
+    background: var(--background-1);
+}
+
+.private-message-bubble {
+    background: var(--card);
+    color: var(--text);
+    border: 1px solid var(--background-3);
+}
+
+.private-message.mine .private-message-bubble {
+    background: var(--accent);
+    color: var(--background-1);
+    border-color: var(--accent);
+}
+
+.private-message-time {
+    color: var(--text);
+    opacity: 0.6;
+}
+
+.private-message.mine .private-message-time {
+    color: var(--background-1);
+    opacity: 0.75;
+}
+
+/* Empty state */
+
+.private-empty {
+    color: var(--text);
+}
+
+.private-empty-icon {
+    color: var(--accent);
+}
+
+.private-empty h3 {
+    color: var(--title);
+}
+
+.private-empty p {
+    color: var(--text);
+    opacity: 0.7;
+}
+
+/* Input area */
+
+.private-message-input {
+    background: var(--header);
+    border-top: 1px solid var(--accent);
+}
+
+.private-message-input input {
+    background: var(--card);
+    color: var(--text);
+    border: 1px solid var(--accent);
+}
+
+.private-message-input input::placeholder {
+    color: var(--text);
+    opacity: 0.6;
+}
+
+.private-message-input button {
+    background: var(--accent);
+    color: var(--background-1);
+    border: none;
+}
+
+.private-message-input button:hover {
+    background: var(--accent-light);
+}
+
+.private-message-input input:disabled,
+.private-message-input button:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+/* Loading states */
+
+.messages-loading,
+.chat-loading {
+    color: var(--text);
+    opacity: 0.7;
+}
+
+/* =========================================
+   GAME HUB - EMOJI PICKER
+========================================= */
+
+.emoji-picker-container {
+    position: relative;
+    display: flex;
+    align-items: center;
+    flex-shrink: 0;
+}
+
+.emoji-picker-toggle {
+    width: 42px;
+    height: 42px;
+    border: 1px solid transparent;
+    border-radius: 12px;
+    background: transparent;
+    color: var(--text);
+    font-size: 22px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition:
+        background 0.2s ease,
+        border-color 0.2s ease,
+        transform 0.2s ease;
+}
+
+.emoji-picker-toggle:hover {
+    background: var(--card);
+    border-color: var(--accent);
+    transform: translateY(-1px);
+}
+
+.emoji-picker-toggle:active {
+    transform: scale(0.94);
+}
+
+/* Main panel */
+
+.emoji-picker-panel {
+    position: absolute;
+    bottom: 52px;
+    left: 0;
+    width: 340px;
+    max-width: calc(100vw - 30px);
+    padding: 14px;
+    border: 1px solid var(--accent);
+    border-radius: 18px;
+    background: var(--background-2);
+    color: var(--text);
+    box-shadow:
+        0 18px 50px rgba(0, 0, 0, 0.35),
+        0 0 20px var(--glow);
+    z-index: 9999;
+    animation: emojiPickerOpen 0.18s ease;
+}
+
+.emoji-picker-panel[hidden] {
+    display: none;
+}
+
+@keyframes emojiPickerOpen {
+    from {
+        opacity: 0;
+        transform: translateY(8px) scale(0.97);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+/* Header */
+
+.emoji-picker-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 12px;
+}
+
+.emoji-picker-title {
+    color: var(--title);
+    font-size: 14px;
+    font-weight: 700;
+}
+
+.emoji-picker-close {
+    width: 28px;
+    height: 28px;
+    border: none;
+    border-radius: 8px;
+    background: transparent;
+    color: var(--text);
+    cursor: pointer;
+    transition: background 0.2s ease;
+}
+
+.emoji-picker-close:hover {
+    background: var(--card);
+    color: var(--accent-light);
+}
+
+/* Search */
+
+.emoji-search {
+    width: 100%;
+    box-sizing: border-box;
+    padding: 10px 12px;
+    border: 1px solid var(--background-3);
+    border-radius: 10px;
+    outline: none;
+    background: var(--card);
+    color: var(--text);
+    font-size: 13px;
+    margin-bottom: 12px;
+    transition: border-color 0.2s ease;
+}
+
+.emoji-search:focus {
+    border-color: var(--accent);
+}
+
+.emoji-search::placeholder {
+    color: var(--text);
+    opacity: 0.55;
+}
+
+/* Categories */
+
+.emoji-categories {
+    display: flex;
+    gap: 6px;
+    overflow-x: auto;
+    padding-bottom: 10px;
+    margin-bottom: 8px;
+    scrollbar-width: thin;
+}
+
+.emoji-category {
+    flex-shrink: 0;
+    border: 1px solid var(--background-3);
+    border-radius: 8px;
+    padding: 7px 10px;
+    background: var(--card);
+    color: var(--text);
+    font-size: 11px;
+    cursor: pointer;
+    transition:
+        background 0.2s ease,
+        border-color 0.2s ease;
+}
+
+.emoji-category:hover {
+    border-color: var(--accent);
+}
+
+.emoji-category.active {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: var(--background-1);
+}
+
+/* Emoji grid */
+
+.emoji-grid {
+    display: grid;
+    grid-template-columns: repeat(8, 1fr);
+    gap: 4px;
+    max-height: 220px;
+    overflow-y: auto;
+    padding: 3px;
+}
+
+.emoji-choice {
+    width: 100%;
+    aspect-ratio: 1;
+    border: none;
+    border-radius: 9px;
+    background: transparent;
+    color: var(--text);
+    font-size: 22px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition:
+        background 0.15s ease,
+        transform 0.15s ease;
+}
+
+.emoji-choice:hover {
+    background: var(--card);
+    transform: scale(1.15);
+}
+
+.emoji-choice:active {
+    transform: scale(0.9);
+}
+
+/* Scrollbars */
+
+.emoji-grid::-webkit-scrollbar,
+.emoji-categories::-webkit-scrollbar {
+    width: 5px;
+    height: 5px;
+}
+
+.emoji-grid::-webkit-scrollbar-thumb,
+.emoji-categories::-webkit-scrollbar-thumb {
+    background: var(--accent);
+    border-radius: 10px;
+}
+
+.emoji-grid::-webkit-scrollbar-track,
+.emoji-categories::-webkit-scrollbar-track {
+    background: var(--background-3);
+}
+
+/* Mobile */
+
+@media (max-width: 600px) {
+    .emoji-picker-panel {
+        width: 300px;
+        left: 0;
+    }
+
+    .emoji-grid {
+        grid-template-columns: repeat(7, 1fr);
+    }
+
+    .emoji-choice {
+        font-size: 20px;
+    }
+}

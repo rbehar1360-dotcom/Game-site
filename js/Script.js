@@ -1789,53 +1789,50 @@ async function loadChatMessages() {
 // =========================================
 
 function addChatMessage(message) {
-    const messageElement = document.createElement("div");
+    if (!message || !message.id) return;
 
+    // Prevent duplicate messages
+    if (
+        chatMessages.querySelector(
+            `[data-message-id="${CSS.escape(String(message.id))}"]`
+        )
+    ) {
+        return;
+    }
+
+    const messageElement = document.createElement("div");
     messageElement.className = "chat-message";
     messageElement.dataset.messageId = message.id;
 
-    // Username
     const username = document.createElement("div");
-
     username.className = "leaderboard-username";
 
-    const playerUsername =
-        message.username ||
-        "User";
+    const playerUsername = message.username || "User";
 
     username.textContent = playerUsername;
-
     username.dataset.userId = message.user_id || "";
     username.dataset.username = playerUsername;
-
     username.classList.add("clickable-profile");
 
-    // Message content
     const content = document.createElement("div");
-
     content.className = "chat-message-content";
 
-    content.textContent = message.content;
+    // textContent safely displays emojis and prevents HTML injection
+    content.textContent = message.content || "";
 
-    // Time
     const time = document.createElement("div");
-
     time.className = "chat-message-time";
 
-    const date = new Date(message.created_at);
-
-    time.textContent = date.toLocaleTimeString([], {
+    time.textContent = new Date(
+        message.created_at
+    ).toLocaleTimeString([], {
         hour: "numeric",
         minute: "2-digit"
     });
 
-    messageElement.appendChild(username);
-    messageElement.appendChild(content);
-    messageElement.appendChild(time);
-
+    messageElement.append(username, content, time);
     chatMessages.appendChild(messageElement);
 }
-
 
 // =========================================
 // SEND MESSAGE
@@ -2437,75 +2434,347 @@ async function loadPrivateMessages(
 // DISPLAY PRIVATE MESSAGE
 // =========================================
 
-function addPrivateMessage(
-    message,
-    currentUserId
-) {
+function addPrivateMessage(message, currentUserId) {
+    if (!message || !message.id) return;
 
-    const wrapper =
-        document.createElement("div");
-
-
-    wrapper.className =
-        "private-message";
-
-
-    const mine =
-        message.sender_id === currentUserId;
-
-
-    if (mine) {
-
-        wrapper.classList.add("mine");
-
+    // Prevent duplicate messages
+    if (
+        privateMessages.querySelector(
+            `[data-message-id="${CSS.escape(String(message.id))}"]`
+        )
+    ) {
+        return;
     }
 
+    const wrapper = document.createElement("div");
+    wrapper.className = "private-message";
+    wrapper.dataset.messageId = message.id;
 
-    const bubble =
-        document.createElement("div");
+    const mine = message.sender_id === currentUserId;
 
+    if (mine) {
+        wrapper.classList.add("mine");
+    }
 
-    bubble.className =
-        "private-message-bubble";
+    const bubble = document.createElement("div");
+    bubble.className = "private-message-bubble";
 
+    const content = document.createElement("div");
+    content.textContent = message.message || "";
 
-    const content =
-        document.createElement("div");
+    const time = document.createElement("div");
+    time.className = "private-message-time";
 
+    time.textContent = new Date(
+        message.created_at
+    ).toLocaleString([], {
+        month: "short",
+        day: "numeric",
+        hour: "numeric",
+        minute: "2-digit"
+    });
 
-    content.textContent =
-        message.message;
+    bubble.append(content, time);
+    wrapper.appendChild(bubble);
+    privateMessages.appendChild(wrapper);
+}
+// =========================================
+// GAME HUB EMOJI PICKER
+// =========================================
 
+(function setupEmojiPickers() {
+    const emojiCategories = {
+        "Smileys": [
+            "😀", "😃", "😄", "😁", "😆", "😅", "😂", "🤣",
+            "😊", "😇", "🙂", "🙃", "😉", "😌", "😍", "🥰",
+            "😘", "😗", "😙", "😚", "😋", "😛", "😝", "😜",
+            "🤪", "🤨", "🧐", "🤓", "😎", "🤩", "🥳", "😏",
+            "😒", "😞", "😔", "😟", "😕", "🙁", "☹️", "😣",
+            "😖", "😫", "😩", "🥺", "😢", "😭", "😤", "😠",
+            "😡", "🤬", "🤯", "😳", "🥵", "🥶", "😱", "😨",
+            "😰", "😥", "😓", "🤗", "🤔", "🫡", "🤭", "🤫",
+            "🤥", "😶", "😐", "😑", "😬", "🙄", "😯", "😦",
+            "😧", "😮", "😲", "🥱", "😴", "🤤", "😪", "😵",
+            "🤐", "🤑", "🤠", "😈", "👿", "🤡", "👻", "💀",
+            "👽", "🤖", "🎃", "😺", "😸", "😹", "😻", "😼",
+            "😽", "🙀", "😿", "😾"
+        ],
 
-    const time =
-        document.createElement("div");
+        "Gestures": [
+            "👍", "👎", "👌", "✌️", "🤞", "🤟", "🤘", "🤙",
+            "👈", "👉", "👆", "👇", "☝️", "✋", "🤚", "🖐️",
+            "🖖", "👋", "🤏", "💪", "🙏", "👏", "🙌", "👐",
+            "🤝", "🫶", "👊", "✍️", "💅", "🤳"
+        ],
 
+        "Hearts": [
+            "❤️", "🧡", "💛", "💚", "💙", "💜", "🖤", "🤍",
+            "🤎", "💔", "❣️", "💕", "💞", "💓", "💗", "💖",
+            "💘", "💝", "💟", "❤️‍🔥", "💯", "✨", "💫", "⭐",
+            "🌟", "🔥"
+        ],
 
-    time.className =
-        "private-message-time";
+        "Objects": [
+            "🎮", "🕹️", "🎯", "🏆", "🥇", "🥈", "🥉", "🎲",
+            "⚽", "🏀", "🏈", "⚾", "🎸", "🎧", "🎵", "🎶",
+            "💻", "🖥️", "📱", "⌨️", "🖱️", "🔒", "🔑", "💡",
+            "🚀", "💎", "💰", "🎁", "🎉", "🎊", "📌", "📢"
+        ],
 
+        "Symbols": [
+            "✅", "❌", "⚡", "❗", "❓", "‼️", "⁉️", "⭕",
+            "🚫", "🔴", "🟠", "🟡", "🟢", "🔵", "🟣", "⚫",
+            "⚪", "🟤", "🔺", "🔻", "▶️", "⏸️", "⏩", "⏪",
+            "🔔", "🔕", "✔️", "☑️", "♻️", "⚠️"
+        ]
+    };
 
-    time.textContent =
-        new Date(
-            message.created_at
-        ).toLocaleString([], {
-            month: "short",
-            day: "numeric",
-            hour: "numeric",
-            minute: "2-digit"
+    function createPicker(input, form) {
+        if (!input || !form) return;
+
+        if (form.querySelector(".emoji-picker-container")) {
+            return;
+        }
+
+        const container = document.createElement("div");
+        container.className = "emoji-picker-container";
+
+        const button = document.createElement("button");
+        button.type = "button";
+        button.className = "emoji-picker-toggle";
+        button.textContent = "😊";
+        button.title = "Open emoji picker";
+        button.setAttribute("aria-label", "Open emoji picker");
+        button.setAttribute("aria-expanded", "false");
+
+        const picker = document.createElement("div");
+        picker.className = "emoji-picker-panel";
+        picker.hidden = true;
+
+        const header = document.createElement("div");
+        header.className = "emoji-picker-header";
+
+        const title = document.createElement("div");
+        title.className = "emoji-picker-title";
+        title.textContent = "Choose an emoji";
+
+        const closeButton = document.createElement("button");
+        closeButton.type = "button";
+        closeButton.className = "emoji-picker-close";
+        closeButton.textContent = "✕";
+        closeButton.setAttribute("aria-label", "Close emoji picker");
+
+        header.append(title, closeButton);
+
+        const search = document.createElement("input");
+        search.type = "search";
+        search.className = "emoji-search";
+        search.placeholder = "Search emojis...";
+        search.autocomplete = "off";
+
+        const categories = document.createElement("div");
+        categories.className = "emoji-categories";
+
+        const emojiGrid = document.createElement("div");
+        emojiGrid.className = "emoji-grid";
+
+        let activeCategory = Object.keys(emojiCategories)[0];
+
+        function renderCategory(category) {
+            activeCategory = category;
+            emojiGrid.innerHTML = "";
+
+            emojiCategories[category].forEach(emoji => {
+                const emojiButton = document.createElement("button");
+
+                emojiButton.type = "button";
+                emojiButton.className = "emoji-choice";
+                emojiButton.textContent = emoji;
+                emojiButton.title = emoji;
+
+                emojiButton.addEventListener("click", () => {
+                    const start = input.selectionStart ?? input.value.length;
+                    const end = input.selectionEnd ?? input.value.length;
+
+                    input.value =
+                        input.value.slice(0, start) +
+                        emoji +
+                        input.value.slice(end);
+
+                    input.focus();
+
+                    const cursorPosition = start + emoji.length;
+
+                    input.setSelectionRange(
+                        cursorPosition,
+                        cursorPosition
+                    );
+
+                    // Intentionally stays open.
+                });
+
+                emojiGrid.appendChild(emojiButton);
+            });
+        }
+
+        function renderCategories() {
+            categories.innerHTML = "";
+
+            Object.keys(emojiCategories).forEach(category => {
+                const categoryButton = document.createElement("button");
+
+                categoryButton.type = "button";
+                categoryButton.className = "emoji-category";
+                categoryButton.textContent = category;
+
+                categoryButton.classList.toggle(
+                    "active",
+                    category === activeCategory
+                );
+
+                categoryButton.addEventListener("click", () => {
+                    search.value = "";
+                    renderCategory(category);
+
+                    categories
+                        .querySelectorAll(".emoji-category")
+                        .forEach(button => {
+                            button.classList.toggle(
+                                "active",
+                                button === categoryButton
+                            );
+                        });
+                });
+
+                categories.appendChild(categoryButton);
+            });
+        }
+
+        search.addEventListener("input", () => {
+            const query = search.value.toLowerCase().trim();
+
+            if (!query) {
+                renderCategory(activeCategory);
+                return;
+            }
+
+            emojiGrid.innerHTML = "";
+
+            Object.values(emojiCategories)
+                .flat()
+                .filter(emoji => emoji.includes(query))
+                .forEach(emoji => {
+                    const emojiButton = document.createElement("button");
+
+                    emojiButton.type = "button";
+                    emojiButton.className = "emoji-choice";
+                    emojiButton.textContent = emoji;
+
+                    emojiButton.addEventListener("click", () => {
+                        const start = input.selectionStart ?? input.value.length;
+                        const end = input.selectionEnd ?? input.value.length;
+
+                        input.value =
+                            input.value.slice(0, start) +
+                            emoji +
+                            input.value.slice(end);
+
+                        input.focus();
+
+                        const cursorPosition = start + emoji.length;
+
+                        input.setSelectionRange(
+                            cursorPosition,
+                            cursorPosition
+                        );
+                    });
+
+                    emojiGrid.appendChild(emojiButton);
+                });
         });
 
+        function closePicker() {
+            picker.hidden = true;
+            button.setAttribute("aria-expanded", "false");
+        }
 
-    bubble.appendChild(content);
+        function togglePicker() {
+            const isOpen = !picker.hidden;
 
-    bubble.appendChild(time);
+            document
+                .querySelectorAll(".emoji-picker-panel")
+                .forEach(otherPicker => {
+                    if (otherPicker !== picker) {
+                        otherPicker.hidden = true;
+                    }
+                });
 
-    wrapper.appendChild(bubble);
+            picker.hidden = isOpen;
 
-    privateMessages.appendChild(wrapper);
+            button.setAttribute(
+                "aria-expanded",
+                String(!isOpen)
+            );
 
-}
+            if (!isOpen) {
+                input.focus();
+            }
+        }
 
+        button.addEventListener("click", event => {
+            event.stopPropagation();
+            togglePicker();
+        });
+
+        closeButton.addEventListener("click", event => {
+            event.stopPropagation();
+            closePicker();
+            input.focus();
+        });
+
+        picker.addEventListener("click", event => {
+            event.stopPropagation();
+        });
+
+        document.addEventListener("click", event => {
+            if (
+                !container.contains(event.target)
+            ) {
+                closePicker();
+            }
+        });
+
+        document.addEventListener("keydown", event => {
+            if (event.key === "Escape") {
+                closePicker();
+            }
+        });
+
+        renderCategories();
+        renderCategory(activeCategory);
+
+        picker.append(
+            header,
+            search,
+            categories,
+            emojiGrid
+        );
+
+        container.append(button, picker);
+
+        form.insertBefore(container, input);
+    }
+
+    createPicker(
+        document.getElementById("chatInput"),
+        document.getElementById("chatForm")
+    );
+
+    createPicker(
+        document.getElementById("privateMessageInput"),
+        document.getElementById("privateMessageForm")
+    );
+})();
 
 // =========================================
 // SEND PRIVATE MESSAGE
