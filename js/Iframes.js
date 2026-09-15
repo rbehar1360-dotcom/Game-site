@@ -25,3 +25,4 @@ const DriftBossURL = "https://cdn-consumer.marketjs.com/game/drift-boss-advanced
 const FridayNightFunkinURL = "https://totalclick.org/games/fnf/game/index.html";
 const StreetRacerURL = "https://html5.gamedistribution.com/rvvASMiM/4e4987a162a143e8a55edde45a9eb3bf/index.html?gd_sdk_referrer_url=https%3A%2F%2Fgamessayarat.com&gd_zone_config=eyJwYXJlbnRVUkwiOiJodHRwczovL2dhbWVzc2F5YXJhdC5jb20iLCJwYXJlbnREb21haW4iOiJnYW1lc3NheWFyYXQuY29tIiwidG9wRG9tYWluIjoiZ2FtZXNyaXguY29tIiwiaGFzSW1wcmVzc2lvbiI6ZmFsc2UsImxvYWRlckVuYWJsZWQiOnRydWUsImhvc3QiOiJodG1sNS5nYW1lZGlzdHJpYnV0aW9uLmNvbSIsInZlcnNpb24iOiIxLjUuMTgifQ%253D%253D";
 const TagURL = "https://tag-game.imrazi222.workers.dev/";
+const CountMastersURL = "https://pinkdev.d13qic2f6zga3.amplifyapp.com/games/clcountmastersstickmangames.html";

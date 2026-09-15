@@ -43,6 +43,7 @@
             "FridayNightFunkin.html": "FridayNightFunkin",
             "StreetRacer.html": "StreetRacer",
             "Tag.html": "Tag",
+            "CountMasters.html": "CountMasters",
         };
 
         return gameMap[filename] || null;
