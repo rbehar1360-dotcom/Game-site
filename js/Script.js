@@ -1731,7 +1731,296 @@ chatOverlay.addEventListener("click", function (event) {
     }
 });
 
+const newMessageButton = document.getElementById("newMessageButton");
 
+if (newMessageButton) {
+    newMessageButton.addEventListener("click", async function () {
+        // =========================================
+// NEW MESSAGE MODAL
+// =========================================
+
+const newMessageButton = document.getElementById("newMessageButton");
+const newMessageOverlay = document.getElementById("newMessageOverlay");
+const closeNewMessage = document.getElementById("closeNewMessage");
+const cancelNewMessage = document.getElementById("cancelNewMessage");
+const newMessageForm = document.getElementById("newMessageForm");
+const newMessageUsername = document.getElementById("newMessageUsername");
+const newMessageError = document.getElementById("newMessageError");
+
+function openNewMessageModal() {
+    if (!newMessageOverlay) return;
+
+    newMessageOverlay.classList.add("open");
+    newMessageUsername.value = "";
+    newMessageError.textContent = "";
+
+    setTimeout(() => {
+        newMessageUsername.focus();
+    }, 100);
+}
+
+function closeNewMessageModal() {
+    if (!newMessageOverlay) return;
+
+    newMessageOverlay.classList.remove("open");
+    newMessageForm.reset();
+    newMessageError.textContent = "";
+}
+
+if (newMessageButton) {
+    newMessageButton.addEventListener("click", async function () {
+        const user = await getCurrentUser();
+
+        if (!user) {
+            alert("Please log in to use messages.");
+            return;
+        }
+
+        openNewMessageModal();
+    });
+}
+
+if (closeNewMessage) {
+    closeNewMessage.addEventListener("click", closeNewMessageModal);
+}
+
+if (cancelNewMessage) {
+    cancelNewMessage.addEventListener("click", closeNewMessageModal);
+}
+
+if (newMessageOverlay) {
+    newMessageOverlay.addEventListener("click", function (event) {
+        if (event.target === newMessageOverlay) {
+            closeNewMessageModal();
+        }
+    });
+}
+
+document.addEventListener("keydown", function (event) {
+    if (
+        event.key === "Escape" &&
+        newMessageOverlay &&
+        newMessageOverlay.classList.contains("open")
+    ) {
+        closeNewMessageModal();
+    }
+});
+
+if (newMessageForm) {
+    newMessageForm.addEventListener("submit", async function (event) {
+        event.preventDefault();
+
+        const username = newMessageUsername.value.trim();
+
+        if (!username) {
+            newMessageError.textContent = "Enter a username first.";
+            return;
+        }
+
+        newMessageError.textContent = "";
+        newMessageUsername.disabled = true;
+
+        const submitButton = newMessageForm.querySelector(
+            ".new-message-submit"
+        );
+
+        submitButton.disabled = true;
+        submitButton.textContent = "Searching...";
+
+        try {
+            const foundUser = await findUserByUsername(username);
+
+            if (!foundUser) {
+                newMessageError.textContent = "No user found with that username.";
+                return;
+            }
+
+            const userId = foundUser.id || foundUser.user_id;
+            const foundUsername = foundUser.username || username;
+
+            if (!userId) {
+                newMessageError.textContent = "This user could not be opened.";
+                return;
+            }
+
+            closeNewMessageModal();
+            await openPrivateConversation(userId, foundUsername);
+        } catch (error) {
+            console.error("New message error:", error);
+            newMessageError.textContent = "Something went wrong. Try again.";
+        } finally {
+            newMessageUsername.disabled = false;
+            submitButton.disabled = false;
+            submitButton.textContent = "Continue";
+        }
+    });
+}
+// =========================================
+// USER CATALOG
+// =========================================
+
+const showUserCatalog = document.getElementById("showUserCatalog");
+const userCatalog = document.getElementById("userCatalog");
+const userCatalogSearch = document.getElementById("userCatalogSearch");
+const userCatalogList = document.getElementById("userCatalogList");
+const backToMessageSearch = document.getElementById("backToMessageSearch");
+
+let catalogUsers = [];
+
+async function loadUserCatalog() {
+    userCatalogList.innerHTML = `
+        <p class="user-catalog-status">Loading users...</p>
+    `;
+
+    const { data, error } = await supabaseClient.rpc(
+        "get_public_users"
+    );
+
+    console.log("Catalog users:", data);
+    console.log("Catalog error:", error);
+
+    if (error) {
+        userCatalogList.innerHTML = `
+            <p class="user-catalog-status">
+                Could not load users.
+            </p>
+        `;
+        return;
+    }
+
+    if (!Array.isArray(data) || data.length === 0) {
+        userCatalogList.innerHTML = `
+            <p class="user-catalog-status">
+                No users found.
+            </p>
+        `;
+        return;
+    }
+
+    catalogUsers = data.map(user => ({
+        id: user.id,
+        username: user.username || user.name || "Unknown User"
+    }));
+
+    renderUserCatalog(catalogUsers);
+}
+
+function renderUserCatalog(users) {
+    userCatalogList.innerHTML = "";
+
+    if (!users.length) {
+        userCatalogList.innerHTML = `
+            <p class="user-catalog-status">
+                No users found.
+            </p>
+        `;
+        return;
+    }
+
+    users.forEach(user => {
+        const username = user.username || "Unknown User";
+        const firstLetter = username.charAt(0).toUpperCase();
+
+        const userButton = document.createElement("button");
+        userButton.type = "button";
+        userButton.className = "user-catalog-user";
+
+        const avatar = document.createElement("span");
+        avatar.className = "user-catalog-avatar";
+        avatar.textContent = firstLetter;
+
+        const info = document.createElement("span");
+        info.className = "user-catalog-user-info";
+
+        const name = document.createElement("span");
+        name.className = "user-catalog-username";
+        name.textContent = username;
+
+        const label = document.createElement("span");
+        label.className = "user-catalog-label";
+        label.textContent = "Start a conversation";
+
+        info.appendChild(name);
+        info.appendChild(label);
+
+        userButton.appendChild(avatar);
+        userButton.appendChild(info);
+
+        userButton.addEventListener("click", async function () {
+            closeNewMessageModal();
+            await openPrivateConversation(user.id, username);
+        });
+
+        userCatalogList.appendChild(userButton);
+    });
+}
+
+if (showUserCatalog) {
+    showUserCatalog.addEventListener("click", async function () {
+        document.getElementById("newMessageForm").hidden = true;
+        document.querySelector(".new-message-main-actions").hidden = true;
+        document.getElementById("newMessageTitle").textContent = "Find a User";
+        document.getElementById("newMessageSubtitle").textContent =
+            "Browse or search registered users.";
+
+        userCatalog.hidden = false;
+        userCatalogSearch.value = "";
+
+        await loadUserCatalog();
+
+        setTimeout(() => {
+            userCatalogSearch.focus();
+        }, 100);
+    });
+}
+
+if (backToMessageSearch) {
+    backToMessageSearch.addEventListener("click", function () {
+        userCatalog.hidden = true;
+        document.getElementById("newMessageForm").hidden = false;
+        document.querySelector(".new-message-main-actions").hidden = false;
+
+        document.getElementById("newMessageTitle").textContent = "New Message";
+        document.getElementById("newMessageSubtitle").textContent =
+            "Search for a username or browse users.";
+    });
+}
+
+if (userCatalogSearch) {
+    userCatalogSearch.addEventListener("input", function () {
+        const searchTerm = userCatalogSearch.value
+            .trim()
+            .toLowerCase();
+
+        const filteredUsers = catalogUsers.filter(user =>
+            (user.username || "").toLowerCase().includes(searchTerm)
+        );
+
+        renderUserCatalog(filteredUsers);
+    });
+}
+        if (!username || !username.trim()) {
+            return;
+        }
+
+        const user = await findUserByUsername(username.trim());
+
+        if (!user) {
+            alert("User not found.");
+            return;
+        }
+
+        const userId = user.id || user.user_id;
+        const foundUsername = user.username || username.trim();
+
+        if (!userId) {
+            alert("Could not find that user's ID.");
+            return;
+        }
+
+        await openPrivateConversation(userId, foundUsername);
+    });
+}
 // =========================================
 // LOAD MESSAGES
 // =========================================
@@ -1982,85 +2271,84 @@ let privateMessagesChannel = null;
 // OPEN INBOX
 // =========================================
 
-messagesButton.addEventListener("click", async function () {
+if (messagesButton) {
+    messagesButton.addEventListener("click", async function () {
+        const user = await getCurrentUser();
 
-    const user = await getCurrentUser();
+        if (!user) {
+            alert("Please log in to use messages.");
 
-    if (!user) {
-        alert("Please log in to use messages.");
-        loginOverlay.classList.add("open");
-        return;
-    }
+            if (loginOverlay) {
+                loginOverlay.classList.add("open");
+            }
 
-    accountMenu.classList.remove("open");
+            return;
+        }
 
-    messagesOverlay.classList.add("open");
+        if (accountMenu) {
+            accountMenu.classList.remove("open");
+        }
 
-    await loadConversations();
+        if (messagesOverlay) {
+            messagesOverlay.classList.add("open");
+        }
 
-    await updateUnreadCount();
-
-});
-
-
+        await loadConversations();
+        await updateUnreadCount();
+    });
+} else {
+    console.error(
+        "Private messaging error: #messagesButton was not found."
+    );
+}
 // =========================================
 // CLOSE INBOX
 // =========================================
 
-closeMessages.addEventListener("click", function () {
-
-    messagesOverlay.classList.remove("open");
-
-});
+if (closeMessages) {
+    closeMessages.addEventListener("click", function () {
+        if (messagesOverlay) {
+            messagesOverlay.classList.remove("open");
+        }
+    });
+}
 
 
 // =========================================
 // CLICK OUTSIDE
 // =========================================
 
-messagesOverlay.addEventListener(
-    "click",
-    function (event) {
-
+if (messagesOverlay) {
+    messagesOverlay.addEventListener("click", function (event) {
         if (event.target === messagesOverlay) {
-
             messagesOverlay.classList.remove("open");
-
         }
-
-    }
-);
-
+    });
+}
 
 // =========================================
 // FIND USER
 // =========================================
 
 async function findUserByUsername(username) {
-
-    const { data, error } =
-        await supabaseClient.rpc(
-            "find_user_by_username",
-            {
-                search_username: username
-            }
-        );
+    const { data, error } = await supabaseClient.rpc(
+        "find_user_by_username",
+        {
+            search_username: username
+        }
+    );
 
     if (error) {
-
-        console.error(
-            "Could not find user:",
-            error
-        );
-
+        console.error("User search error:", error);
         return null;
-
     }
 
-    return data?.[0] || null;
+    if (!data || data.length === 0) {
+        return null;
+    }
 
+    return data[0];
 }
-
 
 // =========================================
 // LOAD CONVERSATIONS

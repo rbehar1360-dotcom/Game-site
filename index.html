@@ -589,7 +589,84 @@
 
 </div>
 
+<div id="newMessageOverlay" class="new-message-overlay">
+    <div class="new-message-modal">
+        <button id="closeNewMessage" class="new-message-close" type="button">
+            ×
+        </button>
 
+        <div class="new-message-icon">✉</div>
+
+        <h2 id="newMessageTitle">New Message</h2>
+        <p id="newMessageSubtitle" class="new-message-subtitle">
+            Search for a username or browse users.
+        </p>
+
+        <div class="new-message-main-actions">
+            <button id="showUserCatalog" type="button" class="find-user-button">
+                Find User
+            </button>
+        </div>
+
+        <form id="newMessageForm">
+            <label for="newMessageUsername">Username</label>
+
+            <div class="new-message-input-wrapper">
+                <span>@</span>
+
+                <input
+                    id="newMessageUsername"
+                    type="text"
+                    placeholder="Enter username..."
+                    autocomplete="off"
+                    maxlength="30"
+                    required
+                >
+            </div>
+
+            <p id="newMessageError" class="new-message-error"></p>
+
+            <div class="new-message-actions">
+                <button
+                    id="cancelNewMessage"
+                    type="button"
+                    class="new-message-cancel"
+                >
+                    Cancel
+                </button>
+
+                <button type="submit" class="new-message-submit">
+                    Continue
+                </button>
+            </div>
+        </form>
+
+        <section id="userCatalog" class="user-catalog" hidden>
+            <div class="user-catalog-header">
+                <h3>Find a User</h3>
+
+                <button id="backToMessageSearch" type="button">
+                    Back
+                </button>
+            </div>
+
+            <div class="user-catalog-search">
+                <span>⌕</span>
+
+                <input
+                    id="userCatalogSearch"
+                    type="text"
+                    placeholder="Search users..."
+                    autocomplete="off"
+                >
+            </div>
+
+            <div id="userCatalogList" class="user-catalog-list">
+                <p class="user-catalog-status">Loading users...</p>
+            </div>
+        </section>
+    </div>
+</div>
 <!-- =========================================
      LOGIN OVERLAY
 ========================================= -->
