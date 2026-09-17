@@ -3431,7 +3431,6 @@ async function setupPrivateMessageRealtime() {
 // =========================================
 
 setupPrivateMessageRealtime();
-
 // =========================================
 // PLAYTIME LEADERBOARD
 // =========================================
@@ -3450,6 +3449,17 @@ const leaderboardList =
 
 const leaderboardGame =
     document.getElementById("leaderboardGame");
+
+const leaderboardUsersTab =
+    document.getElementById("leaderboardUsersTab");
+
+const leaderboardGamesTab =
+    document.getElementById("leaderboardGamesTab");
+
+const leaderboardDescription =
+    document.getElementById("leaderboardDescription");
+
+let currentLeaderboardMode = "users";
 
 
 // =========================================
@@ -3471,37 +3481,72 @@ function formatLeaderboardTime(seconds) {
     );
 
     if (days > 0) {
-        return `${days}d ${hours}h ${minutes}m`;
+        return days + "d " + hours + "h " + minutes + "m";
     }
 
     if (hours > 0) {
-        return `${hours}h ${minutes}m`;
+        return hours + "h " + minutes + "m";
     }
 
     if (minutes > 0) {
-        return `${minutes}m`;
+        return minutes + "m";
     }
 
-    return `${seconds}s`;
+    return seconds + "s";
 }
 
 
 // =========================================
-// LOAD LEADERBOARD
+// GET GAME NAME
 // =========================================
 
-async function loadPlaytimeLeaderboard() {
+function getLeaderboardGameName(gameId) {
 
-    leaderboardList.innerHTML = `
-        <div class="leaderboard-loading">
-            Loading leaderboard...
-        </div>
-    `;
+    if (!gameId) {
+        return "Unknown Game";
+    }
+
+    const wrappers =
+        document.querySelectorAll(
+            ".game-wrapper[data-game-id]"
+        );
+
+    for (const wrapper of wrappers) {
+
+        if (wrapper.dataset.gameId === gameId) {
+
+            const titleElement =
+                wrapper.querySelector(".title");
+
+            if (titleElement) {
+
+                const title =
+                    titleElement.textContent.trim();
+
+                if (title) {
+                    return title;
+                }
+            }
+        }
+    }
+
+    return gameId;
+}
+
+
+// =========================================
+// LOAD USER LEADERBOARD
+// =========================================
+
+async function loadUserLeaderboard() {
+
+    leaderboardList.innerHTML =
+        '<div class="leaderboard-loading">Loading leaderboard...</div>';
 
     const gameId =
         leaderboardGame.value || null;
 
-    const { data, error } =
+    const result =
         await supabaseClient.rpc(
             "get_playtime_leaderboard",
             {
@@ -3510,18 +3555,203 @@ async function loadPlaytimeLeaderboard() {
             }
         );
 
-    if (error) {
+    console.log("USER LEADERBOARD RAW RESULT:", result);
+
+    if (result.error) {
 
         console.error(
             "Could not load playtime leaderboard:",
+            result.error
+        );
+
+        leaderboardList.innerHTML =
+            '<div class="leaderboard-loading">Could not load leaderboard.</div>';
+
+        return;
+    }
+
+    const data = result.data;
+
+    console.log(
+        "USER LEADERBOARD DATA:",
+        JSON.stringify(data, null, 2)
+    );
+
+    leaderboardList.innerHTML = "";
+
+    if (!data || data.length === 0) {
+
+        leaderboardList.innerHTML =
+            '<div class="leaderboard-loading">No playtime recorded yet.</div>';
+
+        return;
+    }
+
+    data.forEach(function(player, index) {
+
+        const row =
+            document.createElement("div");
+
+        row.className =
+            "leaderboard-row";
+
+        const rank =
+            document.createElement("div");
+
+        rank.className =
+            "leaderboard-rank";
+
+        if (index === 0) {
+            rank.textContent = "🥇";
+        }
+
+        else if (index === 1) {
+            rank.textContent = "🥈";
+        }
+
+        else if (index === 2) {
+            rank.textContent = "🥉";
+        }
+
+        else {
+            rank.textContent =
+                "#" + (index + 1);
+        }
+
+        const username =
+            document.createElement("div");
+
+        username.className =
+            "leaderboard-username";
+
+        const playerUsername =
+            player.username ||
+            player.display_name ||
+            "User";
+
+        username.textContent =
+            playerUsername;
+
+        const profileUserId =
+            player.user_id ||
+            player.id ||
+            null;
+
+        const time =
+            document.createElement("div");
+
+        time.className =
+            "leaderboard-time";
+
+        time.textContent =
+            formatLeaderboardTime(
+                player.playtime_seconds
+            );
+
+        row.appendChild(rank);
+        row.appendChild(username);
+        row.appendChild(time);
+
+        row.dataset.userId =
+            profileUserId || "";
+
+        row.dataset.username =
+            playerUsername;
+
+        row.classList.add(
+            "clickable-profile"
+        );
+
+        row.setAttribute(
+            "role",
+            "button"
+        );
+
+        row.setAttribute(
+            "tabindex",
+            "0"
+        );
+
+        row.addEventListener(
+            "click",
+            function() {
+
+                if (
+                    typeof openUserProfile === "function" &&
+                    profileUserId
+                ) {
+
+                    openUserProfile(
+                        profileUserId,
+                        playerUsername
+                    );
+
+                }
+
+            }
+        );
+
+        row.addEventListener(
+            "keydown",
+            function(event) {
+
+                if (
+                    event.key === "Enter" ||
+                    event.key === " "
+                ) {
+
+                    event.preventDefault();
+
+                    if (
+                        typeof openUserProfile === "function" &&
+                        profileUserId
+                    ) {
+
+                        openUserProfile(
+                            profileUserId,
+                            playerUsername
+                        );
+
+                    }
+
+                }
+
+            }
+        );
+
+        leaderboardList.appendChild(row);
+
+    });
+
+}
+// =========================================
+// LOAD GAME LEADERBOARD
+// =========================================
+
+async function loadGameLeaderboard() {
+
+    leaderboardList.innerHTML =
+        '<div class="leaderboard-loading">Loading game leaderboard...</div>';
+
+
+    const { data, error } =
+        await supabaseClient.rpc(
+            "get_game_playtime_leaderboard",
+            {
+                p_limit: 25
+            }
+        );
+
+
+    if (error) {
+
+        console.error(
+            "Could not load game leaderboard:",
             error
         );
 
-        leaderboardList.innerHTML = `
-            <div class="leaderboard-loading">
-                Could not load leaderboard.
-            </div>
-        `;
+        leaderboardList.innerHTML =
+            '<div class="leaderboard-loading">Could not load game leaderboard.</div>';
 
         return;
     }
@@ -3532,17 +3762,14 @@ async function loadPlaytimeLeaderboard() {
 
     if (!data || data.length === 0) {
 
-        leaderboardList.innerHTML = `
-            <div class="leaderboard-loading">
-                No playtime recorded yet.
-            </div>
-        `;
+        leaderboardList.innerHTML =
+            '<div class="leaderboard-loading">No game playtime recorded yet.</div>';
 
         return;
     }
 
 
-    data.forEach((player, index) => {
+    data.forEach(function(game, index) {
 
         const row =
             document.createElement("div");
@@ -3571,11 +3798,22 @@ async function loadPlaytimeLeaderboard() {
         }
 
         else {
-            rank.textContent = `#${index + 1}`;
+            rank.textContent =
+                "#" + (index + 1);
         }
 
 
-        
+        const gameName =
+            document.createElement("div");
+
+        gameName.className =
+            "leaderboard-username";
+
+
+        gameName.textContent =
+            getLeaderboardGameName(
+                game.game_id
+            );
 
 
         const time =
@@ -3584,68 +3822,99 @@ async function loadPlaytimeLeaderboard() {
         time.className =
             "leaderboard-time";
 
+
         time.textContent =
             formatLeaderboardTime(
-                player.playtime_seconds
+                game.playtime_seconds
             );
 
-const username = document.createElement("div");
-username.className = "leaderboard-username";
 
-const playerUsername =
-    player.username ||
-    player.display_name ||
-    "User";
-
-username.textContent = playerUsername;
-
-const profileUserId =
-    player.user_id ||
-    player.id ||
-    null;
-
-username.dataset.userId = profileUserId || "";
-username.dataset.username = playerUsername;
-username.classList.add("clickable-profile");
         row.appendChild(rank);
-row.appendChild(username);
-row.appendChild(time);
+        row.appendChild(gameName);
+        row.appendChild(time);
 
-row.dataset.userId =
-    profileUserId || "";
 
-row.dataset.username =
-    playerUsername;
-
-row.classList.add("clickable-profile");
-
-row.setAttribute("role", "button");
-row.setAttribute("tabindex", "0");
-
-row.addEventListener("click", function () {
-    openUserProfile(
-        profileUserId,
-        playerUsername
-    );
-});
-
-row.addEventListener("keydown", function (event) {
-    if (
-        event.key === "Enter" ||
-        event.key === " "
-    ) {
-        event.preventDefault();
-
-        openUserProfile(
-            profileUserId,
-            playerUsername
-        );
-    }
-});
-
-leaderboardList.appendChild(row);
+        leaderboardList.appendChild(row);
 
     });
+
+}
+
+
+// =========================================
+// SWITCH TO USERS
+// =========================================
+
+if (leaderboardUsersTab) {
+
+    leaderboardUsersTab.addEventListener(
+        "click",
+        async function() {
+
+            currentLeaderboardMode =
+                "users";
+
+
+            leaderboardUsersTab.classList.add(
+                "active"
+            );
+
+            leaderboardGamesTab.classList.remove(
+                "active"
+            );
+
+
+            leaderboardDescription.textContent =
+                "Who has spent the most time gaming?";
+
+
+            leaderboardGame.style.display =
+                "block";
+
+
+            await loadUserLeaderboard();
+
+        }
+    );
+
+}
+
+
+// =========================================
+// SWITCH TO GAMES
+// =========================================
+
+if (leaderboardGamesTab) {
+
+    leaderboardGamesTab.addEventListener(
+        "click",
+        async function() {
+
+            currentLeaderboardMode =
+                "games";
+
+
+            leaderboardGamesTab.classList.add(
+                "active"
+            );
+
+            leaderboardUsersTab.classList.remove(
+                "active"
+            );
+
+
+            leaderboardDescription.textContent =
+                "Which games have been played the most?";
+
+
+            leaderboardGame.style.display =
+                "none";
+
+
+            await loadGameLeaderboard();
+
+        }
+    );
 
 }
 
@@ -3658,11 +3927,9 @@ function setupLeaderboardGames() {
 
     if (!leaderboardGame) return;
 
-    leaderboardGame.innerHTML = `
-        <option value="">
-            🌎 All Games
-        </option>
-    `;
+
+    leaderboardGame.innerHTML =
+        '<option value="">🌎 All Games</option>';
 
 
     const wrappers =
@@ -3674,7 +3941,7 @@ function setupLeaderboardGames() {
     const games = [];
 
 
-    wrappers.forEach(wrapper => {
+    wrappers.forEach(function(wrapper) {
 
         const gameId =
             wrapper.dataset.gameId;
@@ -3682,7 +3949,9 @@ function setupLeaderboardGames() {
         const titleElement =
             wrapper.querySelector(".title");
 
+
         if (!gameId) return;
+
 
         const title =
             titleElement
@@ -3692,7 +3961,9 @@ function setupLeaderboardGames() {
 
         if (
             !games.some(
-                game => game.id === gameId
+                function(game) {
+                    return game.id === gameId;
+                }
             )
         ) {
 
@@ -3707,19 +3978,24 @@ function setupLeaderboardGames() {
 
 
     games
-        .sort((a, b) =>
-            a.title.localeCompare(b.title)
-        )
-        .forEach(game => {
+        .sort(function(a, b) {
+            return a.title.localeCompare(b.title);
+        })
+        .forEach(function(game) {
 
             const option =
-                document.createElement("option");
+                document.createElement(
+                    "option"
+                );
+
 
             option.value =
                 game.id;
 
+
             option.textContent =
                 game.title;
+
 
             leaderboardGame.appendChild(
                 option
@@ -3734,37 +4010,60 @@ function setupLeaderboardGames() {
 // OPEN LEADERBOARD
 // =========================================
 
-// =========================================
-// OPEN LEADERBOARD
-// =========================================
-
 if (leaderboardButton) {
 
     leaderboardButton.addEventListener(
         "click",
         async function(event) {
 
-            // Prevent the account-menu outside-click
-            // handler from interfering
             event.preventDefault();
             event.stopPropagation();
 
-            // Close account menu
-            accountMenu.classList.remove("open");
 
-            // Open leaderboard
-            leaderboardOverlay.classList.add("open");
+            if (
+                typeof accountMenu !== "undefined"
+            ) {
 
-            // Populate game dropdown
+                accountMenu.classList.remove(
+                    "open"
+                );
+
+            }
+
+
+            leaderboardOverlay.classList.add(
+                "open"
+            );
+
+
             setupLeaderboardGames();
 
-            // Load leaderboard data
-            await loadPlaytimeLeaderboard();
+
+            currentLeaderboardMode =
+                "users";
+
+
+            leaderboardUsersTab.classList.add(
+                "active"
+            );
+
+            leaderboardGamesTab.classList.remove(
+                "active"
+            );
+
+
+            leaderboardGame.style.display =
+                "block";
+
+
+            await loadUserLeaderboard();
 
         }
     );
 
 }
+
+
 // =========================================
 // CLOSE LEADERBOARD
 // =========================================
@@ -3773,7 +4072,7 @@ if (closeLeaderboard) {
 
     closeLeaderboard.addEventListener(
         "click",
-        function () {
+        function() {
 
             leaderboardOverlay.classList.remove(
                 "open"
@@ -3793,7 +4092,7 @@ if (leaderboardOverlay) {
 
     leaderboardOverlay.addEventListener(
         "click",
-        function (event) {
+        function(event) {
 
             if (
                 event.target ===
@@ -3820,15 +4119,21 @@ if (leaderboardGame) {
 
     leaderboardGame.addEventListener(
         "change",
-        async function () {
+        async function() {
 
-            await loadPlaytimeLeaderboard();
+            if (
+                currentLeaderboardMode ===
+                "users"
+            ) {
+
+                await loadUserLeaderboard();
+
+            }
 
         }
     );
 
 }
-
 document.addEventListener("DOMContentLoaded", () => {
       const suggestButton = document.getElementById("suggestButton");
       const suggestOverlay = document.getElementById("suggestOverlay");

@@ -326,7 +326,6 @@
 
 </div>
 
-
 <!-- =========================================
      PLAYTIME LEADERBOARD
 ========================================= -->
@@ -335,42 +334,74 @@
 
   <div class="leaderboard-window">
 
-    <div class="leaderboard-header">
 
-      <div>
+<div class="leaderboard-header">
 
-        <h2>🏆 Playtime Leaderboard</h2>
+  <div>
 
-        <p>
-          Who has spent the most time gaming?
-        </p>
+    <h2>🏆 Playtime Leaderboard</h2>
 
-      </div>
+    <p id="leaderboardDescription">
+      Who has spent the most time gaming?
+    </p>
 
-      <button
-        id="closeLeaderboard"
-        class="close-leaderboard"
-      >
-        ✕
-      </button>
+  </div>
 
-    </div>
+  <button
+    id="closeLeaderboard"
+    class="close-leaderboard"
+    type="button"
+  >
+    ✕
+  </button>
 
-    <select id="leaderboardGame">
+</div>
 
-      <option value="">
-        🌎 All Games
-      </option>
 
-    </select>
+<!-- LEADERBOARD TYPE -->
 
-    <div id="leaderboardList">
+<div class="leaderboard-tabs">
 
-      <div class="leaderboard-loading">
-        Loading leaderboard...
-      </div>
+  <button
+    id="leaderboardUsersTab"
+    class="leaderboard-tab active"
+    type="button"
+  >
+    👤 Users
+  </button>
 
-    </div>
+  <button
+    id="leaderboardGamesTab"
+    class="leaderboard-tab"
+    type="button"
+  >
+    🎮 Games
+  </button>
+
+</div>
+
+
+<!-- USER GAME FILTER -->
+
+<select id="leaderboardGame">
+
+  <option value="">
+    🌎 All Games
+  </option>
+
+</select>
+
+
+<!-- LEADERBOARD -->
+
+<div id="leaderboardList">
+
+  <div class="leaderboard-loading">
+    Loading leaderboard...
+  </div>
+
+</div>
+
 
   </div>
 
