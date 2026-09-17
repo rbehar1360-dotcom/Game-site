@@ -1,397 +1,552 @@
 <!DOCTYPE html>
-
 <html lang="en">
 
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <script src="../js/theme.js"></script>
+    <script src="../js/Iframes.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="../js/supabase.js"></script>
+    <script src="../js/playtime.js"></script>
+
+    <title>EaglerCraft</title>
+
+    <style>
+
+        /* =========================================
+           PAGE
+        ========================================= */
+
+        body {
+            margin: 0;
+
+            font-family: Arial, sans-serif;
+
+            background:
+                linear-gradient(
+                    135deg,
+                    var(--background-1),
+                    var(--background-2),
+                    var(--background-3)
+                );
+
+            color: var(--text);
+
+            min-height: 100vh;
+
+            transition:
+                background 0.4s ease,
+                color 0.4s ease;
+        }
 
 
-<script src="../js/theme.js"></script>
-<script src="../js/Iframes.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="../js/supabase.js"></script>
-<script src="../js/playtime.js"></script>
+        /* =========================================
+           HEADER
+        ========================================= */
 
-<title>EaglerCraft</title>
+        .header {
+            display: flex;
 
-<style>
-    body {
-        margin: 0;
-        font-family: Arial, sans-serif;
-        background: linear-gradient(
-            135deg,
-            var(--background-1),
-            var(--background-2),
-            var(--background-3)
-        );
-        color: var(--text);
-        min-height: 100vh;
-        transition: background 0.4s ease, color 0.4s ease;
-    }
+            justify-content: space-between;
+            align-items: center;
 
-    .header {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        padding: 15px 25px;
-        background: var(--header);
-        border-bottom: 1px solid var(--accent);
-        backdrop-filter: blur(10px);
-    }
+            padding: 15px 25px;
 
-    .header h1 {
-        font-size: 20px;
-        margin: 0;
-    }
+            background: var(--header);
 
-    .header a {
-        color: var(--accent);
-        text-decoration: none;
-        font-weight: bold;
-    }
+            border-bottom:
+                1px solid
+                var(--accent);
 
-    .header a:hover {
-        text-decoration: underline;
-    }
-
-    .game-wrapper {
-        width: 95%;
-        max-width: 1200px;
-        margin: 30px auto;
-    }
-
-    .version-selector {
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        gap: 10px;
-        margin-bottom: 15px;
-        flex-wrap: wrap;
-    }
-
-    .version-label {
-        font-weight: bold;
-        margin-right: 5px;
-    }
-
-    .version-button {
-        background: var(--card);
-        color: var(--text);
-        border: 1px solid var(--accent);
-        padding: 9px 16px;
-        border-radius: 8px;
-        font-size: 14px;
-        font-weight: bold;
-        cursor: pointer;
-        transition: 0.2s;
-    }
-
-    .version-button:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 0 12px var(--glow);
-    }
-
-    .version-button.active {
-        background: var(--accent);
-        color: #001018;
-        box-shadow: 0 0 12px var(--glow);
-    }
-
-    .game-container {
-        position: relative;
-        background: #000;
-        border-radius: 12px;
-        overflow: hidden;
-        box-shadow: 0 10px 30px var(--shadow);
-    }
-
-    iframe {
-        display: block;
-        width: 100%;
-        height: 70vh;
-        border: none;
-        background: #000;
-    }
-
-    .game-container.css-fullscreen {
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 100vw;
-        height: 100vh;
-        max-width: none;
-        margin: 0;
-        border-radius: 0;
-        z-index: 999999;
-        box-shadow: none;
-    }
-
-    .game-container.css-fullscreen iframe {
-        width: 100%;
-        height: 100%;
-    }
-
-    .controls {
-        display: flex;
-        justify-content: center;
-        gap: 15px;
-        padding: 15px;
-    }
-
-    .controls button {
-        background: var(--accent);
-        color: #001018;
-        border: none;
-        padding: 10px 18px;
-        border-radius: 8px;
-        font-size: 15px;
-        font-weight: bold;
-        cursor: pointer;
-        transition: 0.2s;
-    }
-
-    .controls button:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 0 15px var(--glow);
-    }
-
-    .fullscreen-exit {
-        position: absolute;
-        top: 15px;
-        right: 15px;
-        z-index: 1000000;
-        display: none;
-        background: rgba(0, 0, 0, 0.65);
-        color: white;
-        border: 1px solid rgba(255, 255, 255, 0.25);
-        padding: 8px 12px;
-        border-radius: 8px;
-        font-size: 14px;
-        cursor: pointer;
-        backdrop-filter: blur(8px);
-    }
-
-    .game-container.css-fullscreen .fullscreen-exit {
-        display: block;
-    }
-
-    .fullscreen-exit:hover {
-        background: rgba(0, 0, 0, 0.85);
-    }
-
-    .loading {
-        position: absolute;
-        inset: 0;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        background: #000;
-        color: white;
-        font-size: 18px;
-        z-index: 5;
-    }
-
-    @media (max-width: 800px) {
-        iframe {
-            height: 60vh;
+            backdrop-filter: blur(10px);
         }
 
         .header h1 {
-            font-size: 16px;
-        }
-    }
-</style>
-
-<script>
-    const EAGLER_VERSIONS = {
-        "1.8.8": "https://eaglercraft.q13x.com/1.8.8/wasm/?retina=true",
-        "1.12.2": "https://eaglercraft.q13x.com/1.12.2/js/?retina=true"
-    };
-
-    let selectedVersion = localStorage.getItem("eaglercraftVersion") || "1.8.8";
-
-    function loadEaglerVersion(version) {
-        if (!EAGLER_VERSIONS[version]) return;
-
-        selectedVersion = version;
-        localStorage.setItem("eaglercraftVersion", version);
-
-        const frame = document.getElementById("gameFrame");
-        const loading = document.getElementById("loading");
-        const title = document.getElementById("gameTitle");
-
-        if (!frame) return;
-
-        loading.style.display = "flex";
-        loading.textContent = "Loading EaglerCraft " + version + "...";
-
-        const buttons = document.querySelectorAll(".version-button");
-
-        buttons.forEach(function(button) {
-            button.classList.remove("active");
-        });
-
-        buttons.forEach(function(button) {
-            if (button.getAttribute("data-version") === version) {
-                button.classList.add("active");
-            }
-        });
-
-        title.textContent = "🎮 EaglerCraft " + version;
-
-        frame.src = EAGLER_VERSIONS[version];
-    }
-
-    function goFullscreen() {
-        const container = document.querySelector(".game-container");
-
-        if (!container) return;
-
-        container.classList.add("css-fullscreen");
-        document.body.style.overflow = "hidden";
-
-        focusGame();
-    }
-
-    function exitFullscreen() {
-        const container = document.querySelector(".game-container");
-
-        if (!container) return;
-
-        container.classList.remove("css-fullscreen");
-        document.body.style.overflow = "";
-
-        focusGame();
-    }
-
-    function focusGame() {
-        const game = document.getElementById("gameFrame");
-
-        if (!game) return;
-
-        setTimeout(function() {
-            game.focus();
-
-            try {
-                game.contentWindow.focus();
-            } catch (error) {
-            }
-        }, 100);
-    }
-
-    function gameLoaded() {
-        const loading = document.getElementById("loading");
-
-        if (loading) {
-            loading.style.display = "none";
+            font-size: 20px;
+            margin: 0;
         }
 
-        focusGame();
-    }
+        .header a {
+            color: var(--accent);
 
-    document.addEventListener("keydown", function(event) {
-        if (event.key === "Escape") {
-            const container = document.querySelector(".game-container");
+            text-decoration: none;
 
-            if (
-                container &&
-                container.classList.contains("css-fullscreen")
-            ) {
-                setTimeout(function() {
-                    focusGame();
-                }, 100);
-            }
+            font-weight: bold;
         }
-    });
 
-    document.addEventListener("keydown", function(event) {
-        if (event.key === "F11") {
-            event.preventDefault();
+        .header a:hover {
+            text-decoration: underline;
+        }
 
-            const container = document.querySelector(".game-container");
+
+        /* =========================================
+           GAME AREA
+        ========================================= */
+
+        .game-wrapper {
+            width: 95%;
+
+            max-width: 1200px;
+
+            margin: 30px auto;
+        }
+
+
+        .game-container {
+            position: relative;
+
+            background: #000;
+
+            border-radius: 12px;
+
+            overflow: hidden;
+
+            box-shadow:
+                0 10px 30px
+                var(--shadow);
+        }
+
+
+        /* =========================================
+           IFRAME
+        ========================================= */
+
+        iframe {
+            display: block;
+
+            width: 100%;
+
+            height: 70vh;
+
+            border: none;
+
+            background: #000;
+        }
+
+
+        /* =========================================
+           CSS FULLSCREEN
+        ========================================= */
+
+        .game-container.css-fullscreen {
+            position: fixed;
+
+            top: 0;
+            left: 0;
+
+            width: 100vw;
+            height: 100vh;
+
+            max-width: none;
+
+            margin: 0;
+
+            border-radius: 0;
+
+            z-index: 999999;
+
+            box-shadow: none;
+        }
+
+
+        .game-container.css-fullscreen iframe {
+            width: 100%;
+            height: 100%;
+        }
+
+
+        /* =========================================
+           CONTROLS
+        ========================================= */
+
+        .controls {
+            display: flex;
+
+            justify-content: center;
+
+            gap: 15px;
+
+            padding: 15px;
+        }
+
+
+        .controls button {
+            background: var(--accent);
+
+            color: #001018;
+
+            border: none;
+
+            padding: 10px 18px;
+
+            border-radius: 8px;
+
+            font-size: 15px;
+
+            font-weight: bold;
+
+            cursor: pointer;
+
+            transition: 0.2s;
+        }
+
+
+        .controls button:hover {
+            transform: translateY(-2px);
+
+            box-shadow:
+                0 0 15px
+                var(--glow);
+        }
+
+
+        /* =========================================
+           FULLSCREEN EXIT BUTTON
+        ========================================= */
+
+        .fullscreen-exit {
+            position: absolute;
+
+            top: 15px;
+            right: 15px;
+
+            z-index: 1000000;
+
+            display: none;
+
+            background: rgba(0, 0, 0, 0.65);
+
+            color: white;
+
+            border:
+                1px solid
+                rgba(255, 255, 255, 0.25);
+
+            padding: 8px 12px;
+
+            border-radius: 8px;
+
+            font-size: 14px;
+
+            cursor: pointer;
+
+            backdrop-filter: blur(8px);
+        }
+
+
+        .game-container.css-fullscreen .fullscreen-exit {
+            display: block;
+        }
+
+
+        .fullscreen-exit:hover {
+            background: rgba(0, 0, 0, 0.85);
+        }
+
+
+        /* =========================================
+           LOADING SCREEN
+        ========================================= */
+
+        .loading {
+            position: absolute;
+
+            inset: 0;
+
+            display: flex;
+
+            align-items: center;
+
+            justify-content: center;
+
+            background: #000;
+
+            color: white;
+
+            font-size: 18px;
+
+            z-index: 5;
+        }
+
+
+        /* =========================================
+           MOBILE
+        ========================================= */
+
+        @media (max-width: 800px) {
+
+            iframe {
+                height: 60vh;
+            }
+
+            .header h1 {
+                font-size: 16px;
+            }
+
+        }
+
+    </style>
+
+
+    <script>
+
+        /* =========================================
+           CSS FULLSCREEN
+        ========================================= */
+
+        function goFullscreen() {
+
+            const container =
+                document.querySelector(".game-container");
 
             if (!container) return;
 
-            if (container.classList.contains("css-fullscreen")) {
-                exitFullscreen();
-            } else {
-                goFullscreen();
-            }
+            container.classList.add("css-fullscreen");
+
+            // Prevent the page behind the game
+            // from scrolling.
+            document.body.style.overflow = "hidden";
+
+            // Focus the game.
+            focusGame();
         }
-    });
 
-    document.addEventListener("DOMContentLoaded", function() {
-        loadEaglerVersion(selectedVersion);
-    });
-</script>
 
+        /* =========================================
+           EXIT CSS FULLSCREEN
+        ========================================= */
+
+        function exitFullscreen() {
+
+            const container =
+                document.querySelector(".game-container");
+
+            if (!container) return;
+
+            container.classList.remove("css-fullscreen");
+
+            document.body.style.overflow = "";
+
+            focusGame();
+        }
+
+
+        /* =========================================
+           FOCUS GAME
+        ========================================= */
+
+        function focusGame() {
+
+            const game =
+                document.getElementById("gameFrame");
+
+            if (!game) return;
+
+            setTimeout(() => {
+
+                game.focus();
+
+                try {
+
+                    game.contentWindow.focus();
+
+                } catch (error) {
+
+                    // Cross-origin iframe.
+                    // Safe to ignore.
+
+                }
+
+            }, 100);
+
+        }
+
+
+        /* =========================================
+           ESCAPE KEY
+           
+           IMPORTANT:
+           
+           Because we're NOT using the browser's
+           Fullscreen API, Esc can reach Eaglercraft.
+           
+           We deliberately DO NOT preventDefault()
+           here.
+        ========================================= */
+
+        document.addEventListener("keydown", (event) => {
+
+            if (event.key === "Escape") {
+
+                const container =
+                    document.querySelector(".game-container");
+
+                if (
+                    container &&
+                    container.classList.contains("css-fullscreen")
+                ) {
+
+                    /*
+                     * Do NOT exit fullscreen here.
+                     *
+                     * Eaglercraft needs Esc for its
+                     * own pause/menu system.
+                     */
+
+                    setTimeout(() => {
+                        focusGame();
+                    }, 100);
+
+                }
+
+            }
+
+        });
+
+
+        /* =========================================
+           REMOVE LOADING SCREEN
+        ========================================= */
+
+        function gameLoaded() {
+
+            const loading =
+                document.getElementById("loading");
+
+            if (loading) {
+
+                loading.style.display = "none";
+
+            }
+
+        }
+
+
+        /* =========================================
+           KEYBOARD SHORTCUT
+           
+           F11 = toggle our CSS fullscreen
+           
+           We prevent the browser's real F11 so
+           the page stays inside the game UI.
+        ========================================= */
+
+        document.addEventListener("keydown", (event) => {
+
+            if (event.key === "F11") {
+
+                event.preventDefault();
+
+                const container =
+                    document.querySelector(".game-container");
+
+                if (!container) return;
+
+                if (
+                    container.classList.contains("css-fullscreen")
+                ) {
+
+                    exitFullscreen();
+
+                } else {
+
+                    goFullscreen();
+
+                }
+
+            }
+
+        });
+
+    </script>
 
 </head>
 
+
 <body>
 
-<div class="header">
-    <h1 id="gameTitle">🎮 EaglerCraft</h1>
 
-    <a href="../index.html">
-        ⬅ Back to Hub
-    </a>
-</div>
+    <!-- =========================================
+         HEADER
+    ========================================= -->
 
-<div class="game-wrapper">
+    <div class="header">
 
-    <div class="version-selector">
-        <span class="version-label">Version:</span>
+        <h1>
+            🎮 EaglerCraft
+        </h1>
 
-        <button
-            class="version-button"
-            data-version="1.8.8"
-            onclick="loadEaglerVersion('1.8.8')"
-        >
-            1.8.8
-        </button>
+        <a href="../index.html">
+            ⬅ Back to Hub
+        </a>
 
-        <button
-            class="version-button"
-            data-version="1.12.2"
-            onclick="loadEaglerVersion('1.12.2')"
-        >
-            1.12.2
-        </button>
     </div>
 
-    <div class="game-container">
 
-        <div class="loading" id="loading">
-            Loading Game...
+    <!-- =========================================
+         GAME AREA
+    ========================================= -->
+
+    <div class="game-wrapper">
+
+        <div class="game-container">
+
+            <div
+                class="loading"
+                id="loading"
+            >
+                Loading Game...
+            </div>
+
+
+            <button
+                class="fullscreen-exit"
+                onclick="exitFullscreen()"
+                title="Exit Fullscreen"
+            >
+                ✕ Exit Fullscreen
+            </button>
+
+
+            <iframe
+                id="gameFrame"
+                src=""
+                allowfullscreen
+                tabindex="0"
+                onload="gameLoaded()"
+            ></iframe>
+
+
+            <script>
+
+                document
+                    .getElementById("gameFrame")
+                    .src = EaglerCraftURL;
+
+            </script>
+
         </div>
 
-        <button
-            class="fullscreen-exit"
-            onclick="exitFullscreen()"
-            title="Exit Fullscreen"
-        >
-            ✕ Exit Fullscreen
-        </button>
 
-        <iframe
-            id="gameFrame"
-            src=""
-            allowfullscreen
-            tabindex="0"
-            onload="gameLoaded()"
-        ></iframe>
+        <!-- =========================================
+             CONTROLS
+        ========================================= -->
+
+        <div class="controls">
+
+            <button onclick="goFullscreen()">
+                Fullscreen
+            </button>
+
+        </div>
 
     </div>
-
-    <div class="controls">
-        <button onclick="goFullscreen()">
-            Fullscreen
-        </button>
-    </div>
-
-</div>
 
 
 </body>
