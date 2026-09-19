@@ -47,9 +47,9 @@
             "SilkSong.html": "SilkSong",
             "TimeShooter2.html": "TimeShooter2",
             "StrangeRopePolice.html": "StrangeRopePolice",
-            "kick-the-buddy.html": "KickTheBuddy",
-            "plants-vs-zombies-2.html": "PVZ2",
-            "idle-mining-empire.html": "IdleMiningEmpire",
+            "KickTheBuddy.html": "KickTheBuddy",
+            "PVZ2.html": "PVZ2",
+            "IdleMiningEmpire.html": "IdleMiningEmpire",
             "StarDewValley.html": "StardewValley"
         };
 
