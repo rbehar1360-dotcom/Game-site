@@ -44,6 +44,13 @@
             "StreetRacer.html": "StreetRacer",
             "Tag.html": "Tag",
             "CountMasters.html": "CountMasters",
+            "SilkSong.html": "SilkSong",
+            "TimeShooter2.html": "TimeShooter2",
+            "StrangeRopePolice.html": "StrangeRopePolice",
+            "kick-the-buddy.html": "KickTheBuddy",
+            "plants-vs-zombies-2.html": "PVZ2",
+            "idle-mining-empire.html": "IdleMiningEmpire",
+            "StarDewValley.html": "StardewValley"
         };
 
         return gameMap[filename] || null;
