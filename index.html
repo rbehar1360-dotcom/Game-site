@@ -10,7 +10,15 @@
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="js/supabase.js" defer></script>
 
-  <script src="js/Script.js" defer></script>
+  <script src="js/01-core-auth.js" defer></script>
+<script src="js/02-games.js" defer></script>
+<script src="js/03-stats-shop.js" defer></script>
+<script src="js/04-chat.js" defer></script>
+<script src="js/05-messages.js" defer></script>
+<script src="js/06-leaderboard.js" defer></script>
+<script src="js/07-legal-owner.js" defer></script>
+<script src="js/08-profile.js" defer></script>
+<script src="js/09-achievements.js" defer></script>
 </head>
 
 <body>
@@ -1064,18 +1072,124 @@
 
 
 <!-- =========================================
-     SEARCH
+     GAME SEARCH & FILTERS
 ========================================= -->
 
-<input
-  type="text"
-  id="searchInput"
-  class="searchInput"
-  placeholder="Search games..."
-  onkeyup="FilterGames()"
+<div class="game-discovery">
+
+    <div class="game-search-box">
+
+        <span class="search-icon">⌕</span>
+
+        <input
+            type="text"
+            id="searchInput"
+            class="searchInput"
+            placeholder="Search games..."
+            autocomplete="off"
+        >
+
+        <button
+            id="clearSearch"
+            class="clear-search"
+            type="button"
+            aria-label="Clear search"
+        >
+            ✕
+        </button>
+
+    </div>
+
+
+    <div class="game-filter-row">
+
+        <button
+            class="game-filter active"
+            data-sort="default"
+            type="button"
+        >
+            🎮 All Games
+        </button>
+
+        <button
+            class="game-filter"
+            data-sort="az"
+            type="button"
+        >
+            A–Z
+        </button>
+
+        <button
+            class="game-filter"
+            data-sort="za"
+            type="button"
+        >
+            Z–A
+        </button>
+
+        <button
+            class="game-filter"
+            data-sort="liked"
+            type="button"
+        >
+            ❤️ Most Liked
+        </button>
+
+        <button
+            class="game-filter"
+            data-sort="played"
+            type="button"
+        >
+            ⏱️ Most Played
+        </button>
+
+        <button
+            class="game-filter"
+            data-sort="favorites"
+            type="button"
+        >
+            ⭐ Favorites
+        </button>
+
+        <span
+            id="gameResultCount"
+            class="game-result-count"
+        >
+            0 games
+        </span>
+
+    </div>
+
+</div>
+
+
+<div
+    id="noGamesFound"
+    class="no-games-found"
+    style="display: none;"
 >
 
+    <div class="no-games-icon">
+        🔎
+    </div>
 
+    <div class="no-games-title">
+        No games found
+    </div>
+
+    <div class="no-games-text">
+        Try searching for something else.
+    </div>
+
+    <button
+        id="noGamesClear"
+        class="no-games-clear"
+        type="button"
+    >
+        Clear Search
+    </button>
+
+</div>
 <!-- =========================================
      GAME GRID
 ========================================= -->

@@ -7615,3 +7615,1818 @@ z-index: 1000;
     box-shadow:
         0 0 12px var(--glow);
 }
+
+/* =========================================
+   GAME DISCOVERY
+========================================= */
+
+.game-discovery {
+    width: 100%;
+    max-width: 900px;
+    margin: 20px auto 25px;
+}
+
+
+/* =========================================
+   SEARCH BOX
+========================================= */
+
+.game-search-box {
+    position: relative;
+    width: 100%;
+}
+
+.searchInput {
+    width: 100%;
+    box-sizing: border-box;
+
+    padding: 15px 50px 15px 48px;
+
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: 14px;
+
+    background: var(--card);
+    color: var(--text);
+
+    font-size: 16px;
+    outline: none;
+
+    transition:
+        border-color 0.2s ease,
+        box-shadow 0.2s ease,
+        background 0.2s ease;
+}
+
+.searchInput::placeholder {
+    color: var(--text);
+    opacity: 0.55;
+}
+
+.searchInput:focus {
+    border-color: var(--accent);
+
+    box-shadow:
+        0 0 0 3px rgba(255, 255, 255, 0.05);
+}
+
+.search-icon {
+    position: absolute;
+
+    left: 17px;
+    top: 50%;
+
+    transform: translateY(-50%);
+
+    font-size: 24px;
+
+    color: var(--accent);
+
+    pointer-events: none;
+
+    line-height: 1;
+}
+
+.clear-search {
+    position: absolute;
+
+    right: 12px;
+    top: 50%;
+
+    transform: translateY(-50%);
+
+    width: 32px;
+    height: 32px;
+
+    border: none;
+    border-radius: 50%;
+
+    background: transparent;
+    color: var(--text);
+
+    font-size: 23px;
+    line-height: 1;
+
+    cursor: pointer;
+
+    opacity: 0;
+
+    pointer-events: none;
+
+    transition:
+        opacity 0.2s ease,
+        background 0.2s ease;
+}
+
+.clear-search.visible {
+    opacity: 0.7;
+    pointer-events: auto;
+}
+
+.clear-search:hover {
+    background: rgba(255, 255, 255, 0.1);
+    opacity: 1;
+}
+
+
+/* =========================================
+   CONTROLS
+========================================= */
+
+.game-discovery-controls {
+    display: flex;
+
+    align-items: center;
+    justify-content: space-between;
+
+    gap: 15px;
+
+    margin-top: 12px;
+}
+
+.game-sort {
+    display: flex;
+
+    align-items: center;
+
+    gap: 8px;
+}
+
+.game-sort label {
+    color: var(--text);
+
+    font-size: 14px;
+
+    opacity: 0.75;
+}
+
+#gameSort {
+    padding: 9px 34px 9px 12px;
+
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: 9px;
+
+    background: var(--card);
+    color: var(--text);
+
+    font-size: 14px;
+
+    outline: none;
+
+    cursor: pointer;
+
+    transition:
+        border-color 0.2s ease,
+        background 0.2s ease;
+}
+
+#gameSort:hover,
+#gameSort:focus {
+    border-color: var(--accent);
+}
+
+#gameSort option {
+    background: var(--card);
+    color: var(--text);
+}
+
+.game-result-count {
+    color: var(--text);
+
+    font-size: 14px;
+
+    opacity: 0.65;
+
+    white-space: nowrap;
+}
+
+
+/* =========================================
+   NO RESULTS
+========================================= */
+
+.no-games-found {
+    width: 100%;
+
+    box-sizing: border-box;
+
+    padding: 45px 20px;
+
+    margin: 10px auto 25px;
+
+    text-align: center;
+
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 16px;
+
+    background: var(--card);
+
+    color: var(--text);
+}
+
+.no-games-icon {
+    font-size: 42px;
+
+    margin-bottom: 10px;
+
+    opacity: 0.8;
+}
+
+.no-games-title {
+    font-size: 21px;
+
+    font-weight: 600;
+
+    margin-bottom: 7px;
+}
+
+.no-games-text {
+    font-size: 14px;
+
+    opacity: 0.6;
+
+    margin-bottom: 18px;
+}
+
+.no-games-clear {
+    border: 1px solid rgba(255, 255, 255, 0.12);
+
+    border-radius: 9px;
+
+    padding: 9px 15px;
+
+    background: transparent;
+
+    color: var(--text);
+
+    cursor: pointer;
+
+    transition:
+        background 0.2s ease,
+        border-color 0.2s ease;
+}
+
+.no-games-clear:hover {
+    background: rgba(255, 255, 255, 0.08);
+
+    border-color: var(--accent);
+}
+
+
+/* =========================================
+   MOBILE
+========================================= */
+
+@media (max-width: 600px) {
+
+    .game-discovery-controls {
+        align-items: flex-start;
+        flex-direction: column;
+    }
+
+    .game-result-count {
+        align-self: flex-end;
+    }
+
+}
+
+/* =========================================
+   GAME DISCOVERY
+========================================= */
+
+.game-discovery {
+    width: 100%;
+    max-width: 1100px;
+    margin: 18px auto 20px;
+    padding: 0 10px;
+    box-sizing: border-box;
+}
+
+
+/* =========================================
+   SEARCH ROW
+========================================= */
+
+.game-search-row {
+    width: 100%;
+}
+
+.game-search-box {
+    position: relative;
+    width: 100%;
+}
+
+.searchInput {
+    width: 100%;
+    height: 46px;
+
+    box-sizing: border-box;
+
+    padding: 0 45px 0 42px;
+
+    border: 1px solid var(--accent);
+    border-radius: 10px;
+
+    background: var(--card);
+    color: var(--text);
+
+    font-family: inherit;
+    font-size: 15px;
+
+    outline: none;
+
+    box-shadow: var(--shadow);
+
+    transition:
+        border-color 0.2s ease,
+        box-shadow 0.2s ease,
+        background 0.2s ease;
+}
+
+.searchInput::placeholder {
+    color: var(--text);
+    opacity: 0.5;
+}
+
+.searchInput:focus {
+    border-color: var(--accent-light);
+
+    box-shadow:
+        0 0 0 2px color-mix(
+            in srgb,
+            var(--accent) 20%,
+            transparent
+        );
+}
+
+.search-icon {
+    position: absolute;
+
+    left: 14px;
+    top: 50%;
+
+    transform: translateY(-50%);
+
+    color: var(--accent);
+
+    font-size: 22px;
+    line-height: 1;
+
+    pointer-events: none;
+}
+
+.clear-search {
+    position: absolute;
+
+    right: 9px;
+    top: 50%;
+
+    width: 30px;
+    height: 30px;
+
+    transform: translateY(-50%);
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    border: none;
+    border-radius: 7px;
+
+    background: transparent;
+    color: var(--text);
+
+    font-size: 13px;
+
+    cursor: pointer;
+
+    opacity: 0;
+
+    pointer-events: none;
+
+    transition:
+        background 0.15s ease,
+        opacity 0.15s ease;
+}
+
+.clear-search.visible {
+    opacity: 0.65;
+    pointer-events: auto;
+}
+
+.clear-search:hover {
+    opacity: 1;
+    background: rgba(255, 255, 255, 0.08);
+}
+
+
+/* =========================================
+   FILTER BUTTONS
+========================================= */
+
+.game-filter-row {
+    display: flex;
+
+    align-items: center;
+
+    gap: 7px;
+
+    margin-top: 10px;
+
+    overflow-x: auto;
+
+    scrollbar-width: none;
+}
+
+.game-filter-row::-webkit-scrollbar {
+    display: none;
+}
+
+.game-filter {
+    flex-shrink: 0;
+
+    padding: 7px 11px;
+
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 8px;
+
+    background: var(--card);
+    color: var(--text);
+
+    font-family: inherit;
+    font-size: 13px;
+
+    cursor: pointer;
+
+    opacity: 0.72;
+
+    transition:
+        background 0.15s ease,
+        border-color 0.15s ease,
+        opacity 0.15s ease,
+        transform 0.15s ease;
+}
+
+.game-filter:hover {
+    opacity: 1;
+
+    border-color: var(--accent);
+
+    transform: translateY(-1px);
+}
+
+.game-filter.active {
+    opacity: 1;
+
+    border-color: var(--accent);
+
+    background: var(--accent);
+
+    color: var(--background-1);
+
+    font-weight: 600;
+}
+
+
+/* =========================================
+   RESULT STATUS
+========================================= */
+
+.game-discovery-status {
+    display: flex;
+
+    align-items: center;
+
+    gap: 8px;
+
+    min-height: 20px;
+
+    margin-top: 8px;
+
+    padding-left: 2px;
+
+    font-size: 12px;
+
+    color: var(--text);
+
+    opacity: 0.55;
+}
+
+.active-search-text {
+    overflow: hidden;
+
+    max-width: 400px;
+
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+
+/* =========================================
+   NO RESULTS
+========================================= */
+
+.no-games-found {
+    width: calc(100% - 20px);
+    max-width: 1100px;
+
+    box-sizing: border-box;
+
+    margin: 8px auto 22px;
+
+    padding: 35px 20px;
+
+    text-align: center;
+
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 12px;
+
+    background: var(--card);
+    color: var(--text);
+
+    box-shadow: var(--shadow);
+}
+
+.no-games-icon {
+    margin-bottom: 8px;
+
+    font-size: 32px;
+
+    opacity: 0.7;
+}
+
+.no-games-title {
+    margin-bottom: 5px;
+
+    font-size: 17px;
+    font-weight: 600;
+}
+
+.no-games-text {
+    margin-bottom: 15px;
+
+    font-size: 13px;
+
+    opacity: 0.55;
+}
+
+.no-games-clear {
+    padding: 7px 12px;
+
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: 7px;
+
+    background: transparent;
+    color: var(--text);
+
+    font-family: inherit;
+    font-size: 13px;
+
+    cursor: pointer;
+
+    transition:
+        background 0.15s ease,
+        border-color 0.15s ease;
+}
+
+.no-games-clear:hover {
+    background: rgba(255, 255, 255, 0.07);
+
+    border-color: var(--accent);
+}
+
+
+/* =========================================
+   MOBILE
+========================================= */
+
+@media (max-width: 600px) {
+
+    .game-discovery {
+        margin-top: 12px;
+        padding: 0 7px;
+    }
+
+    .searchInput {
+        height: 43px;
+        font-size: 14px;
+    }
+
+    .game-filter {
+        padding: 6px 9px;
+        font-size: 12px;
+    }
+
+    .game-discovery-status {
+        font-size: 11px;
+    }
+
+}
+
+/* =========================================
+   GAME DISCOVERY
+========================================= */
+
+.game-discovery {
+    width: calc(100% - 40px);
+    max-width: 1115px;
+    margin: 22px auto 28px;
+    padding: 20px 22px 18px;
+    box-sizing: border-box;
+
+    border: 1px solid rgba(255, 255, 255, 0.13);
+    border-radius: 16px;
+
+    background:
+        linear-gradient(
+            135deg,
+            rgba(255, 255, 255, 0.035),
+            rgba(255, 255, 255, 0.015)
+        ),
+        rgba(20, 8, 45, 0.45);
+
+    box-shadow:
+        0 8px 30px rgba(0, 0, 0, 0.18),
+        0 0 18px rgba(100, 70, 180, 0.08);
+}
+
+
+/* SEARCH */
+
+.game-search-box {
+    position: relative;
+    width: 100%;
+}
+
+.searchInput {
+    width: 100%;
+    height: 58px;
+
+    box-sizing: border-box;
+
+    padding: 0 52px 0 68px;
+
+    border: 1px solid var(--accent);
+    border-radius: 15px;
+
+    background:
+        rgba(30, 13, 60, 0.72);
+
+    color: var(--text);
+
+    font-family: inherit;
+    font-size: 16px;
+
+    outline: none;
+
+    box-shadow:
+        0 0 12px rgba(120, 80, 220, 0.08);
+
+    transition:
+        border-color 0.2s ease,
+        box-shadow 0.2s ease,
+        background 0.2s ease;
+}
+
+.searchInput::placeholder {
+    color: var(--text);
+    opacity: 0.55;
+}
+
+.searchInput:focus {
+    border-color: var(--accent-light);
+
+    box-shadow:
+        0 0 0 2px rgba(130, 100, 255, 0.12),
+        0 0 18px rgba(120, 80, 220, 0.15);
+
+    background:
+        rgba(35, 15, 70, 0.85);
+}
+
+
+/* SEARCH ICON */
+
+.search-icon {
+    position: absolute;
+
+    left: 22px;
+    top: 50%;
+
+    transform: translateY(-50%);
+
+    color: var(--accent-light);
+
+    font-size: 28px;
+    line-height: 1;
+
+    pointer-events: none;
+
+    z-index: 2;
+}
+
+
+/* CLEAR BUTTON */
+
+.clear-search {
+    position: absolute;
+
+    right: 12px;
+    top: 50%;
+
+    width: 34px;
+    height: 34px;
+
+    transform: translateY(-50%);
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    border: none;
+    border-radius: 50%;
+
+    background: rgba(255, 255, 255, 0.08);
+
+    color: var(--text);
+
+    font-size: 14px;
+
+    cursor: pointer;
+
+    opacity: 0;
+    pointer-events: none;
+
+    transition:
+        opacity 0.15s ease,
+        background 0.15s ease;
+}
+
+.clear-search.visible {
+    opacity: 0.75;
+    pointer-events: auto;
+}
+
+.clear-search:hover {
+    opacity: 1;
+    background: rgba(255, 255, 255, 0.14);
+}
+
+
+/* FILTERS */
+
+.game-filter-row {
+    display: flex;
+    align-items: center;
+
+    gap: 9px;
+
+    margin-top: 15px;
+
+    overflow-x: auto;
+
+    scrollbar-width: none;
+}
+
+.game-filter-row::-webkit-scrollbar {
+    display: none;
+}
+
+
+.game-filter {
+    flex-shrink: 0;
+
+    height: 40px;
+
+    padding: 0 15px;
+
+    border: 1px solid rgba(255, 255, 255, 0.10);
+    border-radius: 10px;
+
+    background:
+        rgba(255, 255, 255, 0.035);
+
+    color: var(--text);
+
+    font-family: inherit;
+    font-size: 14px;
+
+    cursor: pointer;
+
+    opacity: 0.78;
+
+    transition:
+        background 0.15s ease,
+        border-color 0.15s ease,
+        opacity 0.15s ease,
+        transform 0.15s ease;
+}
+
+.game-filter:hover {
+    opacity: 1;
+
+    border-color: var(--accent);
+
+    background:
+        rgba(255, 255, 255, 0.06);
+
+    transform: translateY(-1px);
+}
+
+.game-filter.active {
+    opacity: 1;
+
+    border-color: var(--accent-light);
+
+    background: var(--accent);
+
+    color: var(--background-1);
+
+    font-weight: 600;
+
+    box-shadow:
+        0 0 12px rgba(100, 200, 255, 0.12);
+}
+
+
+/* GAME COUNT */
+
+.game-result-count {
+    margin-left: auto;
+
+    flex-shrink: 0;
+
+    padding-left: 12px;
+
+    color: var(--text);
+
+    font-size: 13px;
+
+    opacity: 0.5;
+
+    white-space: nowrap;
+}
+
+
+/* NO RESULTS */
+
+.no-games-found {
+    width: calc(100% - 40px);
+    max-width: 1115px;
+
+    box-sizing: border-box;
+
+    margin: 0 auto 25px;
+
+    padding: 45px 20px;
+
+    text-align: center;
+
+    border: 1px solid rgba(255, 255, 255, 0.10);
+    border-radius: 14px;
+
+    background: var(--card);
+
+    color: var(--text);
+
+    box-shadow: var(--shadow);
+}
+
+.no-games-icon {
+    margin-bottom: 10px;
+
+    font-size: 34px;
+
+    opacity: 0.7;
+}
+
+.no-games-title {
+    margin-bottom: 6px;
+
+    font-size: 18px;
+    font-weight: 600;
+}
+
+.no-games-text {
+    margin-bottom: 17px;
+
+    font-size: 13px;
+
+    opacity: 0.55;
+}
+
+.no-games-clear {
+    padding: 8px 15px;
+
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: 8px;
+
+    background: transparent;
+
+    color: var(--text);
+
+    font-family: inherit;
+    font-size: 13px;
+
+    cursor: pointer;
+
+    transition:
+        background 0.15s ease,
+        border-color 0.15s ease;
+}
+
+.no-games-clear:hover {
+    background: rgba(255, 255, 255, 0.07);
+
+    border-color: var(--accent);
+}
+
+
+/* =========================================
+   MOBILE
+========================================= */
+
+@media (max-width: 700px) {
+
+    .game-discovery {
+        width: calc(100% - 20px);
+
+        margin-top: 15px;
+
+        padding: 14px;
+    }
+
+    .searchInput {
+        height: 48px;
+
+        padding-left: 52px;
+
+        font-size: 14px;
+    }
+
+    .search-icon {
+        left: 17px;
+
+        font-size: 24px;
+    }
+
+    .game-filter-row {
+        gap: 7px;
+
+        margin-top: 11px;
+    }
+
+    .game-filter {
+        height: 36px;
+
+        padding: 0 11px;
+
+        font-size: 12px;
+    }
+
+    .game-result-count {
+        font-size: 11px;
+    }
+
+    .no-games-found {
+        width: calc(100% - 20px);
+    }
+}
+
+/* =========================================
+   GAME DISCOVERY
+========================================= */
+
+.game-discovery {
+    width: calc(100% - 100px);
+    max-width: 1625px;
+
+    margin: 26px auto 42px;
+    padding: 22px 28px 20px;
+
+    box-sizing: border-box;
+
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: 20px;
+
+    background:
+        linear-gradient(
+            135deg,
+            rgba(255, 255, 255, 0.035),
+            rgba(255, 255, 255, 0.015)
+        ),
+        rgba(24, 10, 48, 0.58);
+
+    box-shadow:
+        0 10px 35px rgba(0, 0, 0, 0.16),
+        0 0 25px rgba(110, 70, 190, 0.08);
+}
+
+
+/* =========================================
+   SEARCH BAR
+========================================= */
+
+.game-search-box {
+    position: relative;
+    width: 100%;
+}
+
+.searchInput {
+    display: block;
+
+    width: 100%;
+    height: 64px;
+
+    box-sizing: border-box;
+
+    padding: 0 62px 0 76px;
+
+    border: 2px solid var(--accent-light);
+    border-radius: 17px;
+
+    background:
+        rgba(31, 13, 63, 0.72);
+
+    color: var(--text);
+
+    font-family: inherit;
+    font-size: 18px;
+
+    outline: none;
+
+    box-shadow:
+        0 0 12px rgba(120, 70, 220, 0.12);
+
+    transition:
+        border-color 0.2s ease,
+        box-shadow 0.2s ease,
+        background 0.2s ease;
+}
+
+.searchInput::placeholder {
+    color: var(--text);
+    opacity: 0.58;
+}
+
+.searchInput:focus {
+    border-color: var(--accent-light);
+
+    background:
+        rgba(34, 14, 68, 0.82);
+
+    box-shadow:
+        0 0 0 2px rgba(120, 100, 255, 0.10),
+        0 0 22px rgba(110, 70, 220, 0.16);
+}
+
+
+/* =========================================
+   SEARCH ICON
+========================================= */
+
+.search-icon {
+    position: absolute;
+
+    left: 25px;
+    top: 50%;
+
+    transform: translateY(-50%);
+
+    color: var(--accent-light);
+
+    font-size: 32px;
+    line-height: 1;
+
+    pointer-events: none;
+
+    z-index: 2;
+}
+
+
+/* =========================================
+   CLEAR BUTTON
+========================================= */
+
+.clear-search {
+    position: absolute;
+
+    right: 14px;
+    top: 50%;
+
+    width: 38px;
+    height: 38px;
+
+    transform: translateY(-50%);
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    border: none;
+    border-radius: 50%;
+
+    background: rgba(255, 255, 255, 0.08);
+
+    color: var(--text);
+
+    font-size: 15px;
+
+    cursor: pointer;
+
+    opacity: 0;
+    pointer-events: none;
+
+    transition:
+        opacity 0.15s ease,
+        background 0.15s ease;
+}
+
+.clear-search.visible {
+    opacity: 0.75;
+    pointer-events: auto;
+}
+
+.clear-search:hover {
+    opacity: 1;
+    background: rgba(255, 255, 255, 0.14);
+}
+
+
+/* =========================================
+   FILTER ROW
+========================================= */
+
+.game-filter-row {
+    display: flex;
+    align-items: center;
+
+    width: 100%;
+
+    gap: 10px;
+
+    margin-top: 18px;
+
+    overflow-x: auto;
+
+    scrollbar-width: none;
+}
+
+.game-filter-row::-webkit-scrollbar {
+    display: none;
+}
+
+
+/* =========================================
+   FILTER BUTTONS
+========================================= */
+
+.game-filter {
+    flex-shrink: 0;
+
+    height: 42px;
+
+    padding: 0 17px;
+
+    border: 1px solid rgba(255, 255, 255, 0.10);
+    border-radius: 11px;
+
+    background:
+        rgba(255, 255, 255, 0.035);
+
+    color: var(--text);
+
+    font-family: inherit;
+    font-size: 14px;
+
+    cursor: pointer;
+
+    opacity: 0.78;
+
+    transition:
+        background 0.15s ease,
+        border-color 0.15s ease,
+        opacity 0.15s ease,
+        transform 0.15s ease;
+}
+
+.game-filter:hover {
+    opacity: 1;
+
+    border-color: var(--accent);
+
+    background:
+        rgba(255, 255, 255, 0.06);
+
+    transform: translateY(-1px);
+}
+
+.game-filter.active {
+    opacity: 1;
+
+    border-color: var(--accent-light);
+
+    background: var(--accent);
+
+    color: var(--background-1);
+
+    font-weight: 600;
+
+    box-shadow:
+        0 0 14px rgba(100, 200, 255, 0.13);
+}
+
+
+/* =========================================
+   GAME COUNT
+========================================= */
+
+.game-result-count {
+    margin-left: auto;
+
+    padding-left: 18px;
+
+    flex-shrink: 0;
+
+    color: var(--text);
+
+    font-size: 14px;
+
+    opacity: 0.55;
+
+    white-space: nowrap;
+}
+
+
+/* =========================================
+   NO RESULTS
+========================================= */
+
+.no-games-found {
+    width: calc(100% - 100px);
+    max-width: 1625px;
+
+    box-sizing: border-box;
+
+    margin: 0 auto 30px;
+
+    padding: 50px 20px;
+
+    text-align: center;
+
+    border: 1px solid rgba(255, 255, 255, 0.10);
+    border-radius: 15px;
+
+    background: var(--card);
+
+    color: var(--text);
+
+    box-shadow: var(--shadow);
+}
+
+.no-games-icon {
+    margin-bottom: 10px;
+
+    font-size: 35px;
+
+    opacity: 0.7;
+}
+
+.no-games-title {
+    margin-bottom: 6px;
+
+    font-size: 18px;
+    font-weight: 600;
+}
+
+.no-games-text {
+    margin-bottom: 17px;
+
+    font-size: 13px;
+
+    opacity: 0.55;
+}
+
+.no-games-clear {
+    padding: 8px 15px;
+
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: 8px;
+
+    background: transparent;
+
+    color: var(--text);
+
+    font-family: inherit;
+    font-size: 13px;
+
+    cursor: pointer;
+
+    transition:
+        background 0.15s ease,
+        border-color 0.15s ease;
+}
+
+.no-games-clear:hover {
+    background: rgba(255, 255, 255, 0.07);
+
+    border-color: var(--accent);
+}
+
+
+/* =========================================
+   MOBILE
+========================================= */
+
+@media (max-width: 800px) {
+
+    .game-discovery {
+        width: calc(100% - 30px);
+
+        margin-top: 16px;
+        margin-bottom: 28px;
+
+        padding: 16px;
+    }
+
+    .searchInput {
+        height: 54px;
+
+        padding-left: 58px;
+
+        font-size: 16px;
+    }
+
+    .search-icon {
+        left: 19px;
+
+        font-size: 27px;
+    }
+
+    .game-filter-row {
+        gap: 7px;
+
+        margin-top: 13px;
+    }
+
+    .game-filter {
+        height: 38px;
+
+        padding: 0 12px;
+
+        font-size: 12px;
+    }
+
+    .game-result-count {
+        font-size: 12px;
+    }
+}
+
+/* =========================================
+   GAME DISCOVERY
+========================================= */
+
+.game-discovery {
+    width: calc(100% - 100px);
+    max-width: 1625px;
+
+    margin: 26px auto 42px;
+    padding: 22px 28px 20px;
+
+    box-sizing: border-box;
+
+    border: 1px solid color-mix(
+        in srgb,
+        var(--accent) 18%,
+        transparent
+    );
+
+    border-radius: 20px;
+
+    background: color-mix(
+        in srgb,
+        var(--header) 82%,
+        var(--card)
+    );
+
+    box-shadow:
+        0 10px 35px rgba(0, 0, 0, 0.16),
+        0 0 25px var(--shadow);
+}
+
+
+/* =========================================
+   SEARCH BAR
+========================================= */
+
+.game-search-box {
+    position: relative;
+    width: 100%;
+}
+
+.searchInput {
+    display: block;
+
+    width: 100%;
+    height: 64px;
+
+    box-sizing: border-box;
+
+    padding: 0 62px 0 76px;
+
+    border: 2px solid var(--accent-light);
+    border-radius: 17px;
+
+    background: color-mix(
+        in srgb,
+        var(--card) 88%,
+        var(--background-1)
+    );
+
+    color: var(--text);
+
+    font-family: inherit;
+    font-size: 18px;
+
+    outline: none;
+
+    box-shadow:
+        0 0 12px var(--shadow);
+
+    transition:
+        border-color 0.2s ease,
+        box-shadow 0.2s ease,
+        background 0.2s ease;
+}
+
+.searchInput::placeholder {
+    color: var(--text);
+    opacity: 0.55;
+}
+
+.searchInput:focus {
+    border-color: var(--accent);
+
+    background: color-mix(
+        in srgb,
+        var(--card) 94%,
+        var(--background-1)
+    );
+
+    box-shadow:
+        0 0 0 2px var(--shadow),
+        0 0 22px var(--glow);
+}
+
+
+/* =========================================
+   SEARCH ICON
+========================================= */
+
+.search-icon {
+    position: absolute;
+
+    left: 25px;
+    top: 50%;
+
+    transform: translateY(-50%);
+
+    color: var(--accent-light);
+
+    font-size: 32px;
+    line-height: 1;
+
+    pointer-events: none;
+
+    z-index: 2;
+
+    text-shadow:
+        0 0 8px var(--glow);
+}
+
+
+/* =========================================
+   CLEAR BUTTON
+========================================= */
+
+.clear-search {
+    position: absolute;
+
+    right: 14px;
+    top: 50%;
+
+    width: 38px;
+    height: 38px;
+
+    transform: translateY(-50%);
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    border: 1px solid color-mix(
+        in srgb,
+        var(--accent) 25%,
+        transparent
+    );
+
+    border-radius: 50%;
+
+    background: color-mix(
+        in srgb,
+        var(--card) 75%,
+        transparent
+    );
+
+    color: var(--text);
+
+    font-size: 15px;
+
+    cursor: pointer;
+
+    opacity: 0;
+    pointer-events: none;
+
+    transition:
+        opacity 0.15s ease,
+        background 0.15s ease,
+        border-color 0.15s ease;
+}
+
+.clear-search.visible {
+    opacity: 0.75;
+    pointer-events: auto;
+}
+
+.clear-search:hover {
+    opacity: 1;
+
+    background: var(--accent);
+
+    color: var(--background-1);
+
+    border-color: var(--accent);
+}
+
+
+/* =========================================
+   FILTER ROW
+========================================= */
+
+.game-filter-row {
+    display: flex;
+    align-items: center;
+
+    width: 100%;
+
+    gap: 10px;
+
+    margin-top: 18px;
+
+    overflow-x: auto;
+
+    scrollbar-width: none;
+}
+
+.game-filter-row::-webkit-scrollbar {
+    display: none;
+}
+
+
+/* =========================================
+   FILTER BUTTONS
+========================================= */
+
+.game-filter {
+    flex-shrink: 0;
+
+    height: 42px;
+
+    padding: 0 17px;
+
+    border: 1px solid color-mix(
+        in srgb,
+        var(--accent) 17%,
+        transparent
+    );
+
+    border-radius: 11px;
+
+    background: color-mix(
+        in srgb,
+        var(--card) 82%,
+        transparent
+    );
+
+    color: var(--text);
+
+    font-family: inherit;
+    font-size: 14px;
+
+    cursor: pointer;
+
+    opacity: 0.78;
+
+    transition:
+        background 0.15s ease,
+        border-color 0.15s ease,
+        opacity 0.15s ease,
+        transform 0.15s ease,
+        box-shadow 0.15s ease;
+}
+
+.game-filter:hover {
+    opacity: 1;
+
+    border-color: var(--accent);
+
+    background: color-mix(
+        in srgb,
+        var(--accent) 10%,
+        var(--card)
+    );
+
+    box-shadow:
+        0 0 10px var(--shadow);
+
+    transform: translateY(-1px);
+}
+
+.game-filter.active {
+    opacity: 1;
+
+    border-color: var(--accent-light);
+
+    background: var(--accent);
+
+    color: var(--background-1);
+
+    font-weight: 600;
+
+    box-shadow:
+        0 0 14px var(--shadow);
+}
+
+
+/* =========================================
+   GAME COUNT
+========================================= */
+
+.game-result-count {
+    margin-left: auto;
+
+    padding-left: 18px;
+
+    flex-shrink: 0;
+
+    color: var(--text);
+
+    font-size: 14px;
+
+    opacity: 0.55;
+
+    white-space: nowrap;
+}
+
+
+/* =========================================
+   NO RESULTS
+========================================= */
+
+.no-games-found {
+    width: calc(100% - 100px);
+    max-width: 1625px;
+
+    box-sizing: border-box;
+
+    margin: 0 auto 30px;
+
+    padding: 50px 20px;
+
+    text-align: center;
+
+    border: 1px solid color-mix(
+        in srgb,
+        var(--accent) 15%,
+        transparent
+    );
+
+    border-radius: 15px;
+
+    background: var(--card);
+
+    color: var(--text);
+
+    box-shadow:
+        0 0 20px var(--shadow);
+}
+
+.no-games-icon {
+    margin-bottom: 10px;
+
+    font-size: 35px;
+
+    opacity: 0.7;
+
+    text-shadow:
+        0 0 10px var(--glow);
+}
+
+.no-games-title {
+    margin-bottom: 6px;
+
+    color: var(--title);
+
+    font-size: 18px;
+    font-weight: 600;
+}
+
+.no-games-text {
+    margin-bottom: 17px;
+
+    font-size: 13px;
+
+    opacity: 0.55;
+}
+
+.no-games-clear {
+    padding: 8px 15px;
+
+    border: 1px solid color-mix(
+        in srgb,
+        var(--accent) 25%,
+        transparent
+    );
+
+    border-radius: 8px;
+
+    background: transparent;
+
+    color: var(--text);
+
+    font-family: inherit;
+    font-size: 13px;
+
+    cursor: pointer;
+
+    transition:
+        background 0.15s ease,
+        border-color 0.15s ease,
+        color 0.15s ease;
+}
+
+.no-games-clear:hover {
+    background: var(--accent);
+
+    border-color: var(--accent);
+
+    color: var(--background-1);
+}
+
+
+/* =========================================
+   MOBILE
+========================================= */
+
+@media (max-width: 800px) {
+
+    .game-discovery {
+        width: calc(100% - 30px);
+
+        margin-top: 16px;
+        margin-bottom: 28px;
+
+        padding: 16px;
+    }
+
+    .searchInput {
+        height: 54px;
+
+        padding-left: 58px;
+
+        font-size: 16px;
+    }
+
+    .search-icon {
+        left: 19px;
+
+        font-size: 27px;
+    }
+
+    .game-filter-row {
+        gap: 7px;
+
+        margin-top: 13px;
+    }
+
+    .game-filter {
+        height: 38px;
+
+        padding: 0 12px;
+
+        font-size: 12px;
+    }
+
+    .game-result-count {
+        font-size: 12px;
+    }
+}
