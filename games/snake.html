@@ -1,37 +1,351 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+<meta charset="UTF-8">
+
+<meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0"
+>
+
+<script src="../js/theme.js"></script>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="../js/supabase.js"></script>
 <script src="../js/playtime.js"></script>
-  <meta charset="UTF-8">
-  <title>Snake</title>
-  <style>
-    body {
-      margin: 0;
-      background: #0b0b1a;
-      display: flex;
-      justify-content: center;
-      padding-top: 80px;
+
+<title>Snake</title>
+
+
+<style>
+
+/* =========================================
+   PAGE
+========================================= */
+
+body {
+
+    margin: 0;
+
+    font-family: Arial, sans-serif;
+
+    background:
+        linear-gradient(
+            135deg,
+            var(--background-1),
+            var(--background-2),
+            var(--background-3)
+        );
+
+    color: var(--text);
+
+    min-height: 100vh;
+
+    transition:
+        background 0.4s ease,
+        color 0.4s ease;
+
+}
+
+
+/* =========================================
+   HEADER
+========================================= */
+
+.header {
+
+    display: flex;
+
+    justify-content: space-between;
+
+    align-items: center;
+
+    padding: 15px 25px;
+
+    background: var(--header);
+
+    border-bottom:
+        1px solid
+        var(--accent);
+
+    backdrop-filter: blur(10px);
+
+}
+
+
+.header h1 {
+
+    font-size: 20px;
+
+    margin: 0;
+
+}
+
+
+.header a {
+
+    color: var(--accent);
+
+    text-decoration: none;
+
+    font-weight: bold;
+
+}
+
+
+.header a:hover {
+
+    text-decoration: underline;
+
+}
+
+
+/* =========================================
+   GAME AREA
+========================================= */
+
+.game-wrapper {
+
+    width: 95%;
+
+    max-width: 1200px;
+
+    margin: 30px auto;
+
+}
+
+
+.game-container {
+
+    display: flex;
+
+    justify-content: center;
+
+    align-items: center;
+
+    min-height: 70vh;
+
+    background: var(--card);
+
+    border:
+        1px solid
+        var(--accent);
+
+    border-radius: 12px;
+
+    overflow: hidden;
+
+    box-shadow:
+        0 10px 30px
+        var(--shadow);
+
+}
+
+
+/* =========================================
+   SNAKE CANVAS
+========================================= */
+
+canvas {
+
+    background: #000;
+
+    border:
+        2px solid
+        var(--accent);
+
+    image-rendering: pixelated;
+
+    max-width: 90%;
+
+    height: auto;
+
+    box-shadow:
+        0 0 20px
+        var(--glow);
+
+}
+
+
+/* =========================================
+   CONTROLS
+========================================= */
+
+.controls {
+
+    display: flex;
+
+    justify-content: center;
+
+    gap: 15px;
+
+    padding: 15px;
+
+}
+
+
+.controls button {
+
+    background: var(--accent);
+
+    color: #001018;
+
+    border: none;
+
+    padding: 10px 18px;
+
+    border-radius: 8px;
+
+    font-size: 15px;
+
+    font-weight: bold;
+
+    cursor: pointer;
+
+    transition: 0.2s;
+
+}
+
+
+.controls button:hover {
+
+    transform: translateY(-2px);
+
+    box-shadow:
+        0 0 15px
+        var(--glow);
+
+}
+
+
+/* =========================================
+   MOBILE
+========================================= */
+
+@media (max-width: 800px) {
+
+    .header h1 {
+
+        font-size: 16px;
+
     }
+
+
+    .game-container {
+
+        min-height: 60vh;
+
+    }
+
 
     canvas {
-      background: #000;
-      border: 2px solid #444;
-      image-rendering: pixelated;
+
+        max-width: 95%;
+
     }
-  </style>
+
+}
+
+</style>
+
+
+<script>
+
+/* =========================================
+   FULLSCREEN
+========================================= */
+
+function goFullscreen() {
+
+    const game =
+        document.getElementById("game");
+
+
+    if (game.requestFullscreen) {
+
+        game.requestFullscreen();
+
+    }
+
+    else if (game.webkitRequestFullscreen) {
+
+        game.webkitRequestFullscreen();
+
+    }
+
+    else if (game.msRequestFullscreen) {
+
+        game.msRequestFullscreen();
+
+    }
+
+}
+
+</script>
+
 </head>
+
+
 <body>
-     </div>
- <a class="back-link" href="../index.html">← Back to Games</a>
-   
 
-  </div>
-  <canvas id="game"></canvas>
 
-  <!-- IMPORTANT PATH -->
-  <script src="../js/snake.js"></script>
+<!-- =========================================
+     HEADER
+========================================= -->
+
+<div class="header">
+
+    <h1>🎮 Snake</h1>
+
+    <a href="../index.html">
+        ⬅ Back to Hub
+    </a>
+
+</div>
+
+
+
+<!-- =========================================
+     GAME AREA
+========================================= -->
+
+<div class="game-wrapper">
+
+    <div class="game-container">
+
+        <canvas id="game"></canvas>
+
+    </div>
+
+
+    <!-- CONTROLS -->
+
+    <div class="controls">
+
+        <button onclick="goFullscreen()">
+            Fullscreen
+        </button>
+
+    </div>
+
+</div>
+
+
+<script>window.addEventListener('keydown', function(e) {
+  // Check if the pressed key is the spacebar (Key Code 32 or Code 'Space')
+  if (e.code === 'Space' || e.keyCode === 32) {
+    
+    // Check if the user is currently typing in an input field or textarea
+    const target = e.target.tagName;
+    if (target !== 'INPUT' && target !== 'TEXTAREA' && !e.target.isContentEditable) {
+      e.preventDefault(); 
+    }
+  }
+});</script>
+<script src="../js/snake.js"></script>
+
 </body>
-</html>
 
+</html>
