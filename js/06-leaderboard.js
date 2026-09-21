@@ -268,11 +268,7 @@ async function loadUserLeaderboard() {
             }
         );
 
-    console.log(
-        "USER LEADERBOARD RAW RESULT:",
-        result
-    );
-
+    
     if (result.error) {
 
         console.error(
@@ -289,15 +285,7 @@ async function loadUserLeaderboard() {
     const data =
         result.data;
 
-    console.log(
-        "USER LEADERBOARD DATA:",
-        JSON.stringify(
-            data,
-            null,
-            2
-        )
-    );
-
+    
     leaderboardList.innerHTML = "";
 
     if (
