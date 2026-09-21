@@ -21,7 +21,376 @@
 
 
 <style>
+/* =========================================
+   COMMENTS
+========================================= */
 
+.comments-section {
+
+    margin-top: 20px;
+
+    background: var(--card);
+
+    border:
+        1px solid
+        var(--accent);
+
+    border-radius: 12px;
+
+    padding: 20px;
+
+    box-shadow:
+        0 10px 30px
+        var(--shadow);
+
+    transition:
+        background 0.4s ease,
+        border-color 0.4s ease;
+
+}
+
+
+.comments-header {
+
+    display: flex;
+
+    align-items: center;
+
+    gap: 10px;
+
+    margin-bottom: 15px;
+
+}
+
+
+.comments-header h2 {
+
+    margin: 0;
+
+    font-size: 20px;
+
+}
+
+
+#commentCount {
+
+    display: inline-flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    min-width: 24px;
+
+    height: 24px;
+
+    padding: 0 7px;
+
+    border-radius: 20px;
+
+    background: var(--accent);
+
+    color: #001018;
+
+    font-size: 13px;
+
+    font-weight: bold;
+
+}
+
+
+.comment-login-message {
+
+    padding: 12px 15px;
+
+    border-radius: 8px;
+
+    background: var(--background-2);
+
+    color: var(--text);
+
+    font-size: 14px;
+
+    margin-bottom: 15px;
+
+}
+
+
+.comment-form {
+
+    margin-bottom: 20px;
+
+}
+
+
+#commentInput {
+
+    width: 100%;
+
+    min-height: 90px;
+
+    box-sizing: border-box;
+
+    resize: vertical;
+
+    padding: 12px;
+
+    border:
+        1px solid
+        var(--accent);
+
+    border-radius: 8px;
+
+    background: var(--background-2);
+
+    color: var(--text);
+
+    font-family: Arial, sans-serif;
+
+    font-size: 14px;
+
+    outline: none;
+
+    transition:
+        border-color 0.2s ease,
+        box-shadow 0.2s ease;
+
+}
+
+
+#commentInput:focus {
+
+    border-color: var(--accent-light);
+
+    box-shadow:
+        0 0 10px
+        var(--glow);
+
+}
+
+
+#commentInput::placeholder {
+
+    color: var(--text);
+
+    opacity: 0.55;
+
+}
+
+
+.comment-form-bottom {
+
+    display: flex;
+
+    justify-content: space-between;
+
+    align-items: center;
+
+    margin-top: 8px;
+
+}
+
+
+#commentCharacters {
+
+    font-size: 12px;
+
+    opacity: 0.6;
+
+}
+
+
+#postCommentButton {
+
+    background: var(--accent);
+
+    color: #001018;
+
+    border: none;
+
+    padding: 9px 16px;
+
+    border-radius: 8px;
+
+    font-weight: bold;
+
+    cursor: pointer;
+
+    transition: 0.2s;
+
+}
+
+
+#postCommentButton:hover {
+
+    transform: translateY(-1px);
+
+    box-shadow:
+        0 0 12px
+        var(--glow);
+
+}
+
+
+#postCommentButton:disabled {
+
+    opacity: 0.5;
+
+    cursor: not-allowed;
+
+    transform: none;
+
+    box-shadow: none;
+
+}
+
+
+.comments-list {
+
+    display: flex;
+
+    flex-direction: column;
+
+    gap: 10px;
+
+}
+
+
+.comment {
+
+    padding: 13px 15px;
+
+    border-radius: 9px;
+
+    background: var(--background-2);
+
+    border:
+        1px solid
+        var(--background-3);
+
+}
+
+
+.comment-top {
+
+    display: flex;
+
+    justify-content: space-between;
+
+    align-items: center;
+
+    gap: 10px;
+
+    margin-bottom: 7px;
+
+}
+
+
+.comment-user {
+
+    font-weight: bold;
+
+    color: var(--accent);
+
+}
+
+
+.comment-date {
+
+    font-size: 11px;
+
+    opacity: 0.55;
+
+}
+
+
+.comment-text {
+
+    white-space: pre-wrap;
+
+    word-break: break-word;
+
+    font-size: 14px;
+
+    line-height: 1.5;
+
+}
+
+
+.delete-comment {
+
+    margin-top: 8px;
+
+    padding: 4px 8px;
+
+    border: none;
+
+    border-radius: 5px;
+
+    background: transparent;
+
+    color: var(--text);
+
+    opacity: 0.5;
+
+    cursor: pointer;
+
+    font-size: 11px;
+
+}
+
+
+.delete-comment:hover {
+
+    opacity: 1;
+
+}
+
+
+.comments-empty {
+
+    padding: 25px;
+
+    text-align: center;
+
+    opacity: 0.6;
+
+    font-size: 14px;
+
+}
+
+
+.comments-loading {
+
+    padding: 20px;
+
+    text-align: center;
+
+    opacity: 0.6;
+
+}
+
+
+@media (max-width: 600px) {
+
+    .comments-section {
+
+        padding: 15px;
+
+    }
+
+
+    .comment-top {
+
+        align-items: flex-start;
+
+        flex-direction: column;
+
+        gap: 3px;
+
+    }
+
+}
 /* =========================================
    PAGE
 ========================================= */
@@ -368,10 +737,735 @@ function gameLoaded() {
         </button>
 
     </div>
+    <!-- =========================================
+     COMMENTS
+========================================= -->
+
+<div class="comments-section">
+
+    <div class="comments-header">
+        <h2>Comments</h2>
+        <span id="commentCount">0</span>
+    </div>
+
+    <div id="commentLoginMessage" class="comment-login-message">
+        Log in to leave a comment.
+    </div>
+
+    <div id="commentForm" class="comment-form">
+
+        <textarea
+            id="commentInput"
+            maxlength="500"
+            placeholder="Write a comment..."
+        ></textarea>
+
+        <div class="comment-form-bottom">
+
+            <span id="commentCharacters">
+                0 / 500
+            </span>
+
+            <button id="postCommentButton">
+                Post Comment
+            </button>
+
+        </div>
+
+    </div>
+
+    <div id="commentsList" class="comments-list">
+
+        <div class="comments-loading">
+            Loading comments...
+        </div>
+
+    </div>
 
 </div>
+</div>
+
+<script>
+
+/* =========================================
+   GAME COMMENTS
+========================================= */
+
+const GAME_ID = "AntArt";
+
+const commentsList =
+    document.getElementById("commentsList");
+
+const commentInput =
+    document.getElementById("commentInput");
+
+const commentForm =
+    document.getElementById("commentForm");
+
+const commentLoginMessage =
+    document.getElementById("commentLoginMessage");
+
+const postCommentButton =
+    document.getElementById("postCommentButton");
+
+const commentCharacters =
+    document.getElementById("commentCharacters");
+
+const commentCount =
+    document.getElementById("commentCount");
+
+let commentsChannel = null;
 
 
+/* =========================================
+   LOAD COMMENTS
+========================================= */
+
+async function loadComments() {
+
+    const {
+        data,
+        error
+    } = await supabaseClient
+        .from("game_comments")
+        .select("*")
+        .eq("game_id", GAME_ID)
+        .order("created_at", {
+            ascending: false
+        });
+
+
+    if (error) {
+
+        console.error(
+            "COMMENT LOAD ERROR:",
+            error
+        );
+
+        commentsList.innerHTML = `
+            <div class="comments-empty">
+                Unable to load comments.
+            </div>
+        `;
+
+        return;
+
+    }
+
+
+    commentCount.textContent =
+        data.length;
+
+
+    if (data.length === 0) {
+
+        commentsList.innerHTML = `
+            <div class="comments-empty">
+                No comments yet. Be the first to comment.
+            </div>
+        `;
+
+        return;
+
+    }
+
+
+    commentsList.innerHTML = "";
+
+
+    const {
+        data: {
+            user
+        }
+    } = await supabaseClient.auth.getUser();
+
+
+    data.forEach(comment => {
+
+        renderComment(
+            comment,
+            user
+        );
+
+    });
+
+}
+
+
+/* =========================================
+   RENDER ONE COMMENT
+========================================= */
+
+function renderComment(
+    comment,
+    user
+) {
+
+    const commentElement =
+        document.createElement("div");
+
+    commentElement.className =
+        "comment";
+
+    commentElement.dataset.commentId =
+        comment.id;
+
+
+    const top =
+        document.createElement("div");
+
+    top.className =
+        "comment-top";
+
+
+    const username =
+        document.createElement("span");
+
+    username.className =
+        "comment-user";
+
+    username.textContent =
+        comment.username;
+
+
+    const date =
+        document.createElement("span");
+
+    date.className =
+        "comment-date";
+
+    date.textContent =
+        formatCommentDate(
+            comment.created_at
+        );
+
+
+    top.appendChild(username);
+    top.appendChild(date);
+
+
+    const text =
+        document.createElement("div");
+
+    text.className =
+        "comment-text";
+
+    text.textContent =
+        comment.comment;
+
+
+    commentElement.appendChild(top);
+    commentElement.appendChild(text);
+
+
+    if (
+        user &&
+        user.id === comment.user_id
+    ) {
+
+        const deleteButton =
+            document.createElement("button");
+
+        deleteButton.className =
+            "delete-comment";
+
+        deleteButton.textContent =
+            "Delete";
+
+
+        deleteButton.addEventListener(
+            "click",
+            () => deleteComment(
+                comment.id
+            )
+        );
+
+
+        commentElement.appendChild(
+            deleteButton
+        );
+
+    }
+
+
+    commentsList.prepend(
+        commentElement
+    );
+
+}
+
+
+/* =========================================
+   REALTIME COMMENTS
+========================================= */
+
+function setupCommentsRealtime() {
+
+    if (commentsChannel) {
+
+        supabaseClient
+            .removeChannel(
+                commentsChannel
+            );
+
+    }
+
+
+    commentsChannel =
+        supabaseClient
+            .channel(
+                `game-comments-${GAME_ID}`
+            )
+            .on(
+                "postgres_changes",
+                {
+                    event: "INSERT",
+                    schema: "public",
+                    table: "game_comments",
+                    filter: `game_id=eq.${GAME_ID}`
+                },
+                async payload => {
+
+                    console.log(
+                        "New comment received:",
+                        payload.new
+                    );
+
+
+                    const {
+                        data: {
+                            user
+                        }
+                    } =
+                        await supabaseClient
+                            .auth
+                            .getUser();
+
+
+                    const existingComment =
+                        document.querySelector(
+                            `[data-comment-id="${payload.new.id}"]`
+                        );
+
+
+                    if (
+                        existingComment
+                    ) {
+
+                        return;
+
+                    }
+
+
+                    const emptyMessage =
+                        commentsList.querySelector(
+                            ".comments-empty"
+                        );
+
+
+                    if (emptyMessage) {
+
+                        commentsList.innerHTML = "";
+
+                    }
+
+
+                    renderComment(
+                        payload.new,
+                        user
+                    );
+
+
+                    const currentCount =
+                        Number(
+                            commentCount.textContent
+                        ) || 0;
+
+
+                    commentCount.textContent =
+                        currentCount + 1;
+
+                }
+            )
+            .on(
+                "postgres_changes",
+                {
+                    event: "DELETE",
+                    schema: "public",
+                    table: "game_comments"
+                },
+                payload => {
+
+                    console.log(
+                        "Comment deleted:",
+                        payload.old
+                    );
+
+
+                    const deletedComment =
+                        document.querySelector(
+                            `[data-comment-id="${payload.old.id}"]`
+                        );
+
+
+                    if (
+                        deletedComment
+                    ) {
+
+                        deletedComment.remove();
+
+
+                        const currentCount =
+                            Number(
+                                commentCount.textContent
+                            ) || 0;
+
+
+                        commentCount.textContent =
+                            Math.max(
+                                0,
+                                currentCount - 1
+                            );
+
+                    }
+
+
+                    if (
+                        commentsList.children.length === 0
+                    ) {
+
+                        commentsList.innerHTML = `
+                            <div class="comments-empty">
+                                No comments yet. Be the first to comment.
+                            </div>
+                        `;
+
+                    }
+
+                }
+            )
+            .subscribe(status => {
+
+                console.log(
+                    "Comments realtime status:",
+                    status
+                );
+
+            });
+
+}
+
+
+/* =========================================
+   LOGIN STATE
+========================================= */
+
+async function updateCommentLoginState() {
+
+    const {
+        data: {
+            user
+        }
+    } = await supabaseClient.auth.getUser();
+
+
+    if (user) {
+
+        commentForm.style.display =
+            "block";
+
+        commentLoginMessage.style.display =
+            "none";
+
+    }
+
+    else {
+
+        commentForm.style.display =
+            "none";
+
+        commentLoginMessage.style.display =
+            "block";
+
+    }
+
+}
+
+
+/* =========================================
+   POST COMMENT
+========================================= */
+
+postCommentButton.addEventListener(
+    "click",
+    async () => {
+
+        const comment =
+            commentInput.value.trim();
+
+
+        if (!comment) {
+
+            return;
+
+        }
+
+
+        if (comment.length > 500) {
+
+            return;
+
+        }
+
+
+        const {
+            data: {
+                user
+            }
+        } = await supabaseClient.auth.getUser();
+
+
+        if (!user) {
+
+            alert(
+                "You must be logged in to comment."
+            );
+
+            return;
+
+        }
+
+
+        postCommentButton.disabled =
+            true;
+
+
+        const username =
+            user.user_metadata?.username ||
+            user.email?.split("@")[0] ||
+            "User";
+
+
+        const {
+            error
+        } = await supabaseClient
+            .from("game_comments")
+            .insert({
+
+                game_id: GAME_ID,
+
+                user_id: user.id,
+
+                username: username,
+
+                comment: comment
+
+            });
+
+
+        if (error) {
+
+            console.error(
+                "COMMENT POST ERROR:",
+                error
+            );
+
+            alert(
+                "Could not post comment."
+            );
+
+            postCommentButton.disabled =
+                false;
+
+            return;
+
+        }
+
+
+        commentInput.value = "";
+
+        commentCharacters.textContent =
+            "0 / 500";
+
+
+        postCommentButton.disabled =
+            false;
+
+    }
+);
+
+
+/* =========================================
+   DELETE COMMENT
+========================================= */
+
+async function deleteComment(id) {
+
+    const {
+        error
+    } = await supabaseClient
+        .from("game_comments")
+        .delete()
+        .eq("id", id);
+
+
+    if (error) {
+
+        console.error(
+            "COMMENT DELETE ERROR:",
+            error
+        );
+
+        return;
+
+    }
+
+}
+
+
+/* =========================================
+   CHARACTER COUNTER
+========================================= */
+
+commentInput.addEventListener(
+    "input",
+    () => {
+
+        commentCharacters.textContent =
+            `${commentInput.value.length} / 500`;
+
+    }
+);
+
+
+/* =========================================
+   DATE
+========================================= */
+
+function formatCommentDate(date) {
+
+    const commentDate =
+        new Date(date);
+
+    const now =
+        new Date();
+
+    const seconds =
+        Math.floor(
+            (now - commentDate) / 1000
+        );
+
+
+    if (seconds < 60) {
+
+        return "Just now";
+
+    }
+
+
+    const minutes =
+        Math.floor(
+            seconds / 60
+        );
+
+
+    if (minutes < 60) {
+
+        return `${minutes}m ago`;
+
+    }
+
+
+    const hours =
+        Math.floor(
+            minutes / 60
+        );
+
+
+    if (hours < 24) {
+
+        return `${hours}h ago`;
+
+    }
+
+
+    const days =
+        Math.floor(
+            hours / 24
+        );
+
+
+    if (days < 7) {
+
+        return `${days}d ago`;
+
+    }
+
+
+    return commentDate.toLocaleDateString();
+
+}
+
+
+/* =========================================
+   INITIALIZE
+========================================= */
+
+async function initializeComments() {
+
+    console.log(
+        "Initializing comments..."
+    );
+
+
+    if (!supabaseClient) {
+
+        console.error(
+            "supabaseClient is missing."
+        );
+
+        return;
+
+    }
+
+
+    await updateCommentLoginState();
+
+    await loadComments();
+
+    setupCommentsRealtime();
+
+
+    console.log(
+        "Comments system ready."
+    );
+
+}
+
+
+initializeComments();
+
+
+/* =========================================
+   CLEANUP
+========================================= */
+
+window.addEventListener(
+    "beforeunload",
+    () => {
+
+        if (commentsChannel) {
+
+            supabaseClient.removeChannel(
+                commentsChannel
+            );
+
+        }
+
+    }
+);
+
+</script>
 </body>
 
 </html>

@@ -1,79 +1,426 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
+
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<script src="../js/Wordcounter.js"></script>
+
+<meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0"
+>
+
 <script src="../js/theme.js"></script>
+<script src="../js/Wordcounter.js"></script>
+
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="../js/supabase.js"></script>
 <script src="../js/playtime.js"></script>
+
 <title>Word Counter</title>
 
+
 <style>
-    body {
-        margin: 0;
-        background-color: #000;
-        font-family: Arial, sans-serif;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        height: 100vh;
-        color: white;
+
+/* =========================================
+   PAGE
+========================================= */
+
+body {
+
+    margin: 0;
+
+    font-family: Arial, sans-serif;
+
+    background:
+        linear-gradient(
+            135deg,
+            var(--background-1),
+            var(--background-2),
+            var(--background-3)
+        );
+
+    color: var(--text);
+
+    min-height: 100vh;
+
+    transition:
+        background 0.4s ease,
+        color 0.4s ease;
+
+}
+
+
+/* =========================================
+   HEADER
+========================================= */
+
+.header {
+
+    display: flex;
+
+    justify-content: space-between;
+
+    align-items: center;
+
+    padding: 15px 25px;
+
+    background: var(--header);
+
+    border-bottom:
+        1px solid
+        var(--accent);
+
+    backdrop-filter: blur(10px);
+
+}
+
+
+.header h1 {
+
+    font-size: 20px;
+
+    margin: 0;
+
+}
+
+
+.header a {
+
+    color: var(--accent);
+
+    text-decoration: none;
+
+    font-weight: bold;
+
+}
+
+
+.header a:hover {
+
+    text-decoration: underline;
+
+}
+
+
+/* =========================================
+   GAME AREA
+========================================= */
+
+.game-wrapper {
+
+    width: 95%;
+
+    max-width: 1200px;
+
+    margin: 30px auto;
+
+}
+
+
+.game-container {
+
+    display: flex;
+
+    flex-direction: column;
+
+    align-items: center;
+
+    justify-content: center;
+
+    min-height: 55vh;
+
+    padding: 40px;
+
+    box-sizing: border-box;
+
+    background: var(--card);
+
+    border:
+        1px solid
+        var(--accent);
+
+    border-radius: 12px;
+
+    box-shadow:
+        0 10px 30px
+        var(--shadow);
+
+    text-align: center;
+
+    transition:
+        background 0.4s ease,
+        border-color 0.4s ease,
+        box-shadow 0.4s ease;
+
+}
+
+
+/* =========================================
+   TITLE
+========================================= */
+
+.game-container h2 {
+
+    margin-top: 0;
+
+    margin-bottom: 25px;
+
+    color: var(--title);
+
+}
+
+
+/* =========================================
+   TEXT INPUT
+========================================= */
+
+#textInput {
+
+    width: min(700px, 90%);
+
+    box-sizing: border-box;
+
+    padding: 12px 15px;
+
+    font-size: 16px;
+
+    border-radius: 8px;
+
+    border:
+        1px solid
+        var(--accent);
+
+    background:
+        var(--background-1);
+
+    color: var(--text);
+
+    outline: none;
+
+    margin-bottom: 20px;
+
+    transition: 0.2s ease;
+
+}
+
+
+#textInput::placeholder {
+
+    color: var(--text);
+
+    opacity: 0.6;
+
+}
+
+
+#textInput:focus {
+
+    box-shadow:
+        0 0 15px
+        var(--glow);
+
+}
+
+
+/* =========================================
+   WORD COUNT
+========================================= */
+
+#wordCount {
+
+    font-size: 20px;
+
+    font-weight: bold;
+
+    color: var(--accent);
+
+    margin: 5px 0;
+
+}
+
+
+/* =========================================
+   CONTROLS
+========================================= */
+
+.controls {
+
+    display: flex;
+
+    justify-content: center;
+
+    gap: 15px;
+
+    padding: 15px;
+
+}
+
+
+.controls button {
+
+    background: var(--accent);
+
+    color: #001018;
+
+    border: none;
+
+    padding: 10px 18px;
+
+    border-radius: 8px;
+
+    font-size: 15px;
+
+    font-weight: bold;
+
+    cursor: pointer;
+
+    transition: 0.2s;
+
+}
+
+
+.controls button:hover {
+
+    transform: translateY(-2px);
+
+    box-shadow:
+        0 0 15px
+        var(--glow);
+
+}
+
+
+/* =========================================
+   MOBILE
+========================================= */
+
+@media (max-width: 800px) {
+
+    .header h1 {
+
+        font-size: 16px;
+
     }
+
 
     .game-container {
-        background-color: #111;
-        padding: 20px;
-        border-radius: 12px;
-        box-shadow: 0 0 20px rgba(255, 255, 255, 0.1);
-        width: 90%;
-        max-width: 1000px;
-        text-align: center;
+
+        padding: 25px 15px;
+
+        min-height: 50vh;
+
     }
 
-    h1 {
-        margin-bottom: 20px;
-        font-size: 24px;
+
+    #textInput {
+
+        width: 95%;
+
     }
 
-    iframe {
-        width: 100%;
-        height: 600px;
-        border: none;
-        border-radius: 8px;
-        background-color: black;
-    }
+}
 
-    .back-btn {
-        margin-top: 15px;
-        display: inline-block;
-        padding: 10px 15px;
-        background-color: #222;
-        color: white;
-        text-decoration: none;
-        border-radius: 6px;
-        transition: 0.2s;
-    }
-
-    .back-btn:hover {
-        background-color: #444;
-    }
 </style>
 
+
+<script>
+
+/* =========================================
+   FULLSCREEN
+========================================= */
+
+function goFullscreen() {
+
+    const game =
+        document.querySelector(".game-container");
+
+
+    if (game.requestFullscreen) {
+
+        game.requestFullscreen();
+
+    }
+
+    else if (game.webkitRequestFullscreen) {
+
+        game.webkitRequestFullscreen();
+
+    }
+
+    else if (game.msRequestFullscreen) {
+
+        game.msRequestFullscreen();
+
+    }
+
+}
+
+</script>
+
 </head>
+
+
 <body>
 
-<div class="game-container">
-    <h1>Word Counter!</h1>
 
-    <input onkeyup="countWords()" type="text" id="textInput" placeholder="Type your text here..." style="width: 80%; padding: 10px; font-size: 16px; border-radius: 6px; border: none; margin-bottom: 20px;">
-    <p id="wordCount">Word Count: 0</p>
-    
+<!-- =========================================
+     HEADER
+========================================= -->
 
-    <br>
-    <a href="../index.html" class="back-btn">⬅ Back to Hub</a>
+<div class="header">
+
+    <h1>🎮 Word Counter</h1>
+
+    <a href="../index.html">
+        ⬅ Back to Hub
+    </a>
+
+</div>
+
+
+
+<!-- =========================================
+     GAME AREA
+========================================= -->
+
+<div class="game-wrapper">
+
+    <div class="game-container">
+
+        <h2>
+            Word Counter!
+        </h2>
+
+
+        <input
+            onkeyup="countWords()"
+            type="text"
+            id="textInput"
+            placeholder="Type your text here..."
+            autocomplete="off"
+        >
+
+
+        <p id="wordCount">
+            Word Count: 0
+        </p>
+
+    </div>
+
+
+    <!-- CONTROLS -->
+
+    <div class="controls">
+
+        <button onclick="goFullscreen()">
+            Fullscreen
+        </button>
+
+    </div>
+
 </div>
 
 </body>
+
 </html>
