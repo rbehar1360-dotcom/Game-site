@@ -1,6 +1,6 @@
 const StickmanHookURL = "https://totalclick.org/games/stickmanhook/game/index.html";
 const EaglerCraftURL = "https://reading.q13x.com/1.8.8/wasm/?retina=true";
-const BasketBallLegends2020URL = "https://cfpju876whm.make-by-vann-dont-steal-it-gooners-3351dcb3.nip.io/games/137.html";
+const BasketBallLegends2020URL = "https://pinkdev.d13qic2f6zga3.amplifyapp.com/games/clbasketballstars.html";
 const SlopeURL = "https://slopeonline.online/xlope-game.embed";
 const snowball = "https://totalclick.org/games/snowball/game/index.html";
 const CookieClickerURL = "./games/cookie-clicker.html";
@@ -26,3 +26,9 @@ const FridayNightFunkinURL = "https://totalclick.org/games/fnf/game/index.html";
 const StreetRacerURL = "https://html5.gamedistribution.com/rvvASMiM/4e4987a162a143e8a55edde45a9eb3bf/index.html?gd_sdk_referrer_url=https%3A%2F%2Fgamessayarat.com&gd_zone_config=eyJwYXJlbnRVUkwiOiJodHRwczovL2dhbWVzc2F5YXJhdC5jb20iLCJwYXJlbnREb21haW4iOiJnYW1lc3NheWFyYXQuY29tIiwidG9wRG9tYWluIjoiZ2FtZXNyaXguY29tIiwiaGFzSW1wcmVzc2lvbiI6ZmFsc2UsImxvYWRlckVuYWJsZWQiOnRydWUsImhvc3QiOiJodG1sNS5nYW1lZGlzdHJpYnV0aW9uLmNvbSIsInZlcnNpb24iOiIxLjUuMTgifQ%253D%253D";
 const TagURL = "https://tag-game.imrazi222.workers.dev/";
 const CountMastersURL = "https://pinkdev.d13qic2f6zga3.amplifyapp.com/games/clcountmastersstickmangames.html";
+const DuckLife1URL = "https://pinkdev.d13qic2f6zga3.amplifyapp.com/games/clducklife.html";
+const DuckLife2URL = "https://pinkdev.d13qic2f6zga3.amplifyapp.com/games/clducklife2.html";
+const DuckLife3URL = "https://pinkdev.d13qic2f6zga3.amplifyapp.com/games/clducklife3.html";
+const DuckLife4URL = "https://pinkdev.d13qic2f6zga3.amplifyapp.com/games/clducklife4.html";
+const DuckLife5URL = "https://pinkdev.d13qic2f6zga3.amplifyapp.com/games/duck-life-5.html";
+const FNAFSisterLocationURL = "https://pinkdev.d13qic2f6zga3.amplifyapp.com/games/five-nights-at-freddy-s-sister-location.html";

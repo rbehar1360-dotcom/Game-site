@@ -50,7 +50,19 @@
             "KickTheBuddy.html": "KickTheBuddy",
             "PVZ2.html": "PVZ2",
             "IdleMiningEmpire.html": "IdleMiningEmpire",
-            "StarDewValley.html": "StardewValley"
+            "StarDewValley.html": "StardewValley",
+            "DuckLife1.html": "Duck Life 1",
+            "DuckLife2.html": "Duck Life 2",
+            "DuckLife3.html": "Duck Life 3",
+            "DuckLife4.html": "Duck Life 4",
+            "DuckLife5.html": "Duck Life 5",
+            "FNAFSisterLocation.html": "FNAF Sister Location",
+            "FNAF1.html": "FNAF 1",
+            "FNAF2.html": "FNAF 2",
+            "FNAF3.html": "FNAF 3",
+            "FNAF4.html": "FNAF 4",
+            "FiveNightsAtEpsteins.html": "Five Nights at Epsteins",
+            "Balatro.html": "Balatro"
         };
 
         return gameMap[filename] || null;
