@@ -12,13 +12,11 @@
 
 <script src="../js/theme.js"></script>
 <script src="../js/Iframes.js"></script>
-
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="../js/supabase.js"></script>
 <script src="../js/playtime.js"></script>
 
 <title>Cookie Clicker</title>
-
 
 <style>
 
@@ -27,9 +25,7 @@
 ========================================= */
 
 body {
-
     margin: 0;
-
     font-family: Arial, sans-serif;
 
     background:
@@ -41,13 +37,11 @@ body {
         );
 
     color: var(--text);
-
     min-height: 100vh;
 
     transition:
         background 0.4s ease,
         color 0.4s ease;
-
 }
 
 
@@ -56,11 +50,8 @@ body {
 ========================================= */
 
 .header {
-
     display: flex;
-
     justify-content: space-between;
-
     align-items: center;
 
     padding: 15px 25px;
@@ -73,33 +64,22 @@ body {
 
     backdrop-filter: blur(10px);
 
+    gap: 15px;
 }
-
 
 .header h1 {
-
     font-size: 20px;
-
     margin: 0;
-
 }
-
 
 .header a {
-
     color: var(--accent);
-
     text-decoration: none;
-
     font-weight: bold;
-
 }
 
-
 .header a:hover {
-
     text-decoration: underline;
-
 }
 
 
@@ -108,18 +88,12 @@ body {
 ========================================= */
 
 .game-wrapper {
-
     width: 95%;
-
     max-width: 1200px;
-
     margin: 30px auto;
-
 }
 
-
 .game-container {
-
     position: relative;
 
     background: #000;
@@ -131,7 +105,6 @@ body {
     box-shadow:
         0 10px 30px
         var(--shadow);
-
 }
 
 
@@ -140,15 +113,12 @@ body {
 ========================================= */
 
 iframe {
-
     width: 100%;
-
     height: 70vh;
 
     border: none;
 
     background: #000;
-
 }
 
 
@@ -157,20 +127,16 @@ iframe {
 ========================================= */
 
 .controls {
-
     display: flex;
-
     justify-content: center;
-
     gap: 15px;
 
     padding: 15px;
 
+    flex-wrap: wrap;
 }
 
-
 .controls button {
-
     background: var(--accent);
 
     color: #001018;
@@ -188,18 +154,14 @@ iframe {
     cursor: pointer;
 
     transition: 0.2s;
-
 }
 
-
 .controls button:hover {
-
     transform: translateY(-2px);
 
     box-shadow:
         0 0 15px
         var(--glow);
-
 }
 
 
@@ -208,7 +170,6 @@ iframe {
 ========================================= */
 
 .loading {
-
     position: absolute;
 
     inset: 0;
@@ -226,7 +187,340 @@ iframe {
     font-size: 18px;
 
     z-index: 5;
+}
 
+
+/* =========================================
+   MODAL
+========================================= */
+
+.modal {
+    position: fixed;
+
+    inset: 0;
+
+    display: none;
+
+    align-items: center;
+
+    justify-content: center;
+
+    padding: 20px;
+
+    background: rgba(0, 0, 0, 0.7);
+
+    backdrop-filter: blur(6px);
+
+    z-index: 1000;
+}
+
+.modal.active {
+    display: flex;
+}
+
+.modal-content {
+    width: 100%;
+    max-width: 650px;
+
+    max-height: 90vh;
+
+    overflow-y: auto;
+
+    background: var(--card);
+
+    border:
+        1px solid
+        var(--accent);
+
+    border-radius: 14px;
+
+    padding: 25px;
+
+    box-sizing: border-box;
+
+    box-shadow:
+        0 15px 50px
+        var(--shadow);
+}
+
+.modal-header {
+    display: flex;
+
+    justify-content: space-between;
+
+    align-items: center;
+
+    gap: 15px;
+
+    margin-bottom: 20px;
+}
+
+.modal-header h2 {
+    margin: 0;
+
+    font-size: 22px;
+
+    color: var(--title);
+}
+
+.close-button {
+    border: none;
+
+    background: transparent;
+
+    color: var(--text);
+
+    font-size: 25px;
+
+    cursor: pointer;
+
+    padding: 2px 8px;
+}
+
+.close-button:hover {
+    color: var(--accent);
+}
+
+
+/* =========================================
+   FORM
+========================================= */
+
+.save-form {
+    display: flex;
+
+    flex-direction: column;
+
+    gap: 10px;
+}
+
+.save-form label {
+    font-weight: bold;
+
+    margin-top: 5px;
+}
+
+.save-form input,
+.save-form textarea {
+    width: 100%;
+
+    box-sizing: border-box;
+
+    padding: 11px;
+
+    border-radius: 8px;
+
+    border:
+        1px solid
+        var(--accent);
+
+    background: var(--background-1);
+
+    color: var(--text);
+
+    font-family: Arial, sans-serif;
+
+    outline: none;
+}
+
+.save-form textarea {
+    min-height: 130px;
+
+    resize: vertical;
+
+    font-family: monospace;
+
+    font-size: 13px;
+}
+
+.save-form input:focus,
+.save-form textarea:focus {
+    box-shadow:
+        0 0 10px
+        var(--glow);
+}
+
+
+/* =========================================
+   FORM BUTTONS
+========================================= */
+
+.form-buttons {
+    display: flex;
+
+    gap: 10px;
+
+    margin-top: 5px;
+}
+
+.save-button,
+.cancel-button {
+    flex: 1;
+
+    padding: 11px;
+
+    border: none;
+
+    border-radius: 8px;
+
+    font-weight: bold;
+
+    cursor: pointer;
+}
+
+.save-button {
+    background: var(--accent);
+
+    color: #001018;
+}
+
+.cancel-button {
+    background: var(--background-1);
+
+    color: var(--text);
+
+    border:
+        1px solid
+        var(--accent);
+}
+
+.save-button:hover,
+.cancel-button:hover {
+    box-shadow:
+        0 0 15px
+        var(--glow);
+}
+
+
+/* =========================================
+   SAVED GAMES
+========================================= */
+
+.saved-section {
+    margin-top: 30px;
+}
+
+.saved-section h3 {
+    margin-bottom: 12px;
+}
+
+.saved-list {
+    display: flex;
+
+    flex-direction: column;
+
+    gap: 10px;
+}
+
+.saved-item {
+    padding: 14px;
+
+    border-radius: 10px;
+
+    background: var(--background-1);
+
+    border:
+        1px solid
+        var(--accent);
+}
+
+.saved-item-top {
+    display: flex;
+
+    justify-content: space-between;
+
+    align-items: flex-start;
+
+    gap: 10px;
+
+    margin-bottom: 5px;
+}
+
+.saved-name {
+    font-weight: bold;
+
+    color: var(--title);
+
+    word-break: break-word;
+}
+
+.saved-date {
+    font-size: 12px;
+
+    opacity: 0.7;
+
+    margin-bottom: 10px;
+}
+
+.saved-actions {
+    display: flex;
+
+    gap: 8px;
+
+    flex-wrap: wrap;
+}
+
+.saved-actions button {
+    border: none;
+
+    border-radius: 7px;
+
+    padding: 8px 12px;
+
+    cursor: pointer;
+
+    font-weight: bold;
+
+    background: var(--accent);
+
+    color: #001018;
+}
+
+.saved-actions button:hover {
+    box-shadow:
+        0 0 10px
+        var(--glow);
+}
+
+.saved-actions .delete-button {
+    background: #d9534f;
+
+    color: white;
+}
+
+.empty-saves {
+    opacity: 0.7;
+
+    text-align: center;
+
+    padding: 15px;
+}
+
+
+/* =========================================
+   STATUS
+========================================= */
+
+.status-message {
+    display: none;
+
+    padding: 10px;
+
+    border-radius: 8px;
+
+    margin-bottom: 15px;
+
+    background: var(--background-1);
+
+    border:
+        1px solid
+        var(--accent);
+
+    font-size: 14px;
+}
+
+.status-message.show {
+    display: block;
 }
 
 
@@ -237,18 +531,51 @@ iframe {
 @media (max-width: 800px) {
 
     iframe {
-
         height: 60vh;
-
     }
 
+    .header {
+        padding: 12px 15px;
+    }
 
     .header h1 {
-
         font-size: 16px;
-
     }
 
+    .header a {
+        font-size: 13px;
+    }
+
+    .game-wrapper {
+        width: 96%;
+        margin: 20px auto;
+    }
+
+    .modal {
+        padding: 10px;
+    }
+
+    .modal-content {
+        padding: 18px;
+        max-height: 95vh;
+    }
+
+    .controls {
+        gap: 10px;
+    }
+
+    .controls button {
+        flex: 1;
+        min-width: 120px;
+    }
+
+    .saved-actions button {
+        flex: 1;
+    }
+
+    .form-buttons {
+        flex-direction: column;
+    }
 }
 
 </style>
@@ -265,30 +592,22 @@ function goFullscreen() {
     const game =
         document.getElementById("gameFrame");
 
-
     if (game.requestFullscreen) {
-
         game.requestFullscreen();
-
     }
 
     else if (game.webkitRequestFullscreen) {
-
         game.webkitRequestFullscreen();
-
     }
 
     else if (game.msRequestFullscreen) {
-
         game.msRequestFullscreen();
-
     }
-
 }
 
 
 /* =========================================
-   REMOVE LOADING SCREEN
+   GAME LOADED
 ========================================= */
 
 function gameLoaded() {
@@ -296,8 +615,637 @@ function gameLoaded() {
     document
         .getElementById("loading")
         .style.display = "none";
+}
+
+
+/* =========================================
+   GET CURRENT USER
+========================================= */
+
+async function getCurrentUser() {
+
+    if (
+        typeof supabaseClient === "undefined" ||
+        !supabaseClient
+    ) {
+        console.error("Supabase client not found.");
+
+        return null;
+    }
+
+    const {
+        data,
+        error
+    } = await supabaseClient.auth.getUser();
+
+    if (error) {
+        console.error(error);
+
+        return null;
+    }
+
+    return data.user;
+}
+
+
+/* =========================================
+   OPEN SAVES
+========================================= */
+
+function openSaves() {
+
+    document
+        .getElementById("savesModal")
+        .classList.add("active");
+
+    resetSaveForm();
+
+    loadSavedGames();
+}
+
+
+/* =========================================
+   CLOSE SAVES
+========================================= */
+
+function closeSaves() {
+
+    document
+        .getElementById("savesModal")
+        .classList.remove("active");
+
+    resetSaveForm();
+}
+
+
+/* =========================================
+   RESET FORM
+========================================= */
+
+function resetSaveForm() {
+
+    document.getElementById("saveFormTitle").textContent =
+        "Save New Game";
+
+    document.getElementById("saveName").value = "";
+
+    document.getElementById("saveCode").value = "";
+
+    document.getElementById("editingSaveId").value = "";
+
+    document.getElementById("saveButton").textContent =
+        "Save Game";
+
+    document.getElementById("cancelUpdateButton").style.display =
+        "none";
+}
+
+
+/* =========================================
+   STATUS MESSAGE
+========================================= */
+
+function showStatus(message) {
+
+    const status =
+        document.getElementById("statusMessage");
+
+    status.textContent = message;
+
+    status.classList.add("show");
+
+    setTimeout(() => {
+
+        status.classList.remove("show");
+
+    }, 3000);
+}
+
+
+/* =========================================
+   SAVE / UPDATE
+========================================= */
+
+async function saveCookieClickerSave() {
+
+    const user =
+        await getCurrentUser();
+
+    if (!user) {
+
+        showStatus(
+            "You must be logged in to save Cookie Clicker saves."
+        );
+
+        return;
+    }
+
+
+    const nameInput =
+        document.getElementById("saveName");
+
+    const codeInput =
+        document.getElementById("saveCode");
+
+    const editingId =
+        document.getElementById("editingSaveId").value;
+
+
+    const saveName =
+        nameInput.value.trim();
+
+    const saveCode =
+        codeInput.value.trim();
+
+
+    if (!saveName) {
+
+        showStatus(
+            "Please enter a name for this save."
+        );
+
+        nameInput.focus();
+
+        return;
+    }
+
+
+    if (!saveCode) {
+
+        showStatus(
+            "Please paste your Cookie Clicker save code."
+        );
+
+        codeInput.focus();
+
+        return;
+    }
+
+
+    const button =
+        document.getElementById("saveButton");
+
+    button.disabled = true;
+
+    button.textContent =
+        editingId
+            ? "Updating..."
+            : "Saving...";
+
+
+    let result;
+
+
+    /* =========================================
+       UPDATE EXISTING SAVE
+    ========================================= */
+
+    if (editingId) {
+
+        result =
+            await supabaseClient
+                .from("cookie_clicker_saves")
+                .update({
+                    save_name: saveName,
+                    save_code: saveCode,
+                    updated_at:
+                        new Date().toISOString()
+                })
+                .eq("id", editingId)
+                .eq("user_id", user.id);
+
+    }
+
+
+    /* =========================================
+       CREATE NEW SAVE
+    ========================================= */
+
+    else {
+
+        result =
+            await supabaseClient
+                .from("cookie_clicker_saves")
+                .insert({
+                    user_id: user.id,
+                    save_name: saveName,
+                    save_code: saveCode
+                });
+
+    }
+
+
+    button.disabled = false;
+
+
+    if (result.error) {
+
+        console.error(result.error);
+
+        button.textContent =
+            editingId
+                ? "Update Save"
+                : "Save Game";
+
+        showStatus(
+            editingId
+                ? "Could not update your save."
+                : "Could not save your game."
+        );
+
+        return;
+    }
+
+
+    button.textContent =
+        "Save Game";
+
+
+    showStatus(
+        editingId
+            ? "Cookie Clicker save updated!"
+            : "Cookie Clicker save saved!"
+    );
+
+
+    resetSaveForm();
+
+    loadSavedGames();
+}
+
+
+/* =========================================
+   LOAD SAVED GAMES
+========================================= */
+
+async function loadSavedGames() {
+
+    const list =
+        document.getElementById("savedList");
+
+
+    list.innerHTML =
+        '<div class="empty-saves">Loading saves...</div>';
+
+
+    const user =
+        await getCurrentUser();
+
+
+    if (!user) {
+
+        list.innerHTML =
+            '<div class="empty-saves">Log in to access your saved Cookie Clicker games.</div>';
+
+        return;
+    }
+
+
+    const {
+        data,
+        error
+    } = await supabaseClient
+        .from("cookie_clicker_saves")
+        .select(
+            "id, save_name, save_code, created_at, updated_at"
+        )
+        .eq("user_id", user.id)
+        .order("updated_at", {
+            ascending: false
+        });
+
+
+    if (error) {
+
+        console.error(error);
+
+        list.innerHTML =
+            '<div class="empty-saves">Could not load your saves.</div>';
+
+        return;
+    }
+
+
+    if (!data || data.length === 0) {
+
+        list.innerHTML =
+            '<div class="empty-saves">You have no saved Cookie Clicker games yet.</div>';
+
+        return;
+    }
+
+
+    list.innerHTML = "";
+
+
+    data.forEach(save => {
+
+        const item =
+            document.createElement("div");
+
+        item.className =
+            "saved-item";
+
+
+        /* =========================================
+           NAME
+        ========================================= */
+
+        const top =
+            document.createElement("div");
+
+        top.className =
+            "saved-item-top";
+
+
+        const name =
+            document.createElement("div");
+
+        name.className =
+            "saved-name";
+
+        name.textContent =
+            save.save_name;
+
+
+        top.appendChild(name);
+
+
+        /* =========================================
+           UPDATED DATE
+        ========================================= */
+
+        const date =
+            document.createElement("div");
+
+        date.className =
+            "saved-date";
+
+        date.textContent =
+            "Last updated: " +
+            new Date(
+                save.updated_at || save.created_at
+            ).toLocaleString();
+
+
+        /* =========================================
+           ACTIONS
+        ========================================= */
+
+        const actions =
+            document.createElement("div");
+
+        actions.className =
+            "saved-actions";
+
+
+        const copyButton =
+            document.createElement("button");
+
+        copyButton.textContent =
+            "Copy Code";
+
+        copyButton.onclick =
+            () => copySaveCode(
+                save.save_code
+            );
+
+
+        const updateButton =
+            document.createElement("button");
+
+        updateButton.textContent =
+            "Update Save";
+
+        updateButton.onclick =
+            () => beginUpdate(
+                save
+            );
+
+
+        const deleteButton =
+            document.createElement("button");
+
+        deleteButton.textContent =
+            "Delete";
+
+        deleteButton.className =
+            "delete-button";
+
+        deleteButton.onclick =
+            () => deleteSave(
+                save.id
+            );
+
+
+        actions.appendChild(
+            copyButton
+        );
+
+        actions.appendChild(
+            updateButton
+        );
+
+        actions.appendChild(
+            deleteButton
+        );
+
+
+        item.appendChild(top);
+
+        item.appendChild(date);
+
+        item.appendChild(actions);
+
+
+        list.appendChild(item);
+
+    });
+}
+
+
+/* =========================================
+   BEGIN UPDATE
+========================================= */
+
+function beginUpdate(save) {
+
+    document.getElementById("saveFormTitle").textContent =
+        "Update \"" + save.save_name + "\"";
+
+
+    document.getElementById("saveName").value =
+        save.save_name;
+
+
+    document.getElementById("saveCode").value =
+        "";
+
+
+    document.getElementById("editingSaveId").value =
+        save.id;
+
+
+    document.getElementById("saveButton").textContent =
+        "Update Save";
+
+
+    document.getElementById("cancelUpdateButton").style.display =
+        "block";
+
+
+    document.getElementById("saveCode").placeholder =
+        "Paste your new Cookie Clicker save code here...";
+
+
+    document
+        .getElementById("saveCode")
+        .focus();
 
 }
+
+
+/* =========================================
+   CANCEL UPDATE
+========================================= */
+
+function cancelUpdate() {
+
+    resetSaveForm();
+
+}
+
+
+/* =========================================
+   COPY SAVE CODE
+========================================= */
+
+async function copySaveCode(code) {
+
+    try {
+
+        await navigator.clipboard.writeText(code);
+
+        showStatus(
+            "Save code copied to clipboard."
+        );
+
+    }
+
+    catch (error) {
+
+        console.error(error);
+
+        showStatus(
+            "Could not copy the save code."
+        );
+    }
+}
+
+
+/* =========================================
+   DELETE SAVE
+========================================= */
+
+async function deleteSave(id) {
+
+    const confirmed =
+        confirm(
+            "Delete this Cookie Clicker save?"
+        );
+
+
+    if (!confirmed) {
+        return;
+    }
+
+
+    const user =
+        await getCurrentUser();
+
+
+    if (!user) {
+
+        showStatus(
+            "You must be logged in."
+        );
+
+        return;
+    }
+
+
+    const {
+        error
+    } = await supabaseClient
+        .from("cookie_clicker_saves")
+        .delete()
+        .eq("id", id)
+        .eq("user_id", user.id);
+
+
+    if (error) {
+
+        console.error(error);
+
+        showStatus(
+            "Could not delete the save."
+        );
+
+        return;
+    }
+
+
+    showStatus(
+        "Save deleted."
+    );
+
+
+    loadSavedGames();
+}
+
+
+/* =========================================
+   CLICK OUTSIDE MODAL
+========================================= */
+
+document.addEventListener(
+    "click",
+    function(event) {
+
+        const modal =
+            document.getElementById("savesModal");
+
+
+        if (
+            event.target === modal
+        ) {
+
+            closeSaves();
+
+        }
+
+    }
+);
+
+
+/* =========================================
+   ESCAPE KEY
+========================================= */
+
+document.addEventListener(
+    "keydown",
+    function(event) {
+
+        if (
+            event.key === "Escape"
+        ) {
+
+            closeSaves();
+
+        }
+
+    }
+);
 
 </script>
 
@@ -322,9 +1270,8 @@ function gameLoaded() {
 </div>
 
 
-
 <!-- =========================================
-     GAME AREA
+     GAME
 ========================================= -->
 
 <div class="game-wrapper">
@@ -341,20 +1288,10 @@ function gameLoaded() {
 
         <iframe
             id="gameFrame"
-            src="${CookieClickerURL}"
+            src="cookie-clicker.html"
             allowfullscreen
             onload="gameLoaded()">
         </iframe>
-
-
-        <script>
-
-            document
-                .getElementById("gameFrame")
-                .src =
-                "cookie-clicker.html";
-
-        </script>
 
     </div>
 
@@ -366,6 +1303,128 @@ function gameLoaded() {
         <button onclick="goFullscreen()">
             Fullscreen
         </button>
+
+        <button onclick="openSaves()">
+            💾 Saves
+        </button>
+
+    </div>
+
+</div>
+
+
+<!-- =========================================
+     SAVES MODAL
+========================================= -->
+
+<div
+    class="modal"
+    id="savesModal"
+>
+
+    <div class="modal-content">
+
+        <div class="modal-header">
+
+            <h2>💾 Cookie Clicker Saves</h2>
+
+            <button
+                class="close-button"
+                onclick="closeSaves()"
+            >
+                ×
+            </button>
+
+        </div>
+
+
+        <div
+            class="status-message"
+            id="statusMessage"
+        ></div>
+
+
+        <!-- =====================================
+             SAVE FORM
+        ====================================== -->
+
+        <div class="save-form">
+
+            <h3
+                id="saveFormTitle"
+                style="margin: 0;"
+            >
+                Save New Game
+            </h3>
+
+
+            <label for="saveName">
+                Save Name
+            </label>
+
+            <input
+                id="saveName"
+                type="text"
+                maxlength="100"
+                placeholder="My Main Save"
+            >
+
+
+            <label for="saveCode">
+                Cookie Clicker Save Code
+            </label>
+
+            <textarea
+                id="saveCode"
+                placeholder="Paste your Cookie Clicker save code here..."
+            ></textarea>
+
+
+            <input
+                type="hidden"
+                id="editingSaveId"
+            >
+
+
+            <div class="form-buttons">
+
+                <button
+                    class="save-button"
+                    id="saveButton"
+                    onclick="saveCookieClickerSave()"
+                >
+                    Save Game
+                </button>
+
+
+                <button
+                    class="cancel-button"
+                    id="cancelUpdateButton"
+                    onclick="cancelUpdate()"
+                    style="display: none;"
+                >
+                    Cancel Update
+                </button>
+
+            </div>
+
+        </div>
+
+
+        <!-- =====================================
+             SAVED GAMES
+        ====================================== -->
+
+        <div class="saved-section">
+
+            <h3>Your Saved Games</h3>
+
+            <div
+                class="saved-list"
+                id="savedList"
+            ></div>
+
+        </div>
 
     </div>
 
