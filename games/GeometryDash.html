@@ -2,530 +2,469 @@
 <html lang="en">
 
 <head>
+    <meta charset="UTF-8">
 
-<meta charset="UTF-8">
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
 
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="../js/theme.js"></script>
+    <script src="../js/Iframes.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="../js/supabase.js"></script>
+    <script src="../js/playtime.js"></script>
 
-<script src="../js/Iframes.js"></script>
-<script src="../js/theme.js"></script>
+    <title>EaglerCraft</title>
 
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="../js/supabase.js"></script>
+    <style>
 
-<script src="../js/playtime.js"></script>
+        /* =========================================
+           PAGE
+        ========================================= */
 
-<title>Geometry Dash</title>
+        body {
+            margin: 0;
 
+            font-family: Arial, sans-serif;
 
-<style>
+            background:
+                linear-gradient(
+                    135deg,
+                    var(--background-1),
+                    var(--background-2),
+                    var(--background-3)
+                );
 
-/* =========================================
-   PAGE
-========================================= */
+            color: var(--text);
 
-body {
+            min-height: 100vh;
 
-    margin: 0;
+            transition:
+                background 0.4s ease,
+                color 0.4s ease;
+        }
 
-    font-family: Arial, sans-serif;
 
-    background:
-        linear-gradient(
-            135deg,
-            var(--background-1),
-            var(--background-2),
-            var(--background-3)
-        );
+        /* =========================================
+           HEADER
+        ========================================= */
 
-    color: var(--text);
+        .header {
+            display: flex;
 
-    min-height: 100vh;
+            justify-content: space-between;
+            align-items: center;
 
-    transition:
-        background 0.4s ease,
-        color 0.4s ease;
-}
+            padding: 15px 25px;
 
+            background: var(--header);
 
-/* =========================================
-   HEADER
-========================================= */
+            border-bottom:
+                1px solid
+                var(--accent);
 
-.header {
+            backdrop-filter: blur(10px);
+        }
 
-    display: flex;
+        .header h1 {
+            font-size: 20px;
+            margin: 0;
+        }
 
-    justify-content: space-between;
-    align-items: center;
+        .header a {
+            color: var(--accent);
 
-    padding: 15px 25px;
+            text-decoration: none;
 
-    background: var(--header);
+            font-weight: bold;
+        }
 
-    border-bottom:
-        1px solid
-        color-mix(
-            in srgb,
-            var(--accent) 30%,
-            transparent
-        );
+        .header a:hover {
+            text-decoration: underline;
+        }
 
-    backdrop-filter: blur(10px);
-}
 
+        /* =========================================
+           GAME AREA
+        ========================================= */
 
-.header h1 {
+        .game-wrapper {
+            width: 95%;
 
-    font-size: 20px;
+            max-width: 1200px;
 
-    margin: 0;
+            margin: 30px auto;
+        }
 
-    color: var(--text);
-}
 
+        .game-container {
+            position: relative;
 
-.header a {
+            background: #000;
 
-    color: var(--accent);
+            border-radius: 12px;
 
-    text-decoration: none;
+            overflow: hidden;
 
-    font-weight: bold;
+            box-shadow:
+                0 10px 30px
+                var(--shadow);
+        }
 
-    transition: 0.2s ease;
-}
 
+        /* =========================================
+           IFRAME
+        ========================================= */
 
-.header a:hover {
+        iframe {
+            display: block;
 
-    color: var(--accent-light);
+            width: 100%;
 
-    text-decoration: underline;
+            height: 70vh;
 
-}
+            border: none;
 
+            background: #000;
+        }
 
-/* =========================================
-   GAME AREA
-========================================= */
 
-.game-wrapper {
+        /* =========================================
+           CSS FULLSCREEN
+        ========================================= */
 
-    width: 95%;
+        .game-container.css-fullscreen {
+            position: fixed;
 
-    max-width: 1200px;
+            top: 0;
+            left: 0;
 
-    margin: 30px auto;
+            width: 100vw;
+            height: 100vh;
 
-}
+            max-width: none;
 
+            margin: 0;
 
-/* =========================================
-   GAME CONTAINER
-========================================= */
+            border-radius: 0;
 
-.game-container {
+            z-index: 999999;
 
-    position: relative;
+            box-shadow: none;
+        }
 
-    background: #000;
 
-    border-radius: 12px;
+        .game-container.css-fullscreen iframe {
+            width: 100%;
+            height: 100%;
+        }
 
-    overflow: hidden;
 
-    box-shadow:
-        0 10px 30px var(--shadow);
-}
+        /* =========================================
+           CONTROLS
+        ========================================= */
 
+        .controls {
+            display: flex;
 
-/* =========================================
-   IFRAME
-========================================= */
+            justify-content: center;
 
-iframe {
+            gap: 15px;
 
-    width: 100%;
+            padding: 15px;
+        }
 
-    height: 70vh;
 
-    border: none;
+        .controls button {
+            background: var(--accent);
 
-    background: #000;
+            color: #001018;
 
-}
+            border: none;
 
+            padding: 10px 18px;
 
-/* =========================================
-   SERVER SWITCHER
-========================================= */
+            border-radius: 8px;
 
-.server-panel {
+            font-size: 15px;
 
-    margin-top: 15px;
+            font-weight: bold;
 
-    padding: 15px;
+            cursor: pointer;
 
-    background: var(--header);
+            transition: 0.2s;
+        }
 
-    border-radius: 10px;
 
-    text-align: center;
+        .controls button:hover {
+            transform: translateY(-2px);
 
-}
+            box-shadow:
+                0 0 15px
+                var(--glow);
+        }
 
 
-.server-panel p {
+        /* =========================================
+           FULLSCREEN EXIT BUTTON
+        ========================================= */
 
-    margin-top: 0;
+        .fullscreen-exit {
+            position: absolute;
 
-    margin-bottom: 12px;
+            top: 15px;
+            right: 15px;
 
-    font-size: 14px;
+            z-index: 1000000;
 
-}
+            display: none;
 
+            background: rgba(0, 0, 0, 0.65);
 
-.server-buttons {
+            color: white;
 
-    display: flex;
+            border:
+                1px solid
+                rgba(255, 255, 255, 0.25);
 
-    justify-content: center;
+            padding: 8px 12px;
 
-    flex-wrap: wrap;
+            border-radius: 8px;
 
-    gap: 10px;
+            font-size: 14px;
 
-}
+            cursor: pointer;
 
+            backdrop-filter: blur(8px);
+        }
 
-.server-buttons button {
 
-    background: var(--accent);
+        .game-container.css-fullscreen .fullscreen-exit {
+            display: block;
+        }
 
-    color: #001018;
 
-    border: none;
+        .fullscreen-exit:hover {
+            background: rgba(0, 0, 0, 0.85);
+        }
 
-    padding: 9px 15px;
 
-    border-radius: 7px;
+        /* =========================================
+           LOADING SCREEN
+        ========================================= */
 
-    font-size: 14px;
+        .loading {
+            position: absolute;
 
-    font-weight: bold;
+            inset: 0;
 
-    cursor: pointer;
+            display: flex;
 
-    transition: 0.2s ease;
+            align-items: center;
 
-}
+            justify-content: center;
 
+            background: #000;
 
-.server-buttons button:hover {
+            color: white;
 
-    background: var(--accent-light);
+            font-size: 18px;
 
-    transform: translateY(-2px);
+            z-index: 5;
+        }
 
-    box-shadow:
-        0 0 15px var(--glow);
 
-}
+        /* =========================================
+           MOBILE
+        ========================================= */
 
+        @media (max-width: 800px) {
 
-.server-buttons button.active {
+            iframe {
+                height: 60vh;
+            }
 
-    outline:
-        2px solid
-        var(--accent-light);
+            .header h1 {
+                font-size: 16px;
+            }
 
-}
+        }
 
+    </style>
 
-/* =========================================
-   CONTROLS
-========================================= */
 
-.controls {
+    <script>
 
-    display: flex;
+        /* =========================================
+           CSS FULLSCREEN
+        ========================================= */
 
-    justify-content: center;
+        function goFullscreen() {
 
-    gap: 15px;
+            const container =
+                document.querySelector(".game-container");
 
-    padding: 15px;
+            if (!container) return;
 
-}
+            container.classList.add("css-fullscreen");
 
+            // Prevent the page behind the game
+            // from scrolling.
+            document.body.style.overflow = "hidden";
 
-.controls button {
+            // Focus the game.
+            focusGame();
+        }
 
-    background: var(--accent);
 
-    color: #001018;
+        /* =========================================
+           EXIT CSS FULLSCREEN
+        ========================================= */
 
-    border: none;
+        function exitFullscreen() {
 
-    padding: 10px 18px;
+            const container =
+                document.querySelector(".game-container");
 
-    border-radius: 8px;
+            if (!container) return;
 
-    font-size: 15px;
+            container.classList.remove("css-fullscreen");
 
-    font-weight: bold;
+            document.body.style.overflow = "";
 
-    cursor: pointer;
+            focusGame();
+        }
 
-    transition: 0.2s ease;
-}
 
+        /* =========================================
+           FOCUS GAME
+        ========================================= */
 
-.controls button:hover {
+        function focusGame() {
 
-    background: var(--accent-light);
+            const game =
+                document.getElementById("gameFrame");
 
-    transform: translateY(-2px);
+            if (!game) return;
 
-    box-shadow:
-        0 0 15px var(--glow);
+            setTimeout(() => {
 
-}
+                game.focus();
 
+                try {
 
-/* =========================================
-   LOADING SCREEN
-========================================= */
+                    game.contentWindow.focus();
 
-.loading {
+                } catch (error) {
 
-    position: absolute;
+                    // Cross-origin iframe.
+                    // Safe to ignore.
 
-    inset: 0;
+                }
 
-    display: flex;
+            }, 100);
 
-    align-items: center;
+        }
 
-    justify-content: center;
 
-    background: var(--header);
+        /* =========================================
+           ESCAPE KEY
+           
+           IMPORTANT:
+           
+           Because we're NOT using the browser's
+           Fullscreen API, Esc can reach Eaglercraft.
+           
+           We deliberately DO NOT preventDefault()
+           here.
+        ========================================= */
 
-    color: var(--text);
+        document.addEventListener("keydown", (event) => {
 
-    font-size: 18px;
+            if (event.key === "Escape") {
 
-    z-index: 10;
+                const container =
+                    document.querySelector(".game-container");
 
-    text-align: center;
+                if (
+                    container &&
+                    container.classList.contains("css-fullscreen")
+                ) {
 
-}
+                    /*
+                     * Do NOT exit fullscreen here.
+                     *
+                     * Eaglercraft needs Esc for its
+                     * own pause/menu system.
+                     */
 
+                    setTimeout(() => {
+                        focusGame();
+                    }, 100);
 
-/* =========================================
-   MOBILE
-========================================= */
+                }
 
-@media (max-width: 800px) {
-
-    iframe {
-
-        height: 60vh;
-
-    }
-
-
-    .header h1 {
-
-        font-size: 16px;
-
-    }
-
-}
-
-</style>
-
-
-<script>
-
-/* =========================================
-   GAME SERVERS
-========================================= */
-
-/*
-    Put your actual URLs here.
-
-    You can add as many servers as you want.
-*/
-
-const GeometryDashServers = [
-
-    {
-        name: "Server 1",
-        url: "geometry-dash.html"
-    },
-
-    {
-        name: "Server 2",
-        url: "https://YOUR-SERVER-2.com/game/"
-    },
-
-    {
-        name: "Server 3",
-        url: "https://YOUR-SERVER-3.com/game/"
-    },
-
-    {
-        name: "Server 4",
-        url: "https://YOUR-SERVER-4.com/game/"
-    }
-
-];
-
-
-/* =========================================
-   LOAD SERVER
-========================================= */
-
-function loadGameServer(index) {
-
-    const iframe =
-        document.getElementById("gameFrame");
-
-    const loading =
-        document.getElementById("loading");
-
-
-    const server =
-        GeometryDashServers[index];
-
-
-    if (!server) {
-
-        return;
-
-    }
-
-
-    /*
-        Show loading screen.
-    */
-
-    loading.style.display = "flex";
-
-    loading.innerHTML = `
-
-        <div>
-
-            Loading ${server.name}...
-
-        </div>
-
-    `;
-
-
-    /*
-        Change iframe.
-    */
-
-    iframe.src = server.url;
-
-
-    /*
-        Update active button.
-    */
-
-    document
-        .querySelectorAll(".server-button")
-        .forEach(button => {
-
-            button.classList.remove("active");
+            }
 
         });
 
 
-    const selectedButton =
-        document.querySelector(
-            `[data-server="${index}"]`
-        );
+        /* =========================================
+           REMOVE LOADING SCREEN
+        ========================================= */
+
+        function gameLoaded() {
+
+            const loading =
+                document.getElementById("loading");
+
+            if (loading) {
+
+                loading.style.display = "none";
+
+            }
+
+        }
 
 
-    if (selectedButton) {
+        /* =========================================
+           KEYBOARD SHORTCUT
+           
+           F11 = toggle our CSS fullscreen
+           
+           We prevent the browser's real F11 so
+           the page stays inside the game UI.
+        ========================================= */
 
-        selectedButton.classList.add("active");
+        document.addEventListener("keydown", (event) => {
 
-    }
+            if (event.key === "F11") {
 
+                event.preventDefault();
 
-    console.log(
-        "Loading:",
-        server.name,
-        server.url
-    );
+                const container =
+                    document.querySelector(".game-container");
 
-}
+                if (!container) return;
 
+                if (
+                    container.classList.contains("css-fullscreen")
+                ) {
 
-/* =========================================
-   GAME LOADED
-========================================= */
+                    exitFullscreen();
 
-function gameLoaded() {
+                } else {
 
-    document
-        .getElementById("loading")
-        .style.display = "none";
+                    goFullscreen();
 
-}
+                }
 
+            }
 
-/* =========================================
-   FULLSCREEN
-========================================= */
+        });
 
-function goFullscreen() {
-
-    const game =
-        document.getElementById("gameFrame");
-
-
-    if (game.requestFullscreen) {
-
-        game.requestFullscreen();
-
-    }
-
-    else if (game.webkitRequestFullscreen) {
-
-        game.webkitRequestFullscreen();
-
-    }
-
-    else if (game.msRequestFullscreen) {
-
-        game.msRequestFullscreen();
-
-    }
-
-}
-
-
-/* =========================================
-   START GAME
-========================================= */
-
-window.addEventListener(
-    "DOMContentLoaded",
-    () => {
-
-        loadGameServer(0);
-
-    }
-);
-
-</script>
+    </script>
 
 </head>
 
@@ -533,124 +472,81 @@ window.addEventListener(
 <body>
 
 
-<!-- =========================================
-     HEADER
-========================================= -->
+    <!-- =========================================
+         HEADER
+    ========================================= -->
 
-<div class="header">
+    <div class="header">
 
-    <h1>🎮 Geometry Dash</h1>
+        <h1>
+            🎮 EaglerCraft
+        </h1>
 
-    <a href="../index.html">
-        ⬅ Back to Hub
-    </a>
-
-</div>
-
-
-<!-- =========================================
-     GAME AREA
-========================================= -->
-
-<div class="game-wrapper">
-
-
-    <div class="game-container">
-
-
-        <div
-            class="loading"
-            id="loading"
-        >
-
-            Loading Game...
-
-        </div>
-
-
-        <iframe
-            id="gameFrame"
-            src="about:blank"
-            allowfullscreen
-            onload="gameLoaded()"
-        ></iframe>
-
+        <a href="../index.html">
+            ⬅ Back to Hub
+        </a>
 
     </div>
 
 
     <!-- =========================================
-         SERVER OPTIONS
-    ========================================== -->
+         GAME AREA
+    ========================================= -->
 
-    <div class="server-panel">
+    <div class="game-wrapper">
 
-        <p>
-            Game won't load?
-            Try another server:
-        </p>
+        <div class="game-container">
 
-
-        <div class="server-buttons">
+            <div
+                class="loading"
+                id="loading"
+            >
+                Loading Game...
+            </div>
 
 
             <button
-                class="server-button active"
-                data-server="0"
-                onclick="loadGameServer(0)"
+                class="fullscreen-exit"
+                onclick="exitFullscreen()"
+                title="Exit Fullscreen"
             >
-                Server 1
+                ✕ Exit Fullscreen
             </button>
 
 
-            <button
-                class="server-button"
-                data-server="1"
-                onclick="loadGameServer(1)"
-            >
-                Server 2
+            <iframe
+                id="gameFrame"
+                src=""
+                allowfullscreen
+                tabindex="0"
+                onload="gameLoaded()"
+            ></iframe>
+
+
+            <script>
+
+                document
+                    .getElementById("gameFrame")
+                    .src = "geometry-dash.html";
+
+            </script>
+
+        </div>
+
+
+        <!-- =========================================
+             CONTROLS
+        ========================================= -->
+
+        <div class="controls">
+
+            <button onclick="goFullscreen()">
+                Fullscreen
             </button>
-
-
-            <button
-                class="server-button"
-                data-server="2"
-                onclick="loadGameServer(2)"
-            >
-                Server 3
-            </button>
-
-
-            <button
-                class="server-button"
-                data-server="3"
-                onclick="loadGameServer(3)"
-            >
-                Server 4
-            </button>
-
 
         </div>
 
     </div>
-
-
-    <!-- =========================================
-         CONTROLS
-    ========================================== -->
-
-    <div class="controls">
-
-        <button onclick="goFullscreen()">
-
-            Fullscreen
-
-        </button>
-
-    </div>
-
-
-</div>
 
 
 </body>
