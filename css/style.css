@@ -177,22 +177,42 @@ z-index: 1000;
    GAME GRID
 ========================================= */
 
+/* =========================================
+   GAME GRID
+========================================= */
+
 .game-grid {
+
   display: grid;
 
   grid-template-columns:
-    repeat(
-      auto-fit,
-      minmax(150px, 1fr)
-    );
+    repeat(10, minmax(0, 1fr));
 
-  gap: 15px;
+  gap: 14px;
 
-  max-width: 900px;
+  width: calc(100% - 70px);
 
-  margin: 10px auto 40px;
+  max-width: 1500px;
+
+  margin: 15px auto 40px;
 
   padding: 10px;
+
+  box-sizing: border-box;
+
+}
+
+
+/* =========================================
+   GAME WRAPPER
+========================================= */
+
+.game-wrapper {
+
+  min-width: 0;
+
+  width: 100%;
+
 }
 
 
@@ -201,9 +221,15 @@ z-index: 1000;
 ========================================= */
 
 .game-link {
+
   text-decoration: none;
 
   color: inherit;
+
+  display: block;
+
+  width: 100%;
+
 }
 
 
@@ -212,46 +238,83 @@ z-index: 1000;
 ========================================= */
 
 .game-card {
+
+  width: 100%;
+
+  height: 150px;
+
+  min-width: 0;
+
+  box-sizing: border-box;
+
   background: var(--card);
 
-  border-radius: 16px;
+  border-radius: 12px;
 
-  padding: 20px;
+  padding: 10px;
 
-  transition: all 0.25s ease;
+  display: flex;
+
+  flex-direction: column;
+
+  align-items: center;
+
+  justify-content: center;
+
+  text-align: center;
+
+  overflow: hidden;
+
+  transition:
+    transform 0.25s ease,
+    box-shadow 0.25s ease;
 
   box-shadow:
     0 4px 12px var(--shadow);
 
   backdrop-filter: blur(6px);
-}
 
-
-.game-card:hover {
-  transform:
-    translateY(-6px)
-    scale(1.03);
-
-  box-shadow:
-    0 6px 22px var(--glow);
 }
 
 
 /* =========================================
-   GAME ICON
+   GAME CARD HOVER
+========================================= */
+
+.game-card:hover {
+
+  transform:
+    translateY(-5px)
+    scale(1.03);
+
+  box-shadow:
+    0 6px 22px var(--glow);
+
+}
+
+
+/* =========================================
+   GAME IMAGE AREA
 ========================================= */
 
 .icon {
-  font-size: 48px;
 
-  margin-bottom: 10px;
+  width: 65px;
 
-  width: 80px;
-  height: 80px;
+  height: 65px;
+
+  max-width: 65px;
+
+  max-height: 65px;
 
   object-fit: contain;
 
-  align-items: center;
+  display: block;
+
+  flex-shrink: 0;
+
+  margin: 0 auto 8px;
+
 }
 
 
@@ -260,43 +323,262 @@ z-index: 1000;
 ========================================= */
 
 .title {
-  font-size: 15px;
+
+  width: 100%;
+
+  min-width: 0;
+
+  height: 36px;
+
+  max-height: 36px;
+
+  display: -webkit-box;
+
+  -webkit-box-orient: vertical;
+
+  -webkit-line-clamp: 2;
+
+  overflow: hidden;
+
+  text-overflow: ellipsis;
+
+  font-size: 13px;
+
+  line-height: 18px;
 
   font-weight: bold;
 
   color: var(--title);
+
+  text-align: center;
+
+  word-break: break-word;
+
 }
 
+
+/* =========================================
+   LARGE DESKTOP
+========================================= */
+
+@media (max-width: 1400px) {
+
+  .game-grid {
+
+    grid-template-columns:
+      repeat(8, minmax(0, 1fr));
+
+  }
+
+}
+
+
+/* =========================================
+   TABLET / SMALL DESKTOP
+========================================= */
+
+@media (max-width: 1100px) {
+
+  .game-grid {
+
+    grid-template-columns:
+      repeat(6, minmax(0, 1fr));
+
+    gap: 12px;
+
+  }
+
+}
+
+
+/* =========================================
+   SMALL TABLET
+========================================= */
+
+@media (max-width: 800px) {
+
+  .game-grid {
+
+    grid-template-columns:
+      repeat(4, minmax(0, 1fr));
+
+    width: calc(100% - 30px);
+
+    gap: 12px;
+
+  }
+
+  .game-card {
+
+    height: 145px;
+
+    padding: 8px;
+
+  }
+
+  .icon {
+
+    width: 58px;
+
+    height: 58px;
+
+    max-width: 58px;
+
+    max-height: 58px;
+
+  }
+
+  .title {
+
+    font-size: 12px;
+
+    line-height: 17px;
+
+    height: 34px;
+
+    max-height: 34px;
+
+  }
+
+}
+
+
+/* =========================================
+   PHONE
+========================================= */
+
+@media (max-width: 550px) {
+
+  .game-grid {
+
+    grid-template-columns:
+      repeat(3, minmax(0, 1fr));
+
+    width: calc(100% - 20px);
+
+    gap: 10px;
+
+  }
+
+  .game-card {
+
+    height: 130px;
+
+    padding: 7px;
+
+    border-radius: 10px;
+
+  }
+
+  .icon {
+
+    width: 48px;
+
+    height: 48px;
+
+    max-width: 48px;
+
+    max-height: 48px;
+
+    margin-bottom: 6px;
+
+  }
+
+  .title {
+
+    font-size: 11px;
+
+    line-height: 15px;
+
+    height: 30px;
+
+    max-height: 30px;
+
+  }
+
+}
+
+
+/* =========================================
+   SMALL PHONE
+========================================= */
+
+@media (max-width: 400px) {
+
+  .game-grid {
+
+    grid-template-columns:
+      repeat(2, minmax(0, 1fr));
+
+    gap: 10px;
+
+  }
+
+  .game-card {
+
+    height: 135px;
+
+  }
+
+  .icon {
+
+    width: 55px;
+
+    height: 55px;
+
+    max-width: 55px;
+
+    max-height: 55px;
+
+  }
+
+  .title {
+
+    font-size: 12px;
+
+    line-height: 16px;
+
+    height: 32px;
+
+    max-height: 32px;
+
+  }
+
+}
 
 /* =========================================
    SETTINGS OVERLAY
 ========================================= */
 
 .settings-overlay {
+
   position: fixed;
 
   inset: 0;
 
-  background: rgba(0, 0, 0, 0.55);
+  background:
+    rgba(0, 0, 0, 0.55);
 
   backdrop-filter: blur(5px);
 
   display: none;
 
   justify-content: center;
+
   align-items: center;
 
   z-index: 9999;
 
   padding: 20px;
+
 }
 
 
 .settings-overlay.open {
+
   display: flex;
+
 }
-
-
 /* =========================================
    SETTINGS WINDOW
 ========================================= */
