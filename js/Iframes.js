@@ -3,7 +3,7 @@ const EaglerCraftURL = "https://reading.q13x.com/1.8.8/wasm/?retina=true";
 const BasketBallLegends2020URL = "https://pinkdev.d13qic2f6zga3.amplifyapp.com/games/clbasketballstars.html";
 const SlopeURL = "https://slopeonline.online/xlope-game.embed";
 const snowball = "https://totalclick.org/games/snowball/game/index.html";
-const CookieClickerURL = "./games/cookie-clicker.html";
+const CookieClickerURL = "../GameFiles/cookie-clicker.html";
 const GeometryDashURL = "https://cfpju876whm.make-by-vann-dont-steal-it-gooners-3351dcb3.nip.io/games/417.html";
 const SnakeURL = "https://totalclick.org/games/snakeio/game/index.html";
 const Motom3xmURL = "https://moto-x3m.bitbucket.io/file/";
