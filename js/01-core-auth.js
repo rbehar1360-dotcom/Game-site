@@ -8,6 +8,9 @@ const gameDiscoveryStats = new Map();
 
 let currentGameSort = "default";
 
+let gamePlaytimeLoaded = false;
+let gamePlaytimeLoading = false;
+
 
 // =========================================
 // GET GAME ELEMENTS
@@ -74,91 +77,158 @@ function isGameFavorite(game) {
 
 async function loadGamePlaytime() {
 
-    gameDiscoveryStats.clear();
+    // Already loaded.
+    if (gamePlaytimeLoaded) {
+        return true;
+    }
 
-    const { data, error } =
-        await supabaseClient
-            .from("game_playtime")
-            .select("game_id, playtime_seconds");
+    // Another request is already running.
+    if (gamePlaytimeLoading) {
 
-    if (error) {
+        while (gamePlaytimeLoading) {
+            await new Promise(resolve =>
+                setTimeout(resolve, 50)
+            );
+        }
 
-        console.error(
+        return gamePlaytimeLoaded;
+    }
+
+
+    gamePlaytimeLoading = true;
+
+
+    try {
+
+        gameDiscoveryStats.clear();
+
+
+        /*
+         * We only need totals grouped by game.
+         *
+         * If the user is logged out and RLS blocks this
+         * table, don't break the entire discovery system.
+         */
+
+        const { data, error } =
+            await supabaseClient
+                .from("game_playtime")
+                .select(
+                    "game_id, playtime_seconds"
+                );
+
+
+        if (error) {
+
+            console.warn(
+                "Playtime data unavailable:",
+                error.message
+            );
+
+            return false;
+        }
+
+
+        (data || []).forEach(row => {
+
+            const gameId =
+                row.game_id;
+
+            const seconds =
+                Number(
+                    row.playtime_seconds
+                ) || 0;
+
+
+            gameDiscoveryStats.set(
+                gameId,
+                (
+                    gameDiscoveryStats.get(gameId)
+                    || 0
+                ) + seconds
+            );
+
+        });
+
+
+        gamePlaytimeLoaded = true;
+
+        return true;
+
+    }
+
+    catch (error) {
+
+        console.warn(
             "Could not load game playtime:",
             error
         );
 
-        return;
+        return false;
 
     }
 
-    const playtimeTotals =
-        new Map();
+    finally {
 
-    (data || []).forEach(row => {
+        gamePlaytimeLoading = false;
 
-        const gameId =
-            row.game_id;
-
-        const seconds =
-            Number(row.playtime_seconds) || 0;
-
-        playtimeTotals.set(
-            gameId,
-            (playtimeTotals.get(gameId) || 0) + seconds
-        );
-
-    });
-
-    playtimeTotals.forEach(
-        (seconds, gameId) => {
-
-            gameDiscoveryStats.set(
-                gameId,
-                seconds
-            );
-
-        }
-    );
+    }
 
 }
 
 
 // =========================================
-// FUZZY MATCH
+// FUZZY SEARCH
 // =========================================
 
-function gameMatchesSearch(title, search) {
+function gameMatchesSearch(
+    title,
+    search
+) {
 
     if (!search) {
         return true;
     }
 
+
     const normalizedTitle =
         title
             .toLowerCase()
-            .replace(/[^a-z0-9]/g, "");
+            .replace(
+                /[^a-z0-9]/g,
+                ""
+            );
+
 
     const normalizedSearch =
         search
             .toLowerCase()
-            .replace(/[^a-z0-9]/g, "");
+            .replace(
+                /[^a-z0-9]/g,
+                ""
+            );
+
 
     if (!normalizedSearch) {
         return true;
     }
 
-    // Normal substring match
+
+    // Normal substring match.
     if (
         normalizedTitle.includes(
             normalizedSearch
         )
     ) {
+
         return true;
+
     }
 
-    // Fuzzy character matching
+
+    // Fuzzy character matching.
     let searchIndex = 0;
+
 
     for (
         let i = 0;
@@ -173,16 +243,20 @@ function gameMatchesSearch(title, search) {
 
             searchIndex++;
 
+
             if (
                 searchIndex ===
                 normalizedSearch.length
             ) {
+
                 return true;
+
             }
 
         }
 
     }
+
 
     return false;
 
@@ -193,43 +267,59 @@ function gameMatchesSearch(title, search) {
 // SEARCH RELEVANCE
 // =========================================
 
-function getSearchScore(title, search) {
+function getSearchScore(
+    title,
+    search
+) {
 
     if (!search) {
         return 0;
     }
 
+
     const normalizedTitle =
         title.toLowerCase();
 
+
     const normalizedSearch =
         search.toLowerCase();
+
 
     if (
         normalizedTitle ===
         normalizedSearch
     ) {
+
         return 1000;
+
     }
+
 
     if (
         normalizedTitle.startsWith(
             normalizedSearch
         )
     ) {
+
         return 500;
+
     }
+
 
     if (
         normalizedTitle.includes(
             normalizedSearch
         )
     ) {
+
         return 250;
+
     }
+
 
     let score = 0;
     let position = 0;
+
 
     for (
         const character of normalizedSearch
@@ -241,19 +331,24 @@ function getSearchScore(title, search) {
                 position
             );
 
+
         if (found === -1) {
             return 0;
         }
 
+
         score +=
-            10 - Math.min(
+            10 -
+            Math.min(
                 found - position,
                 10
             );
 
+
         position = found + 1;
 
     }
+
 
     return score;
 
@@ -278,6 +373,7 @@ function sortGameWrappers(
             const titleB =
                 getGameTitle(b);
 
+
             const idA =
                 a.dataset.gameId;
 
@@ -285,9 +381,9 @@ function sortGameWrappers(
                 b.dataset.gameId;
 
 
-            // -----------------------------------------
+            // =========================================
             // DEFAULT
-            // -----------------------------------------
+            // =========================================
 
             if (
                 currentGameSort ===
@@ -307,9 +403,9 @@ function sortGameWrappers(
             }
 
 
-            // -----------------------------------------
+            // =========================================
             // SEARCH RELEVANCE
-            // -----------------------------------------
+            // =========================================
 
             if (
                 search &&
@@ -332,9 +428,9 @@ function sortGameWrappers(
             }
 
 
-            // -----------------------------------------
+            // =========================================
             // A-Z
-            // -----------------------------------------
+            // =========================================
 
             if (
                 currentGameSort ===
@@ -348,9 +444,9 @@ function sortGameWrappers(
             }
 
 
-            // -----------------------------------------
+            // =========================================
             // Z-A
-            // -----------------------------------------
+            // =========================================
 
             if (
                 currentGameSort ===
@@ -364,9 +460,9 @@ function sortGameWrappers(
             }
 
 
-            // -----------------------------------------
+            // =========================================
             // MOST LIKED
-            // -----------------------------------------
+            // =========================================
 
             if (
                 currentGameSort ===
@@ -382,9 +478,9 @@ function sortGameWrappers(
             }
 
 
-            // -----------------------------------------
+            // =========================================
             // MOST PLAYED
-            // -----------------------------------------
+            // =========================================
 
             if (
                 currentGameSort ===
@@ -408,9 +504,9 @@ function sortGameWrappers(
             }
 
 
-            // -----------------------------------------
+            // =========================================
             // FAVORITES FIRST
-            // -----------------------------------------
+            // =========================================
 
             if (
                 currentGameSort ===
@@ -423,19 +519,26 @@ function sortGameWrappers(
                 const favoriteB =
                     isGameFavorite(b);
 
+
                 if (
                     favoriteA &&
                     !favoriteB
                 ) {
+
                     return -1;
+
                 }
+
 
                 if (
                     !favoriteA &&
                     favoriteB
                 ) {
+
                     return 1;
+
                 }
+
 
                 return (
                     Number(
@@ -469,20 +572,24 @@ function updateGameDiscovery() {
             "searchInput"
         );
 
+
     const gameGrid =
         document.querySelector(
             ".game-grid"
         );
+
 
     const noGamesFound =
         document.getElementById(
             "noGamesFound"
         );
 
+
     const resultCount =
         document.getElementById(
             "gameResultCount"
         );
+
 
     const clearButton =
         document.getElementById(
@@ -494,7 +601,9 @@ function updateGameDiscovery() {
         !searchInput ||
         !gameGrid
     ) {
+
         return;
+
     }
 
 
@@ -508,9 +617,9 @@ function updateGameDiscovery() {
         getGameWrappers();
 
 
-    // -----------------------------------------
+    // =========================================
     // SAVE ORIGINAL ORDER
-    // -----------------------------------------
+    // =========================================
 
     allGames.forEach(
         (game, index) => {
@@ -529,9 +638,9 @@ function updateGameDiscovery() {
     );
 
 
-    // -----------------------------------------
+    // =========================================
     // FIND MATCHES
-    // -----------------------------------------
+    // =========================================
 
     const matchingGames =
         allGames.filter(
@@ -543,15 +652,21 @@ function updateGameDiscovery() {
         );
 
 
-    // -----------------------------------------
-    // SHOW / HIDE GAMES
-    // -----------------------------------------
+    // =========================================
+    // SHOW / HIDE
+    // =========================================
 
     allGames.forEach(
         game => {
 
+            const isMatch =
+                matchingGames.includes(
+                    game
+                );
+
+
             game.style.display =
-                matchingGames.includes(game)
+                isMatch
                     ? ""
                     : "none";
 
@@ -559,9 +674,9 @@ function updateGameDiscovery() {
     );
 
 
-    // -----------------------------------------
+    // =========================================
     // SORT
-    // -----------------------------------------
+    // =========================================
 
     const sortedGames =
         sortGameWrappers(
@@ -577,7 +692,9 @@ function updateGameDiscovery() {
     sortedGames.forEach(
         game => {
 
-            fragment.appendChild(game);
+            fragment.appendChild(
+                game
+            );
 
         }
     );
@@ -588,9 +705,9 @@ function updateGameDiscovery() {
     );
 
 
-    // -----------------------------------------
+    // =========================================
     // RESULT COUNT
-    // -----------------------------------------
+    // =========================================
 
     if (resultCount) {
 
@@ -604,9 +721,9 @@ function updateGameDiscovery() {
     }
 
 
-    // -----------------------------------------
+    // =========================================
     // CLEAR BUTTON
-    // -----------------------------------------
+    // =========================================
 
     if (clearButton) {
 
@@ -618,9 +735,9 @@ function updateGameDiscovery() {
     }
 
 
-    // -----------------------------------------
+    // =========================================
     // NO RESULTS
-    // -----------------------------------------
+    // =========================================
 
     if (noGamesFound) {
 
@@ -640,29 +757,51 @@ function updateGameDiscovery() {
 
 function setupGameDiscovery() {
 
-    if (gameDiscoveryInitialized) {
+    if (
+        gameDiscoveryInitialized
+    ) {
+
         return;
+
     }
+
+
+    const searchInput =
+        document.getElementById(
+            "searchInput"
+        );
+
+
+    if (!searchInput) {
+
+        console.warn(
+            "Game discovery: search input not found."
+        );
+
+        return;
+
+    }
+
 
     gameDiscoveryInitialized = true;
 
 
-    const searchInput =
-        document.getElementById("searchInput");
-
     const clearButton =
-        document.getElementById("clearSearch");
+        document.getElementById(
+            "clearSearch"
+        );
+
 
     const noGamesClear =
-        document.getElementById("noGamesClear");
+        document.getElementById(
+            "noGamesClear"
+        );
+
 
     const filterButtons =
-        document.querySelectorAll(".game-filter");
-
-
-    if (!searchInput) {
-        return;
-    }
+        document.querySelectorAll(
+            ".game-filter"
+        );
 
 
     // =========================================
@@ -679,48 +818,74 @@ function setupGameDiscovery() {
     // FILTER BUTTONS
     // =========================================
 
-    filterButtons.forEach(button => {
+    filterButtons.forEach(
+        button => {
 
-        button.addEventListener(
-            "click",
-            async function() {
+            button.addEventListener(
+                "click",
+                async function() {
 
-                currentGameSort =
-                    button.dataset.sort;
+                    const requestedSort =
+                        button.dataset.sort;
 
 
-                filterButtons.forEach(
-                    otherButton => {
+                    // Safety check.
+                    if (!requestedSort) {
+                        return;
+                    }
 
-                        otherButton.classList.remove(
-                            "active"
-                        );
+
+                    currentGameSort =
+                        requestedSort;
+
+
+                    filterButtons.forEach(
+                        otherButton => {
+
+                            otherButton.classList.remove(
+                                "active"
+                            );
+
+                        }
+                    );
+
+
+                    button.classList.add(
+                        "active"
+                    );
+
+
+                    // =========================================
+                    // MOST PLAYED
+                    // =========================================
+
+                    if (
+                        currentGameSort ===
+                        "played"
+                    ) {
+
+                        /*
+                         * Don't let a failed Supabase
+                         * playtime request break filtering.
+                         */
+
+                        await loadGamePlaytime();
 
                     }
-                );
 
 
-                button.classList.add(
-                    "active"
-                );
+                    /*
+                     * Every other filter works completely
+                     * locally and does NOT require login.
+                     */
 
-
-                if (
-                    currentGameSort ===
-                    "played"
-                ) {
-
-                    await loadGamePlaytime();
+                    updateGameDiscovery();
 
                 }
+            );
 
-
-                updateGameDiscovery();
-
-            }
-        );
-
-    });
+        }
+    );
 
 
     // =========================================
@@ -730,6 +895,21 @@ function setupGameDiscovery() {
     function clearSearch() {
 
         searchInput.value = "";
+
+        currentGameSort = "default";
+
+        filterButtons.forEach(
+            button => {
+
+                button.classList.toggle(
+                    "active",
+                    button.dataset.sort ===
+                    "default"
+                );
+
+            }
+        );
+
 
         updateGameDiscovery();
 
@@ -788,15 +968,11 @@ function setupGameDiscovery() {
 }
 
 
-setupGameDiscovery();
-
-
 // =========================================
 // START
 // =========================================
 
 setupGameDiscovery();
-
 // =========================================
 // LOGIN WINDOW
 // =========================================

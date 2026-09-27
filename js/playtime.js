@@ -62,7 +62,11 @@
             "FNAF3.html": "FNAF 3",
             "FNAF4.html": "FNAF 4",
             "FiveNightsAtEpsteins.html": "Five Nights at Epsteins",
-            "Balatro.html": "Balatro"
+            "Balatro.html": "Balatro",
+            "BasketRandom.html": "Basket Random",
+            "SoccerRandom.html": "Soccer Random",
+            "VolleyRandom.html": "Volley Random",
+            "BoxingRandom.html": "Boxing Random",
         };
 
         return gameMap[filename] || null;

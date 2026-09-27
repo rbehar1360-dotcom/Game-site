@@ -1,18 +1,42 @@
+// =========================================
 // GAME LIKES
 // =========================================
+
+async function getCurrentUser() {
+    const { data, error } =
+        await supabaseClient.auth.getUser();
+
+    if (error) {
+        console.error(
+            "Could not get current user:",
+            error
+        );
+
+        return null;
+    }
+
+    return data?.user || null;
+}
+
 
 async function setupLikes() {
 
     const gameWrappers =
         document.querySelectorAll(".game-wrapper");
 
-    for (const wrapper of gameWrappers) {
+    // Get the current user ONCE.
+    const user = await getCurrentUser();
+
+    // Collect all valid game cards.
+    const gameData = [];
+
+    gameWrappers.forEach(wrapper => {
 
         const gameId =
             wrapper.dataset.gameId;
 
         if (!gameId) {
-            continue;
+            return;
         }
 
         const likeButton =
@@ -21,79 +45,118 @@ async function setupLikes() {
         const likeCount =
             wrapper.querySelector(".like-count");
 
-        // Skip cards that do not have the complete like system
         if (!likeButton || !likeCount) {
-            continue;
+            return;
         }
 
+        gameData.push({
+            wrapper,
+            gameId,
+            likeButton,
+            likeCount
+        });
 
-        // -----------------------------------------
-        // GET TOTAL LIKES
-        // -----------------------------------------
-
-        const { count, error: countError } =
-            await supabaseClient
-                .from("likes")
-                .select("*", {
-                    count: "exact",
-                    head: true
-                })
-                .eq("game_id", gameId);
+    });
 
 
-        if (countError) {
-
-            console.error(
-                "Could not get likes:",
-                countError
-            );
-
-            continue;
-        }
+    if (!gameData.length) {
+        return;
+    }
 
 
-        likeCount.textContent =
-            count || 0;
+    // =========================================
+    // LOAD ALL LIKE COUNTS IN PARALLEL
+    // =========================================
 
+    await Promise.all(
 
-        // -----------------------------------------
-        // CHECK IF CURRENT USER LIKED
-        // -----------------------------------------
+        gameData.map(async game => {
 
-        const { data: userData } =
-            await supabaseClient.auth.getUser();
-
-        const user =
-            userData.user;
-
-
-        if (user) {
-
-            const { data: existingLike } =
+            const { count, error } =
                 await supabaseClient
                     .from("likes")
-                    .select("id")
-                    .eq("user_id", user.id)
-                    .eq("game_id", gameId)
-                    .maybeSingle();
+                    .select("*", {
+                        count: "exact",
+                        head: true
+                    })
+                    .eq("game_id", game.gameId);
 
+            if (error) {
 
-            if (existingLike) {
-
-                likeButton.classList.add(
-                    "liked"
+                console.error(
+                    "Could not get likes:",
+                    error
                 );
 
+                return;
             }
+
+            game.likeCount.textContent =
+                count || 0;
+
+        })
+
+    );
+
+
+    // =========================================
+    // LOAD USER'S LIKES ONCE
+    // =========================================
+
+    let likedGameIds = new Set();
+
+    if (user) {
+
+        const { data: userLikes, error } =
+            await supabaseClient
+                .from("likes")
+                .select("game_id")
+                .eq("user_id", user.id);
+
+        if (error) {
+
+            console.error(
+                "Could not load user's likes:",
+                error
+            );
+
+        } else {
+
+            likedGameIds = new Set(
+                (userLikes || []).map(
+                    like => like.game_id
+                )
+            );
 
         }
 
+    }
 
-        // -----------------------------------------
-        // LIKE BUTTON CLICK
-        // -----------------------------------------
 
-        likeButton.addEventListener(
+    // =========================================
+    // UPDATE LIKE BUTTONS
+    // =========================================
+
+    gameData.forEach(game => {
+
+        if (likedGameIds.has(game.gameId)) {
+
+            game.likeButton.classList.add(
+                "liked"
+            );
+
+        }
+
+    });
+
+
+    // =========================================
+    // LIKE BUTTON CLICK
+    // =========================================
+
+    gameData.forEach(game => {
+
+        game.likeButton.addEventListener(
             "click",
             async function(event) {
 
@@ -101,11 +164,8 @@ async function setupLikes() {
                 event.stopPropagation();
 
 
-                const { data: userData } =
-                    await supabaseClient.auth.getUser();
-
                 const user =
-                    userData.user;
+                    await getCurrentUser();
 
 
                 if (!user) {
@@ -118,20 +178,36 @@ async function setupLikes() {
                 }
 
 
-                // Check existing like
+                // =========================================
+                // CHECK EXISTING LIKE
+                // =========================================
 
-                const { data: existingLike } =
+                const {
+                    data: existingLike,
+                    error: findError
+                } =
                     await supabaseClient
                         .from("likes")
                         .select("id")
                         .eq("user_id", user.id)
-                        .eq("game_id", gameId)
+                        .eq("game_id", game.gameId)
                         .maybeSingle();
 
 
-                // -----------------------------------------
+                if (findError) {
+
+                    console.error(
+                        "Could not check like:",
+                        findError
+                    );
+
+                    return;
+                }
+
+
+                // =========================================
                 // REMOVE LIKE
-                // -----------------------------------------
+                // =========================================
 
                 if (existingLike) {
 
@@ -156,25 +232,25 @@ async function setupLikes() {
                     }
 
 
-                    likeButton.classList.remove(
+                    game.likeButton.classList.remove(
                         "liked"
                     );
 
 
-                    likeCount.textContent =
+                    game.likeCount.textContent =
                         Math.max(
                             0,
                             Number(
-                                likeCount.textContent
+                                game.likeCount.textContent
                             ) - 1
                         );
 
                 }
 
 
-                // -----------------------------------------
+                // =========================================
                 // ADD LIKE
-                // -----------------------------------------
+                // =========================================
 
                 else {
 
@@ -183,7 +259,7 @@ async function setupLikes() {
                             .from("likes")
                             .insert({
                                 user_id: user.id,
-                                game_id: gameId
+                                game_id: game.gameId
                             });
 
 
@@ -198,14 +274,14 @@ async function setupLikes() {
                     }
 
 
-                    likeButton.classList.add(
+                    game.likeButton.classList.add(
                         "liked"
                     );
 
 
-                    likeCount.textContent =
+                    game.likeCount.textContent =
                         Number(
-                            likeCount.textContent
+                            game.likeCount.textContent
                         ) + 1;
 
                 }
@@ -213,14 +289,16 @@ async function setupLikes() {
             }
         );
 
-    }
+    });
 
 }
 
 
+// =========================================
+// START LIKE SYSTEM
+// =========================================
+
 setupLikes();
-
-
 
 // =========================================
 // GAME VIEW TRACKING
