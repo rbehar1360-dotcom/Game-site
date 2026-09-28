@@ -67,6 +67,8 @@
             "SoccerRandom.html": "Soccer Random",
             "VolleyRandom.html": "Volley Random",
             "BoxingRandom.html": "Boxing Random",
+            "BlackJack.html": "Black Jack",
+            "BasketBallFrvr.html": "BasketBallFrvr"
         };
 
         return gameMap[filename] || null;
