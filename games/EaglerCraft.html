@@ -2,6 +2,7 @@
 <html lang="en">
 
 <head>
+
     <meta charset="UTF-8">
 
     <meta
@@ -11,17 +12,16 @@
 
     <script src="../js/theme.js"></script>
     <script src="../js/Iframes.js"></script>
+
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="../js/supabase.js"></script>
+
     <script src="../js/playtime.js"></script>
 
     <title>EaglerCraft</title>
 
-    <style>
 
-        /* =========================================
-           PAGE
-        ========================================= */
+    <style>
 
         body {
             margin: 0;
@@ -46,10 +46,6 @@
         }
 
 
-        /* =========================================
-           HEADER
-        ========================================= */
-
         .header {
             display: flex;
 
@@ -67,10 +63,13 @@
             backdrop-filter: blur(10px);
         }
 
+
         .header h1 {
             font-size: 20px;
+
             margin: 0;
         }
+
 
         .header a {
             color: var(--accent);
@@ -80,14 +79,11 @@
             font-weight: bold;
         }
 
+
         .header a:hover {
             text-decoration: underline;
         }
 
-
-        /* =========================================
-           GAME AREA
-        ========================================= */
 
         .game-wrapper {
             width: 95%;
@@ -97,6 +93,110 @@
             margin: 30px auto;
         }
 
+
+        /* =========================================
+           VERSION SELECTOR
+        ========================================= */
+
+        .version-section {
+            margin-bottom: 15px;
+        }
+
+
+        .version-title {
+            font-size: 16px;
+
+            font-weight: bold;
+
+            margin-bottom: 10px;
+        }
+
+
+        .version-buttons {
+            display: flex;
+
+            flex-wrap: wrap;
+
+            gap: 10px;
+        }
+
+
+        .version-button {
+            background: var(--card);
+
+            color: var(--text);
+
+            border:
+                1px solid
+                var(--accent);
+
+            padding: 10px 15px;
+
+            border-radius: 8px;
+
+            font-size: 14px;
+
+            font-weight: bold;
+
+            cursor: pointer;
+
+            transition: 0.2s;
+
+            box-shadow:
+                0 4px 12px
+                var(--shadow);
+        }
+
+
+        .version-button:hover {
+            transform: translateY(-2px);
+
+            box-shadow:
+                0 0 12px
+                var(--glow);
+        }
+
+
+        .version-button.active {
+            background: var(--accent);
+
+            color: #001018;
+        }
+
+
+        .version-button.locked {
+            opacity: 0.8;
+        }
+
+
+        .version-button.locked:hover {
+            opacity: 1;
+        }
+
+
+        .version-button:disabled {
+            cursor: wait;
+
+            opacity: 0.6;
+
+            transform: none;
+
+            box-shadow: none;
+        }
+
+
+        .version-status {
+            margin-top: 8px;
+
+            font-size: 14px;
+
+            min-height: 18px;
+        }
+
+
+        /* =========================================
+           GAME
+        ========================================= */
 
         .game-container {
             position: relative;
@@ -113,10 +213,6 @@
         }
 
 
-        /* =========================================
-           IFRAME
-        ========================================= */
-
         iframe {
             display: block;
 
@@ -131,7 +227,7 @@
 
 
         /* =========================================
-           CSS FULLSCREEN
+           FULLSCREEN
         ========================================= */
 
         .game-container.css-fullscreen {
@@ -157,7 +253,73 @@
 
         .game-container.css-fullscreen iframe {
             width: 100%;
+
             height: 100%;
+        }
+
+
+        .fullscreen-exit {
+            position: absolute;
+
+            top: 15px;
+            right: 15px;
+
+            z-index: 1000000;
+
+            display: none;
+
+            background: rgba(0, 0, 0, 0.65);
+
+            color: white;
+
+            border:
+                1px solid
+                rgba(255, 255, 255, 0.25);
+
+            padding: 8px 12px;
+
+            border-radius: 8px;
+
+            font-size: 14px;
+
+            cursor: pointer;
+
+            backdrop-filter: blur(8px);
+        }
+
+
+        .game-container.css-fullscreen .fullscreen-exit {
+            display: block;
+        }
+
+
+        .fullscreen-exit:hover {
+            background: rgba(0, 0, 0, 0.85);
+        }
+
+
+        /* =========================================
+           LOADING
+        ========================================= */
+
+        .loading {
+            position: absolute;
+
+            inset: 0;
+
+            display: flex;
+
+            align-items: center;
+
+            justify-content: center;
+
+            background: #000;
+
+            color: white;
+
+            font-size: 18px;
+
+            z-index: 5;
         }
 
 
@@ -207,75 +369,6 @@
 
 
         /* =========================================
-           FULLSCREEN EXIT BUTTON
-        ========================================= */
-
-        .fullscreen-exit {
-            position: absolute;
-
-            top: 15px;
-            right: 15px;
-
-            z-index: 1000000;
-
-            display: none;
-
-            background: rgba(0, 0, 0, 0.65);
-
-            color: white;
-
-            border:
-                1px solid
-                rgba(255, 255, 255, 0.25);
-
-            padding: 8px 12px;
-
-            border-radius: 8px;
-
-            font-size: 14px;
-
-            cursor: pointer;
-
-            backdrop-filter: blur(8px);
-        }
-
-
-        .game-container.css-fullscreen .fullscreen-exit {
-            display: block;
-        }
-
-
-        .fullscreen-exit:hover {
-            background: rgba(0, 0, 0, 0.85);
-        }
-
-
-        /* =========================================
-           LOADING SCREEN
-        ========================================= */
-
-        .loading {
-            position: absolute;
-
-            inset: 0;
-
-            display: flex;
-
-            align-items: center;
-
-            justify-content: center;
-
-            background: #000;
-
-            color: white;
-
-            font-size: 18px;
-
-            z-index: 5;
-        }
-
-
-        /* =========================================
            MOBILE
         ========================================= */
 
@@ -285,8 +378,21 @@
                 height: 60vh;
             }
 
+
             .header h1 {
                 font-size: 16px;
+            }
+
+
+            .version-buttons {
+                gap: 7px;
+            }
+
+
+            .version-button {
+                padding: 8px 11px;
+
+                font-size: 13px;
             }
 
         }
@@ -296,44 +402,618 @@
 
     <script>
 
+        let currentUser = null;
+
+        let eaglerVersions = [];
+
+
         /* =========================================
-           CSS FULLSCREEN
+           INITIALIZE
+        ========================================= */
+
+        async function initializeEaglercraft() {
+
+            try {
+
+                const {
+                    data: {
+                        user
+                    },
+                    error
+                } = await supabaseClient.auth.getUser();
+
+
+                if (error) {
+
+                    console.error(
+                        "Could not get logged-in user:",
+                        error
+                    );
+
+                }
+
+
+                currentUser = user || null;
+
+            } catch (error) {
+
+                console.error(
+                    "Could not get logged-in user:",
+                    error
+                );
+
+            }
+
+
+            await loadVersions();
+
+
+            /*
+             * Load the original free version.
+             */
+
+            loadGame(EaglerCraftURL);
+
+        }
+
+
+        /* =========================================
+           LOAD DATABASE VERSIONS
+        ========================================= */
+
+        async function loadVersions() {
+
+            const {
+                data,
+                error
+            } = await supabaseClient
+
+                .from("eaglercraft_versions")
+
+                .select(
+                    "id, version_key, version_name, description, price, game_url, sort_order"
+                )
+
+                .eq("active", true)
+
+                .order(
+                    "sort_order",
+                    {
+                        ascending: true
+                    }
+                );
+
+
+            if (error) {
+
+                console.error(
+                    "Could not load Eaglercraft versions:",
+                    error
+                );
+
+                eaglerVersions = [];
+
+            } else {
+
+                eaglerVersions =
+                    data || [];
+
+            }
+
+
+            await renderVersionButtons();
+
+        }
+
+
+        /* =========================================
+           RENDER VERSION BUTTONS
+        ========================================= */
+
+        async function renderVersionButtons() {
+
+            const container =
+                document.getElementById(
+                    "versionButtons"
+                );
+
+
+            if (!container) return;
+
+
+            container.innerHTML = "";
+
+
+            /*
+             * ORIGINAL 1.8.8
+             */
+
+            const classicButton =
+                document.createElement("button");
+
+
+            classicButton.className =
+                "version-button active";
+
+
+            classicButton.textContent =
+                "🎮 Eaglercraft 1.8.8";
+
+
+            classicButton.onclick =
+                function () {
+
+                    selectClassicVersion(
+                        classicButton
+                    );
+
+                };
+
+
+            container.appendChild(
+                classicButton
+            );
+
+
+            /*
+             * DATABASE VERSIONS
+             */
+
+            for (
+                const version
+                of eaglerVersions
+            ) {
+
+                const button =
+                    document.createElement(
+                        "button"
+                    );
+
+
+                const unlocked =
+                    await isVersionUnlocked(
+                        version.id
+                    );
+
+
+                button.className =
+                    "version-button";
+
+
+                if (unlocked) {
+
+                    button.textContent =
+                        `🎮 ${version.version_name}`;
+
+
+                    button.onclick =
+                        function () {
+
+                            selectVersion(
+                                version,
+                                button
+                            );
+
+                        };
+
+                } else {
+
+                    button.classList.add(
+                        "locked"
+                    );
+
+
+                    button.textContent =
+                        `🔒 ${version.version_name} — ${version.price} Coins`;
+
+
+                    button.onclick =
+                        function () {
+
+                            unlockVersion(
+                                version,
+                                button
+                            );
+
+                        };
+
+                }
+
+
+                container.appendChild(
+                    button
+                );
+
+            }
+
+        }
+
+
+        /* =========================================
+           CHECK UNLOCK
+        ========================================= */
+
+        async function isVersionUnlocked(
+            versionId
+        ) {
+
+            if (!currentUser) {
+
+                return false;
+
+            }
+
+
+            const {
+                data,
+                error
+            } = await supabaseClient
+
+                .from("eaglercraft_unlocks")
+
+                .select("id")
+
+                .eq(
+                    "user_id",
+                    currentUser.id
+                )
+
+                .eq(
+                    "version_id",
+                    versionId
+                )
+
+                .maybeSingle();
+
+
+            if (error) {
+
+                console.error(
+                    "Could not check Eaglercraft unlock:",
+                    error
+                );
+
+                return false;
+
+            }
+
+
+            return !!data;
+
+        }
+
+
+        /* =========================================
+           SELECT CLASSIC
+        ========================================= */
+
+        function selectClassicVersion(
+            button
+        ) {
+
+            setActiveButton(
+                button
+            );
+
+
+            setStatus(
+                "Eaglercraft 1.8.8"
+            );
+
+
+            loadGame(
+                EaglerCraftURL
+            );
+
+        }
+
+
+        /* =========================================
+           SELECT UNLOCKED VERSION
+        ========================================= */
+
+        function selectVersion(
+            version,
+            button
+        ) {
+
+            setActiveButton(
+                button
+            );
+
+
+            setStatus(
+                version.version_name
+            );
+
+
+            loadGame(
+                version.game_url
+            );
+
+        }
+
+
+        /* =========================================
+           UNLOCK VERSION
+        ========================================= */
+
+        async function unlockVersion(
+            version,
+            button
+        ) {
+
+            if (!currentUser) {
+
+                setStatus(
+                    "You must be logged in to unlock this version."
+                );
+
+                return;
+
+            }
+
+
+            const confirmed =
+                confirm(
+                    `Unlock ${version.version_name} for ${version.price} coins?`
+                );
+
+
+            if (!confirmed) {
+
+                return;
+
+            }
+
+
+            button.disabled = true;
+
+            button.textContent =
+                "⏳ Unlocking...";
+
+
+            setStatus(
+                "Processing purchase..."
+            );
+
+
+            try {
+
+                const {
+                    data,
+                    error
+                } = await supabaseClient.rpc(
+                    "unlock_eaglercraft_version",
+                    {
+                        p_version_id:
+                            version.id
+                    }
+                );
+
+
+                if (error) {
+
+                    throw error;
+
+                }
+
+
+                if (
+                    !data ||
+                    data.success !== true
+                ) {
+
+                    throw new Error(
+                        "The unlock was not completed."
+                    );
+
+                }
+
+
+                setStatus(
+                    `${version.version_name} unlocked!`
+                );
+
+
+                await loadVersions();
+
+
+                const buttons =
+                    [
+                        ...document.querySelectorAll(
+                            ".version-button"
+                        )
+                    ];
+
+
+                const unlockedButton =
+                    buttons.find(
+                        button =>
+                            button.textContent.includes(
+                                version.version_name
+                            )
+                    );
+
+
+                if (unlockedButton) {
+
+                    selectVersion(
+                        version,
+                        unlockedButton
+                    );
+
+                }
+
+            } catch (error) {
+
+                console.error(
+                    "Eaglercraft unlock failed:",
+                    error
+                );
+
+
+                setStatus(
+                    error.message ||
+                    "Could not unlock this version."
+                );
+
+
+                await renderVersionButtons();
+
+            }
+
+        }
+
+
+        /* =========================================
+           LOAD GAME
+        ========================================= */
+
+        function loadGame(
+            url
+        ) {
+
+            const frame =
+                document.getElementById(
+                    "gameFrame"
+                );
+
+
+            const loading =
+                document.getElementById(
+                    "loading"
+                );
+
+
+            if (!frame) return;
+
+
+            if (loading) {
+
+                loading.style.display =
+                    "flex";
+
+            }
+
+
+            frame.src = url;
+
+
+            focusGame();
+
+        }
+
+
+        /* =========================================
+           ACTIVE BUTTON
+        ========================================= */
+
+        function setActiveButton(
+            activeButton
+        ) {
+
+            document
+                .querySelectorAll(
+                    ".version-button"
+                )
+                .forEach(
+                    button => {
+
+                        button.classList.remove(
+                            "active"
+                        );
+
+                    }
+                );
+
+
+            activeButton.classList.add(
+                "active"
+            );
+
+        }
+
+
+        /* =========================================
+           STATUS
+        ========================================= */
+
+        function setStatus(
+            message
+        ) {
+
+            const status =
+                document.getElementById(
+                    "versionStatus"
+                );
+
+
+            if (status) {
+
+                status.textContent =
+                    message;
+
+            }
+
+        }
+
+
+        /* =========================================
+           FULLSCREEN
         ========================================= */
 
         function goFullscreen() {
 
             const container =
-                document.querySelector(".game-container");
+                document.querySelector(
+                    ".game-container"
+                );
+
 
             if (!container) return;
 
-            container.classList.add("css-fullscreen");
 
-            // Prevent the page behind the game
-            // from scrolling.
-            document.body.style.overflow = "hidden";
+            container.classList.add(
+                "css-fullscreen"
+            );
 
-            // Focus the game.
+
+            document.body.style.overflow =
+                "hidden";
+
+
             focusGame();
+
         }
 
 
         /* =========================================
-           EXIT CSS FULLSCREEN
+           EXIT FULLSCREEN
         ========================================= */
 
         function exitFullscreen() {
 
             const container =
-                document.querySelector(".game-container");
+                document.querySelector(
+                    ".game-container"
+                );
+
 
             if (!container) return;
 
-            container.classList.remove("css-fullscreen");
 
-            document.body.style.overflow = "";
+            container.classList.remove(
+                "css-fullscreen"
+            );
+
+
+            document.body.style.overflow =
+                "";
+
 
             focusGame();
+
         }
 
 
@@ -344,112 +1024,131 @@
         function focusGame() {
 
             const game =
-                document.getElementById("gameFrame");
+                document.getElementById(
+                    "gameFrame"
+                );
+
 
             if (!game) return;
 
-            setTimeout(() => {
 
-                game.focus();
+            setTimeout(
+                function () {
 
-                try {
+                    game.focus();
 
-                    game.contentWindow.focus();
 
-                } catch (error) {
+                    try {
 
-                    // Cross-origin iframe.
-                    // Safe to ignore.
+                        game.contentWindow.focus();
 
-                }
+                    } catch (error) {
 
-            }, 100);
+                        // Cross-origin iframe.
+                        // Safe to ignore.
+
+                    }
+
+                },
+                100
+            );
+
+        }
+
+
+        /* =========================================
+           GAME LOADED
+        ========================================= */
+
+        function gameLoaded() {
+
+            const loading =
+                document.getElementById(
+                    "loading"
+                );
+
+
+            if (loading) {
+
+                loading.style.display =
+                    "none";
+
+            }
 
         }
 
 
         /* =========================================
            ESCAPE KEY
-           
-           IMPORTANT:
-           
-           Because we're NOT using the browser's
-           Fullscreen API, Esc can reach Eaglercraft.
-           
-           We deliberately DO NOT preventDefault()
-           here.
         ========================================= */
 
-        document.addEventListener("keydown", (event) => {
-
-            if (event.key === "Escape") {
-
-                const container =
-                    document.querySelector(".game-container");
+        document.addEventListener(
+            "keydown",
+            function (event) {
 
                 if (
-                    container &&
-                    container.classList.contains("css-fullscreen")
+                    event.key === "Escape"
                 ) {
 
-                    /*
-                     * Do NOT exit fullscreen here.
-                     *
-                     * Eaglercraft needs Esc for its
-                     * own pause/menu system.
-                     */
+                    const container =
+                        document.querySelector(
+                            ".game-container"
+                        );
 
-                    setTimeout(() => {
-                        focusGame();
-                    }, 100);
+
+                    if (
+                        container &&
+                        container.classList.contains(
+                            "css-fullscreen"
+                        )
+                    ) {
+
+                        setTimeout(
+                            focusGame,
+                            100
+                        );
+
+                    }
 
                 }
 
             }
-
-        });
-
-
-        /* =========================================
-           REMOVE LOADING SCREEN
-        ========================================= */
-
-        function gameLoaded() {
-
-            const loading =
-                document.getElementById("loading");
-
-            if (loading) {
-
-                loading.style.display = "none";
-
-            }
-
-        }
+        );
 
 
         /* =========================================
-           KEYBOARD SHORTCUT
-           
-           F11 = toggle our CSS fullscreen
-           
-           We prevent the browser's real F11 so
-           the page stays inside the game UI.
+           F11
         ========================================= */
 
-        document.addEventListener("keydown", (event) => {
+        document.addEventListener(
+            "keydown",
+            function (event) {
 
-            if (event.key === "F11") {
+                if (
+                    event.key !== "F11"
+                ) {
+
+                    return;
+
+                }
+
 
                 event.preventDefault();
 
+
                 const container =
-                    document.querySelector(".game-container");
+                    document.querySelector(
+                        ".game-container"
+                    );
+
 
                 if (!container) return;
 
+
                 if (
-                    container.classList.contains("css-fullscreen")
+                    container.classList.contains(
+                        "css-fullscreen"
+                    )
                 ) {
 
                     exitFullscreen();
@@ -461,8 +1160,17 @@
                 }
 
             }
+        );
 
-        });
+
+        /* =========================================
+           START
+        ========================================= */
+
+        document.addEventListener(
+            "DOMContentLoaded",
+            initializeEaglercraft
+        );
 
     </script>
 
@@ -472,15 +1180,12 @@
 <body>
 
 
-    <!-- =========================================
-         HEADER
-    ========================================= -->
-
     <div class="header">
 
         <h1>
             🎮 EaglerCraft
         </h1>
+
 
         <a href="../index.html">
             ⬅ Back to Hub
@@ -489,13 +1194,41 @@
     </div>
 
 
-    <!-- =========================================
-         GAME AREA
-    ========================================= -->
-
     <div class="game-wrapper">
 
+
+        <div class="version-section">
+
+            <div class="version-title">
+                Minecraft Versions
+            </div>
+
+
+            <div
+                class="version-buttons"
+                id="versionButtons"
+            >
+
+                <button
+                    class="version-button"
+                    disabled
+                >
+                    Loading versions...
+                </button>
+
+            </div>
+
+
+            <div
+                class="version-status"
+                id="versionStatus"
+            ></div>
+
+        </div>
+
+
         <div class="game-container">
+
 
             <div
                 class="loading"
@@ -523,28 +1256,19 @@
             ></iframe>
 
 
-            <script>
-
-                document
-                    .getElementById("gameFrame")
-                    .src = EaglerCraftURL;
-
-            </script>
-
         </div>
 
 
-        <!-- =========================================
-             CONTROLS
-        ========================================= -->
-
         <div class="controls">
 
-            <button onclick="goFullscreen()">
+            <button
+                onclick="goFullscreen()"
+            >
                 Fullscreen
             </button>
 
         </div>
+
 
     </div>
 
