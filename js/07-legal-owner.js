@@ -306,6 +306,12 @@ const ownerUserSearch =
 const refreshOwnerUsers =
     document.getElementById("refreshOwnerUsers");
 
+const ownerGiveAllAmount =
+    document.getElementById("ownerGiveAllAmount");
+
+const ownerGiveAll =
+    document.getElementById("ownerGiveAll");
+
 let ownerUsers = [];
 
 
@@ -920,6 +926,88 @@ async function adjustUserCoins(
         "success"
     );
 }
+
+
+// =========================================
+// GIVE COINS TO ALL USERS
+// =========================================
+
+if (ownerGiveAll) {
+
+    ownerGiveAll.addEventListener(
+        "click",
+        async function() {
+
+            const amount =
+                Number(ownerGiveAllAmount?.value);
+
+            if (
+                !Number.isInteger(amount) ||
+                amount <= 0
+            ) {
+
+                showOwnerNotification(
+                    "Enter a valid whole number.",
+                    "error"
+                );
+
+                ownerGiveAllAmount?.focus();
+
+                return;
+            }
+
+            const confirmed =
+                confirm(
+                    `Give ${amount.toLocaleString()} coins to every user?`
+                );
+
+            if (!confirmed) {
+                return;
+            }
+
+            ownerGiveAll.disabled = true;
+
+            const { data, error } =
+                await supabaseClient.rpc(
+                    "admin_give_coins_to_all",
+                    {
+                        amount: amount
+                    }
+                );
+
+            ownerGiveAll.disabled = false;
+
+            if (error) {
+
+                console.error(
+                    "Give all coins failed:",
+                    error
+                );
+
+                showOwnerNotification(
+                    error.message ||
+                    "Could not give coins to all users.",
+                    "error"
+                );
+
+                return;
+            }
+
+            ownerGiveAllAmount.value = "";
+
+            await loadOwnerUsers();
+
+            showOwnerNotification(
+                `Gave ${amount.toLocaleString()} coins to ${Number(
+                    data || 0
+                ).toLocaleString()} users.`,
+                "success"
+            );
+        }
+    );
+}
+
+
 // =========================================
 // OPEN OWNER PANEL
 // =========================================
@@ -1080,6 +1168,7 @@ document.addEventListener(
     }
 );
 
+
 // =========================================
 // UPDATE OWNER PANEL AFTER LOGIN
 // =========================================
@@ -1097,12 +1186,15 @@ supabaseClient.auth.onAuthStateChange(
         if (
             event === "SIGNED_OUT"
         ) {
+
             if (ownerPanelButton) {
+
                 ownerPanelButton.style.display =
                     "none";
             }
 
             if (ownerOverlay) {
+
                 ownerOverlay.classList.remove(
                     "open"
                 );

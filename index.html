@@ -141,17 +141,29 @@
 
     <div class="owner-toolbar">
 
-      <input
-        type="text"
-        id="ownerUserSearch"
-        placeholder="Search users..."
-      >
+  <input
+    type="text"
+    id="ownerUserSearch"
+    placeholder="Search users..."
+  >
 
-      <button id="refreshOwnerUsers">
-        ↻ Refresh
-      </button>
+  <input
+    type="number"
+    id="ownerGiveAllAmount"
+    min="1"
+    step="1"
+    placeholder="Coins for everyone"
+  >
 
-    </div>
+  <button id="ownerGiveAll">
+    🪙 Give All
+  </button>
+
+  <button id="refreshOwnerUsers">
+    ↻ Refresh
+  </button>
+
+</div>
 
     <div id="ownerUserList" class="owner-user-list">
 
