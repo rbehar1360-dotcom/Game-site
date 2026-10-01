@@ -40,6 +40,9 @@ const profileAchievements =
 const profileMessageButton =
     document.getElementById("profileMessageButton");
 
+const profileGiveCoinsButton =
+    document.getElementById("profileGiveCoinsButton");
+
 let currentProfileUser = null;
 
 
@@ -290,7 +293,10 @@ async function openUserProfile(
         `;
     }
 
-    
+    if (profileGiveCoinsButton) {
+        profileGiveCoinsButton.style.display =
+            "none";
+    }
 
     // If leaderboard did not provide the UUID,
     // try finding the user by username.
@@ -463,8 +469,6 @@ async function openUserProfile(
         recentGames
     );
 
-   
-
     const currentUser =
         await getCurrentUser();
 
@@ -484,6 +488,187 @@ async function openUserProfile(
                 "block";
 
         }
+
+    }
+
+    if (profileGiveCoinsButton) {
+
+        if (
+            currentUser &&
+            currentUser.id !== data.user_id
+        ) {
+
+            profileGiveCoinsButton.style.display =
+                "block";
+
+        } else {
+
+            profileGiveCoinsButton.style.display =
+                "none";
+
+        }
+
+    }
+
+}
+
+
+// =========================================
+// GIVE COINS
+// =========================================
+
+async function giveCoinsToProfileUser() {
+
+    if (!currentProfileUser) {
+        return;
+    }
+
+    const currentUser =
+        await getCurrentUser();
+
+    if (!currentUser) {
+
+        closeUserProfile();
+
+        if (loginOverlay) {
+            loginOverlay.classList.add("open");
+        }
+
+        return;
+    }
+
+    if (
+        currentUser.id ===
+        currentProfileUser.id
+    ) {
+        return;
+    }
+
+    const amountInput =
+        window.prompt(
+            `How many coins do you want to give ${currentProfileUser.username}?`
+        );
+
+    if (amountInput === null) {
+        return;
+    }
+
+    const amount =
+        Number(
+            amountInput.trim()
+        );
+
+    if (
+        !Number.isInteger(amount) ||
+        amount <= 0
+    ) {
+
+        if (typeof showOwnerNotification === "function") {
+
+            showOwnerNotification(
+                "Enter a valid whole number.",
+                "error"
+            );
+
+        } else {
+
+            alert(
+                "Enter a valid whole number."
+            );
+
+        }
+
+        return;
+    }
+
+    const confirmed =
+        window.confirm(
+            `Give ${amount.toLocaleString()} coins to ${currentProfileUser.username}?`
+        );
+
+    if (!confirmed) {
+        return;
+    }
+
+    if (profileGiveCoinsButton) {
+
+        profileGiveCoinsButton.disabled =
+            true;
+
+        profileGiveCoinsButton.textContent =
+            "Sending...";
+
+    }
+
+    const { data, error } =
+        await supabaseClient.rpc(
+            "transfer_coins",
+            {
+                target_user_id:
+                    currentProfileUser.id,
+
+                amount:
+                    amount
+            }
+        );
+
+    if (profileGiveCoinsButton) {
+
+        profileGiveCoinsButton.disabled =
+            false;
+
+        profileGiveCoinsButton.textContent =
+            "🪙 Give Coins";
+
+    }
+
+    if (error) {
+
+        console.error(
+            "Coin transfer failed:",
+            error
+        );
+
+        if (typeof showOwnerNotification === "function") {
+
+            showOwnerNotification(
+                error.message ||
+                "Could not transfer coins.",
+                "error"
+            );
+
+        } else {
+
+            alert(
+                error.message ||
+                "Could not transfer coins."
+            );
+
+        }
+
+        return;
+    }
+
+    if (
+        typeof loadCoinBalance === "function"
+    ) {
+
+        await loadCoinBalance();
+
+    }
+
+    if (typeof showOwnerNotification === "function") {
+
+        showOwnerNotification(
+            `Gave ${amount.toLocaleString()} coins to ${currentProfileUser.username}.`,
+            "success"
+        );
+
+    } else {
+
+        alert(
+            `Gave ${amount.toLocaleString()} coins to ${currentProfileUser.username}.`
+        );
 
     }
 
@@ -634,4 +819,20 @@ if (profileMessageButton) {
     );
 
 }
+
+
+// =========================================
+// GIVE COINS FROM PROFILE
+// =========================================
+
+if (profileGiveCoinsButton) {
+
+    profileGiveCoinsButton.addEventListener(
+        "click",
+        giveCoinsToProfileUser
+    );
+
+}
+
+
 // =========================================
