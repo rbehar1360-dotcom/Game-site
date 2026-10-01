@@ -76,6 +76,15 @@
 
     const gameId = getGameId();
 
+    window.gameId = gameId;
+
+    const currentScript = document.currentScript;
+    if (currentScript && currentScript.src) {
+        const commentsScript = document.createElement("script");
+        commentsScript.src = new URL("comments.js", currentScript.src).href;
+        document.head.appendChild(commentsScript);
+    }
+
     if (!gameId) {
         console.warn("⏱️ Could not determine game ID.");
         return;
