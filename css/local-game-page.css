@@ -1,0 +1,134 @@
+body {
+    min-height: 100vh;
+    margin: 0;
+    color: var(--text);
+    font-family: Arial, sans-serif;
+    background: linear-gradient(135deg, var(--background-1), var(--background-2), var(--background-3));
+}
+
+.header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 15px 25px;
+    background: var(--header);
+    border-bottom: 1px solid var(--accent);
+    backdrop-filter: blur(10px);
+}
+
+.header h1 {
+    margin: 0;
+    font-size: 20px;
+}
+
+.header a {
+    color: var(--accent);
+    font-weight: bold;
+    text-decoration: none;
+}
+
+.header a:hover {
+    text-decoration: underline;
+}
+
+.game-wrapper {
+    width: 95%;
+    max-width: 1200px;
+    margin: 30px auto;
+}
+
+.game-container {
+    position: relative;
+    overflow: hidden;
+    background: #000;
+    border-radius: 12px;
+    box-shadow: 0 10px 30px var(--shadow);
+}
+
+.game-container iframe {
+    display: block;
+    width: 100%;
+    height: 70vh;
+    border: 0;
+    background: #000;
+}
+
+.game-container.css-fullscreen {
+    position: fixed;
+    z-index: 999999;
+    inset: 0;
+    width: 100vw;
+    height: 100vh;
+    max-width: none;
+    margin: 0;
+    border-radius: 0;
+    box-shadow: none;
+}
+
+.game-container.css-fullscreen iframe {
+    width: 100%;
+    height: 100%;
+}
+
+.loading {
+    position: absolute;
+    z-index: 1;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #fff;
+    background: #000;
+    font-size: 18px;
+}
+
+.fullscreen-exit {
+    position: absolute;
+    z-index: 2;
+    top: 15px;
+    right: 15px;
+    display: none;
+    padding: 8px 12px;
+    color: #fff;
+    background: rgba(0, 0, 0, 0.75);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    border-radius: 8px;
+    cursor: pointer;
+}
+
+.game-container.css-fullscreen .fullscreen-exit {
+    display: block;
+}
+
+.controls {
+    display: flex;
+    justify-content: center;
+    gap: 15px;
+    padding: 15px;
+}
+
+.controls button {
+    padding: 10px 18px;
+    color: #001018;
+    background: var(--accent);
+    border: 0;
+    border-radius: 8px;
+    font-size: 15px;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+.controls button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 0 15px var(--glow);
+}
+
+@media (max-width: 800px) {
+    .header h1 {
+        font-size: 16px;
+    }
+
+    .game-container iframe {
+        height: 60vh;
+    }
+}

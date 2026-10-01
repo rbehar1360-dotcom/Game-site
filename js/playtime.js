@@ -68,7 +68,29 @@
             "VolleyRandom.html": "Volley Random",
             "BoxingRandom.html": "Boxing Random",
             "BlackJack.html": "Black Jack",
-            "BasketBallFrvr.html": "BasketBallFrvr"
+            "BasketBallFrvr.html": "BasketBallFrvr",
+            "BitPlanes.html": "BitPlanes",
+            "BobTheRobber.html": "BobTheRobber",
+            "DogeMiner.html": "DogeMiner",
+            "DogeMiner2.html": "DogeMiner2",
+            "FruitNinja.html": "FruitNinja",
+            "JohnnyTrigger.html": "JohnnyTrigger",
+            "MotoX3m2.html": "MotoX3m2",
+            "MotoX3m3.html": "MotoX3m3",
+            "MrMine.html": "MrMine",
+            "RoofTopSnipers.html": "RoofTopSnipers",
+            "RoofTopSnipers2.html": "RoofTopSnipers2",
+            "Run3.html": "Run3",
+            "Wheely.html": "Wheely",
+            "Wheely2.html": "Wheely2",
+            "Wheely3.html": "Wheely3",
+            "Wheely4.html": "Wheely4",
+            "Wheely5.html": "Wheely5",
+            "Wheely6.html": "Wheely6",
+            "Wheely7.html": "Wheely7",
+            "Wheely8.html": "Wheely8",
+            "WorldsHardestGame.html": "WorldsHardestGame",
+            "YouVS100Skibidi.html": "YouVS100Skibidi"
         };
 
         return gameMap[filename] || null;
