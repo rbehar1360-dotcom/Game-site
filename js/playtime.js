@@ -105,6 +105,10 @@
         const commentsScript = document.createElement("script");
         commentsScript.src = new URL("comments.js", currentScript.src).href;
         document.head.appendChild(commentsScript);
+
+        const localGamePageScript = document.createElement("script");
+        localGamePageScript.src = new URL("local-game-page.js", currentScript.src).href;
+        document.head.appendChild(localGamePageScript);
     }
 
     if (!gameId) {
