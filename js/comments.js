@@ -932,46 +932,40 @@
                             "Delete",
                             "comment-action comment-delete",
                             async () => {
-                                if (
-                                    !confirm(
-                                        "Delete this comment?"
-                                    )
-                                ) {
-                                    return;
-                                }
+    if (!confirm("Delete this comment?")) {
+        return;
+    }
 
-                                const { error } =
-                                    await supabase
-                                        .from(
-                                            "game_comments"
-                                        )
-                                        .update({
-                                            deleted_at:
-                                                new Date().toISOString(),
-                                            comment: ""
-                                        })
-                                        .eq(
-                                            "id",
-                                            comment.id
-                                        )
-                                        .eq(
-                                            "user_id",
-                                            currentUser.id
-                                        );
+    const { data, error } = await supabase
+        .from("game_comments")
+        .update({
+            deleted_at: new Date().toISOString(),
+            comment: ""
+        })
+        .eq("id", comment.id)
+        .eq("user_id", currentUser.id)
+        .select();
 
-                                if (error) {
-                                    console.error(
-                                        "DELETE ERROR:",
-                                        error
-                                    );
+    if (error) {
+        console.error("DELETE ERROR:", error);
+        showMessage("Could not delete comment.");
+        return;
+    }
 
-                                    showMessage(
-                                        "Could not delete comment."
-                                    );
-                                } else {
-                                    await loadComments();
-                                }
-                            }
+    if (!data || data.length === 0) {
+        console.error("DELETE ERROR: Update affected 0 rows.", {
+            commentId: comment.id,
+            currentUserId: currentUser.id
+        });
+
+        showMessage(
+            "Comment could not be deleted. Check your Supabase RLS policy."
+        );
+        return;
+    }
+
+    await loadComments();
+}
                         )
                     );
                 }
