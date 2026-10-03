@@ -28,7 +28,10 @@
         const supabase = window.supabaseClient;
         const gameId = getGameId();
 
-        if (!supabase) return;
+        if (!supabase) {
+            console.error("COMMENTS: Supabase client not found.");
+            return;
+        }
 
         const section = document.createElement("section");
         section.className = "comments-section";
@@ -40,24 +43,49 @@
                     <h2>Game Discussion</h2>
                     <p>Share strategies, reactions, and moments from the game.</p>
                 </div>
-                <span class="community-count" id="commentCount">0 posts</span>
+
+                <span class="community-count" id="commentCount">
+                    0 posts
+                </span>
             </div>
 
             <div class="community-composer" id="commentForm">
                 <div class="composer-avatar" id="composerAvatar">?</div>
 
                 <div class="composer-main">
-                    <textarea id="commentInput"
+                    <textarea
+                        id="commentInput"
                         maxlength="1000"
-                        placeholder="What's on your mind?"></textarea>
+                        placeholder="What's on your mind?"
+                    ></textarea>
 
-                    <div class="composer-preview" id="mediaPreview"></div>
+                    <div
+                        class="composer-preview"
+                        id="mediaPreview"
+                    ></div>
 
                     <div class="composer-toolbar">
                         <div class="composer-tools">
-                            <button type="button" id="emojiButton">😊 Emoji</button>
-                            <button type="button" id="imageButton">▧ Image</button>
-                            <button type="button" id="gifButton">GIF</button>
+                            <button
+                                type="button"
+                                id="emojiButton"
+                            >
+                                😊 Emoji
+                            </button>
+
+                            <button
+                                type="button"
+                                id="imageButton"
+                            >
+                                ▧ Image
+                            </button>
+
+                            <button
+                                type="button"
+                                id="gifButton"
+                            >
+                                GIF
+                            </button>
 
                             <input
                                 type="file"
@@ -76,15 +104,26 @@
                         </button>
                     </div>
 
-                    <div class="composer-extras" id="composerExtras" hidden></div>
+                    <div
+                        class="composer-extras"
+                        id="composerExtras"
+                        hidden
+                    ></div>
 
-                    <div class="composer-count" id="commentCharacters">
+                    <div
+                        class="composer-count"
+                        id="commentCharacters"
+                    >
                         0 / 1000
                     </div>
                 </div>
             </div>
 
-            <div class="community-login" id="commentLoginMessage" hidden>
+            <div
+                class="community-login"
+                id="commentLoginMessage"
+                hidden
+            >
                 Log in to join the discussion.
             </div>
 
@@ -94,14 +133,20 @@
                     <span id="discussionCount">0</span>
                 </h3>
 
-                <select id="commentSort" aria-label="Sort comments">
+                <select
+                    id="commentSort"
+                    aria-label="Sort comments"
+                >
                     <option value="newest">Newest</option>
                     <option value="oldest">Oldest</option>
                     <option value="top">Most reactions</option>
                 </select>
             </div>
 
-            <div class="comments-list" id="commentsList">
+            <div
+                class="comments-list"
+                id="commentsList"
+            >
                 <div class="comments-empty">
                     Loading discussion...
                 </div>
@@ -144,12 +189,6 @@
             "😢"
         ];
 
-        /*
-         * Built-in GIFs.
-         *
-         * These are simply starter GIF URLs.
-         * Users can also save their own GIF URLs to Supabase.
-         */
         const builtInGifs = [
             {
                 name: "Hype",
@@ -196,14 +235,23 @@
 
         function formatDate(value) {
             const date = new Date(value);
+
             const seconds = Math.floor(
                 (Date.now() - date.getTime()) / 1000
             );
 
             if (seconds < 60) return "Just now";
-            if (seconds < 3600) return `${Math.floor(seconds / 60)}m ago`;
-            if (seconds < 86400) return `${Math.floor(seconds / 3600)}h ago`;
-            if (seconds < 604800) return `${Math.floor(seconds / 86400)}d ago`;
+            if (seconds < 3600) {
+                return `${Math.floor(seconds / 60)}m ago`;
+            }
+
+            if (seconds < 86400) {
+                return `${Math.floor(seconds / 3600)}h ago`;
+            }
+
+            if (seconds < 604800) {
+                return `${Math.floor(seconds / 86400)}d ago`;
+            }
 
             return date.toLocaleDateString();
         }
@@ -347,7 +395,11 @@
                 });
 
             if (error) {
-                console.error("SAVED GIF LOAD ERROR:", error);
+                console.error(
+                    "SAVED GIF LOAD ERROR:",
+                    error
+                );
+
                 savedGifs = [];
                 return;
             }
@@ -373,7 +425,11 @@
                 });
 
             if (error && error.code !== "23505") {
-                console.error("SAVE GIF ERROR:", error);
+                console.error(
+                    "SAVE GIF ERROR:",
+                    error
+                );
+
                 showMessage("Could not save that GIF.");
                 return;
             }
@@ -391,7 +447,11 @@
                 .eq("user_id", currentUser.id);
 
             if (error) {
-                console.error("DELETE GIF ERROR:", error);
+                console.error(
+                    "DELETE GIF ERROR:",
+                    error
+                );
+
                 showMessage("Could not remove GIF.");
                 return;
             }
@@ -457,6 +517,7 @@
 
                 if (!savedGifs.length) {
                     const empty = document.createElement("div");
+
                     empty.className = "comments-empty";
                     empty.textContent =
                         "You haven't saved any GIFs yet.";
@@ -466,14 +527,20 @@
                 }
 
                 savedGifs.forEach(gif => {
-                    const wrapper = document.createElement("div");
+                    const wrapper =
+                        document.createElement("div");
+
                     wrapper.className = "gif-card";
 
-                    const button = document.createElement("button");
+                    const button =
+                        document.createElement("button");
+
                     button.type = "button";
                     button.className = "gif-card";
 
-                    const image = document.createElement("img");
+                    const image =
+                        document.createElement("img");
+
                     image.src = gif.gif_url;
                     image.alt = "Saved GIF";
                     image.loading = "lazy";
@@ -484,7 +551,9 @@
                         selectGif(gif.gif_url);
                     };
 
-                    const remove = document.createElement("button");
+                    const remove =
+                        document.createElement("button");
+
                     remove.type = "button";
                     remove.className = "gif-remove";
                     remove.textContent = "×";
@@ -548,10 +617,12 @@
             extras.className = "composer-extras gif-entry";
 
             const label = document.createElement("label");
+
             label.textContent =
                 "Paste a direct GIF URL. It will be saved to My GIFs.";
 
-            const urlInput = document.createElement("input");
+            const urlInput =
+                document.createElement("input");
 
             urlInput.type = "url";
             urlInput.placeholder =
@@ -569,6 +640,7 @@
                         showMessage(
                             "Enter a valid GIF URL."
                         );
+
                         return;
                     }
 
@@ -634,12 +706,13 @@
             const path =
                 `${currentUser.id}/${crypto.randomUUID()}.${extension}`;
 
-            const { error } = await supabase.storage
-                .from("comment-media")
-                .upload(path, file, {
-                    contentType: file.type,
-                    upsert: false
-                });
+            const { error } =
+                await supabase.storage
+                    .from("comment-media")
+                    .upload(path, file, {
+                        contentType: file.type,
+                        upsert: false
+                    });
 
             if (error) throw error;
 
@@ -680,41 +753,65 @@
 
             const existing = reactions.find(
                 reaction =>
-                    String(reaction.comment_id) ===
-                        String(commentId) &&
+                    String(reaction.comment_id) === String(commentId) &&
                     reaction.user_id === currentUser.id &&
                     reaction.reaction === emoji
             );
 
-            let result;
-
             if (existing) {
-                result = await supabase
+                const { error } = await supabase
                     .from("game_comment_reactions")
                     .delete()
-                    .eq("id", existing.id);
+                    .eq("id", existing.id)
+                    .eq("user_id", currentUser.id);
+
+                if (error) {
+                    console.error(
+                        "REACTION ERROR:",
+                        error
+                    );
+
+                    showMessage(
+                        "Could not update reaction."
+                    );
+
+                    return;
+                }
+
+                reactions = reactions.filter(
+                    reaction =>
+                        reaction.id !== existing.id
+                );
             } else {
-                result = await supabase
-                    .from("game_comment_reactions")
-                    .insert({
-                        comment_id: commentId,
-                        user_id: currentUser.id,
-                        reaction: emoji
-                    });
+                const { data, error } =
+                    await supabase
+                        .from("game_comment_reactions")
+                        .insert({
+                            comment_id: commentId,
+                            user_id: currentUser.id,
+                            reaction: emoji
+                        })
+                        .select()
+                        .single();
+
+                if (error) {
+                    console.error(
+                        "REACTION ERROR:",
+                        error
+                    );
+
+                    showMessage(
+                        "Could not update reaction."
+                    );
+
+                    return;
+                }
+
+                if (data) {
+                    reactions.push(data);
+                }
             }
 
-            if (result.error) {
-                console.error(
-                    "REACTION ERROR:",
-                    result.error
-                );
-                showMessage(
-                    "Could not update reaction."
-                );
-                return;
-            }
-
-            await loadReactions();
             renderComments();
         }
 
@@ -807,9 +904,7 @@
 
                 if (url) {
                     const image =
-                        document.createElement(
-                            "img"
-                        );
+                        document.createElement("img");
 
                     image.className =
                         "comment-media";
@@ -834,9 +929,7 @@
 
                 if (url) {
                     const image =
-                        document.createElement(
-                            "img"
-                        );
+                        document.createElement("img");
 
                     image.className =
                         "comment-media comment-gif";
@@ -851,9 +944,7 @@
 
             if (!comment.deleted_at) {
                 const actions =
-                    document.createElement(
-                        "div"
-                    );
+                    document.createElement("div");
 
                 actions.className =
                     "comment-actions";
@@ -932,40 +1023,60 @@
                             "Delete",
                             "comment-action comment-delete",
                             async () => {
-    if (!confirm("Delete this comment?")) {
-        return;
-    }
+                                if (
+                                    !confirm(
+                                        "Delete this comment?"
+                                    )
+                                ) {
+                                    return;
+                                }
 
-    const { data, error } = await supabase
-        .from("game_comments")
-        .update({
-            deleted_at: new Date().toISOString(),
-            comment: ""
-        })
-        .eq("id", comment.id)
-        .eq("user_id", currentUser.id)
-        .select();
+                                const { data, error } =
+                                    await supabase
+                                        .from("game_comments")
+                                        .update({
+                                            deleted_at:
+                                                new Date().toISOString(),
+                                            comment: ""
+                                        })
+                                        .eq(
+                                            "id",
+                                            comment.id
+                                        )
+                                        .eq(
+                                            "user_id",
+                                            currentUser.id
+                                        )
+                                        .select()
+                                        .single();
 
-    if (error) {
-        console.error("DELETE ERROR:", error);
-        showMessage("Could not delete comment.");
-        return;
-    }
+                                if (error) {
+                                    console.error(
+                                        "DELETE ERROR:",
+                                        error
+                                    );
 
-    if (!data || data.length === 0) {
-        console.error("DELETE ERROR: Update affected 0 rows.", {
-            commentId: comment.id,
-            currentUserId: currentUser.id
-        });
+                                    showMessage(
+                                        "Could not delete comment."
+                                    );
 
-        showMessage(
-            "Comment could not be deleted. Check your Supabase RLS policy."
-        );
-        return;
-    }
+                                    return;
+                                }
 
-    await loadComments();
-}
+                                const index =
+                                    comments.findIndex(
+                                        c =>
+                                            String(c.id) ===
+                                            String(data.id)
+                                    );
+
+                                if (index !== -1) {
+                                    comments[index] =
+                                        data;
+                                }
+
+                                renderComments();
+                            }
                         )
                     );
                 }
@@ -981,12 +1092,14 @@
 
             const roots =
                 comments.filter(
-                    comment => !comment.parent_id
+                    comment =>
+                        !comment.parent_id
                 );
 
             const children =
                 comments.filter(
-                    comment => comment.parent_id
+                    comment =>
+                        comment.parent_id
                 );
 
             const sort =
@@ -997,6 +1110,34 @@
                     (a, b) =>
                         new Date(a.created_at) -
                         new Date(b.created_at)
+                );
+            } else if (sort === "top") {
+                roots.sort(
+                    (a, b) => {
+                        const aCount =
+                            reactionSummary(a.id);
+
+                        const bCount =
+                            reactionSummary(b.id);
+
+                        const aTotal =
+                            [...aCount.values()]
+                                .reduce(
+                                    (sum, value) =>
+                                        sum + value,
+                                    0
+                                );
+
+                        const bTotal =
+                            [...bCount.values()]
+                                .reduce(
+                                    (sum, value) =>
+                                        sum + value,
+                                    0
+                                );
+
+                        return bTotal - aTotal;
+                    }
                 );
             } else {
                 roots.sort(
@@ -1139,6 +1280,8 @@
                 );
 
             await loadSavedGifs();
+
+            renderComments();
         }
 
         async function submitComment() {
@@ -1166,8 +1309,14 @@
             }
 
             postButton.disabled = true;
+
             postButton.textContent =
-                "Posting...";
+                replyTo
+                    ? "Replying..."
+                    : "Posting...";
+
+            const replyParent =
+                replyTo;
 
             try {
                 let imageUrl = null;
@@ -1179,7 +1328,7 @@
                         );
                 }
 
-                const { error } =
+                const { data, error } =
                     await supabase
                         .from("game_comments")
                         .insert({
@@ -1192,17 +1341,33 @@
                                 ),
                             comment: text,
                             parent_id:
-                                replyTo
-                                    ? replyTo.id
+                                replyParent
+                                    ? replyParent.id
                                     : null,
                             image_url:
                                 imageUrl,
                             gif_url:
                                 selectedGif ||
                                 null
-                        });
+                        })
+                        .select()
+                        .single();
 
-                if (error) throw error;
+                if (error) {
+                    throw error;
+                }
+
+                if (
+                    data &&
+                    !comments.some(
+                        c =>
+                            String(c.id) ===
+                            String(data.id)
+                    )
+                ) {
+                    comments.push(data);
+                    renderComments();
+                }
 
                 input.value = "";
 
@@ -1224,8 +1389,6 @@
 
                 setComposerMedia();
                 closeExtras();
-
-                await loadComments();
             } catch (error) {
                 console.error(
                     "COMMENT POST ERROR:",
@@ -1301,28 +1464,230 @@
                 .channel(
                     `community-comments-${gameId}`
                 )
+
                 .on(
                     "postgres_changes",
                     {
-                        event: "*",
+                        event: "INSERT",
                         schema: "public",
                         table: "game_comments",
                         filter:
                             `game_id=eq.${gameId}`
                     },
-                    loadComments
+                    payload => {
+                        const newComment =
+                            payload.new;
+
+                        if (
+                            !comments.some(
+                                c =>
+                                    String(c.id) ===
+                                    String(
+                                        newComment.id
+                                    )
+                            )
+                        ) {
+                            comments.push(
+                                newComment
+                            );
+
+                            renderComments();
+                        }
+                    }
                 )
+
                 .on(
                     "postgres_changes",
                     {
-                        event: "*",
+                        event: "UPDATE",
+                        schema: "public",
+                        table: "game_comments",
+                        filter:
+                            `game_id=eq.${gameId}`
+                    },
+                    payload => {
+                        const updatedComment =
+                            payload.new;
+
+                        const index =
+                            comments.findIndex(
+                                c =>
+                                    String(c.id) ===
+                                    String(
+                                        updatedComment.id
+                                    )
+                            );
+
+                        if (index !== -1) {
+                            comments[index] =
+                                updatedComment;
+
+                            renderComments();
+                        } else if (
+                            updatedComment.game_id ===
+                            gameId
+                        ) {
+                            comments.push(
+                                updatedComment
+                            );
+
+                            renderComments();
+                        }
+                    }
+                )
+
+                .on(
+                    "postgres_changes",
+                    {
+                        event: "DELETE",
+                        schema: "public",
+                        table: "game_comments"
+                    },
+                    payload => {
+                        const deletedId =
+                            payload.old?.id;
+
+                        if (
+                            deletedId == null
+                        ) {
+                            return;
+                        }
+
+                        const oldLength =
+                            comments.length;
+
+                        comments =
+                            comments.filter(
+                                comment =>
+                                    String(
+                                        comment.id
+                                    ) !==
+                                    String(
+                                        deletedId
+                                    )
+                            );
+
+                        if (
+                            comments.length !==
+                            oldLength
+                        ) {
+                            renderComments();
+                        }
+                    }
+                )
+
+                .on(
+                    "postgres_changes",
+                    {
+                        event: "INSERT",
                         schema: "public",
                         table:
                             "game_comment_reactions"
                     },
-                    loadComments
+                    payload => {
+                        const reaction =
+                            payload.new;
+
+                        if (
+                            !reactions.some(
+                                r =>
+                                    String(r.id) ===
+                                    String(
+                                        reaction.id
+                                    )
+                            )
+                        ) {
+                            reactions.push(
+                                reaction
+                            );
+
+                            renderComments();
+                        }
+                    }
                 )
-                .subscribe();
+
+                .on(
+                    "postgres_changes",
+                    {
+                        event: "DELETE",
+                        schema: "public",
+                        table:
+                            "game_comment_reactions"
+                    },
+                    payload => {
+                        const deletedId =
+                            payload.old?.id;
+
+                        if (
+                            deletedId == null
+                        ) {
+                            return;
+                        }
+
+                        reactions =
+                            reactions.filter(
+                                reaction =>
+                                    String(
+                                        reaction.id
+                                    ) !==
+                                    String(
+                                        deletedId
+                                    )
+                            );
+
+                        renderComments();
+                    }
+                )
+
+                .on(
+                    "postgres_changes",
+                    {
+                        event: "UPDATE",
+                        schema: "public",
+                        table:
+                            "game_comment_reactions"
+                    },
+                    payload => {
+                        const updatedReaction =
+                            payload.new;
+
+                        const index =
+                            reactions.findIndex(
+                                reaction =>
+                                    String(
+                                        reaction.id
+                                    ) ===
+                                    String(
+                                        updatedReaction.id
+                                    )
+                            );
+
+                        if (index !== -1) {
+                            reactions[index] =
+                                updatedReaction;
+
+                            renderComments();
+                        }
+                    }
+                )
+
+                .subscribe(
+                    status => {
+                        console.log(
+                            "COMMENTS REALTIME:",
+                            status
+                        );
+
+                        if (
+                            status ===
+                            "CHANNEL_ERROR"
+                        ) {
+                            console.error(
+                                "Comments Realtime failed. Make sure game_comments and game_comment_reactions are enabled in Supabase Realtime."
+                            );
+                        }
+                    }
+                );
 
         window.addEventListener(
             "beforeunload",
