@@ -1023,60 +1023,29 @@
                             "Delete",
                             "comment-action comment-delete",
                             async () => {
-                                if (
-                                    !confirm(
-                                        "Delete this comment?"
-                                    )
-                                ) {
-                                    return;
-                                }
+    if (!confirm("Delete this comment?")) {
+        return;
+    }
 
-                                const { data, error } =
-                                    await supabase
-                                        .from("game_comments")
-                                        .update({
-                                            deleted_at:
-                                                new Date().toISOString(),
-                                            comment: ""
-                                        })
-                                        .eq(
-                                            "id",
-                                            comment.id
-                                        )
-                                        .eq(
-                                            "user_id",
-                                            currentUser.id
-                                        )
-                                        .select()
-                                        .single();
+    const { error } = await supabase
+        .from("game_comments")
+        .delete()
+        .eq("id", comment.id)
+        .eq("user_id", currentUser.id);
 
-                                if (error) {
-                                    console.error(
-                                        "DELETE ERROR:",
-                                        error
-                                    );
+    if (error) {
+        console.error("DELETE ERROR:", error);
+        showMessage("Could not delete comment.");
+        return;
+    }
 
-                                    showMessage(
-                                        "Could not delete comment."
-                                    );
+    // Remove it immediately for the person who deleted it.
+    comments = comments.filter(
+        c => String(c.id) !== String(comment.id)
+    );
 
-                                    return;
-                                }
-
-                                const index =
-                                    comments.findIndex(
-                                        c =>
-                                            String(c.id) ===
-                                            String(data.id)
-                                    );
-
-                                if (index !== -1) {
-                                    comments[index] =
-                                        data;
-                                }
-
-                                renderComments();
-                            }
+    renderComments();
+}
                         )
                     );
                 }
