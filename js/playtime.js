@@ -238,11 +238,10 @@
                 .on("postgres_changes", {
                     event: "INSERT",
                     schema: "public",
-                    table: "private_messages",
-                    filter: `recipient_id=eq.${user.id}`
+                    table: "private_messages"
                 }, messageEvent => {
                     const message = messageEvent.new;
-                    if (!message) return;
+                    if (!message || message.recipient_id !== user.id) return;
 
                     const preview = typeof message.message === "string" &&
                         message.message.startsWith("[[GIF]]")
