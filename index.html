@@ -43,10 +43,16 @@
     <button id="chatButton" class="chat-button">
       💬 Chat
     </button>
+    <button id="messagesButton" class="messages-header-button" type="button">
+      Texting
+      <span id="unreadMessagesBadge" class="unread-messages-badge">0</span>
+    </button>
 
     <button id="loginButton" class="login-button">
       👤 Login
     </button>
+
+    
 
     <button id="settingsButton" class="settings-button">
       ⚙️
@@ -107,12 +113,6 @@
     <button id="logoutButton">
       🚪 Logout
     </button>
-
-    <button id="messagesButton">
-      ✉️ Messages
-      <span id="unreadMessagesBadge" class="unread-messages-badge">0</span>
-    </button>
-
   </div>
 
 </header>
@@ -910,19 +910,23 @@
           </div>
 
 
-          <div class="settings-option">
+          <div class="settings-option message-notification-option">
 
             <div>
-              <strong>Private messages</strong>
+              <strong>Message notifications</strong>
 
               <p>
-                Notify you when someone sends you a message.
+                Get browser notifications when a new text arrives.
               </p>
             </div>
 
-            <span class="coming-soon">
-              Coming Soon
-            </span>
+            <button
+              id="enableMessageNotifications"
+              class="message-notification-setting"
+              type="button"
+            >
+              🔔 Enable Notifications
+            </button>
 
           </div>
 
@@ -1459,7 +1463,7 @@
 
       <div>
 
-        <h2>✉️ Messages</h2>
+        <h2>Texting</h2>
 
         <span class="messages-subtitle">
           Private conversations
@@ -1467,12 +1471,18 @@
 
       </div>
 
-      <button
-        id="closeMessages"
-        class="close-messages"
-      >
-        ✕
-      </button>
+      <div class="messages-header-actions">
+
+        <button
+          id="closeMessages"
+          class="close-messages"
+          type="button"
+          aria-label="Close messages"
+        >
+          ✕
+        </button>
+
+      </div>
 
     </div>
 
@@ -1568,9 +1578,10 @@
           <input
             type="text"
             id="privateMessageInput"
-            placeholder="Type a message..."
+            placeholder="Message..."
             maxlength="2000"
             autocomplete="off"
+            enterkeyhint="send"
             disabled
           >
 
@@ -1578,6 +1589,8 @@
             type="submit"
             disabled
             id="privateMessageSend"
+            class="message-send-button"
+            aria-label="Send message"
           >
             ➤
           </button>
@@ -3214,6 +3227,13 @@
 
 </div>
 
+
+<div
+  id="messageNotificationContainer"
+  class="message-notification-container"
+  aria-live="polite"
+  aria-atomic="false"
+></div>
 
 </body>
 </html>

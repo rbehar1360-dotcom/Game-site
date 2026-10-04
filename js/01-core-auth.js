@@ -1061,6 +1061,11 @@ signupButton.addEventListener("click", function() {
 
 });
 
+if (new URLSearchParams(window.location.search).get("signup") === "1") {
+    signupButton.click();
+    loginOverlay.classList.add("open");
+}
+
 // =========================================
 // SUPABASE AUTHENTICATION
 // =========================================

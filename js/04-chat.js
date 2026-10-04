@@ -50,11 +50,7 @@ chatOverlay.addEventListener("click", function (event) {
     }
 });
 
-const newMessageButton = document.getElementById("newMessageButton");
-
-if (newMessageButton) {
-    newMessageButton.addEventListener("click", async function () {
-        // =========================================
+// =========================================
 // NEW MESSAGE MODAL
 // =========================================
 
@@ -69,6 +65,12 @@ const newMessageError = document.getElementById("newMessageError");
 function openNewMessageModal() {
     if (!newMessageOverlay) return;
 
+    if (userCatalog) userCatalog.hidden = true;
+    if (newMessageForm) newMessageForm.hidden = false;
+    document.querySelector(".new-message-main-actions").hidden = false;
+    document.getElementById("newMessageTitle").textContent = "New Text";
+    document.getElementById("newMessageSubtitle").textContent =
+        "Find someone to start texting.";
     newMessageOverlay.classList.add("open");
     newMessageUsername.value = "";
     newMessageError.textContent = "";
@@ -84,6 +86,9 @@ function closeNewMessageModal() {
     newMessageOverlay.classList.remove("open");
     newMessageForm.reset();
     newMessageError.textContent = "";
+    if (userCatalog) userCatalog.hidden = true;
+    if (newMessageForm) newMessageForm.hidden = false;
+    document.querySelector(".new-message-main-actions").hidden = false;
 }
 
 if (newMessageButton) {
@@ -91,7 +96,7 @@ if (newMessageButton) {
         const user = await getCurrentUser();
 
         if (!user) {
-            alert("Please log in to use messages.");
+            alert("Please log in to use texting.");
             return;
         }
 
@@ -278,9 +283,9 @@ if (showUserCatalog) {
     showUserCatalog.addEventListener("click", async function () {
         document.getElementById("newMessageForm").hidden = true;
         document.querySelector(".new-message-main-actions").hidden = true;
-        document.getElementById("newMessageTitle").textContent = "Find a User";
+        document.getElementById("newMessageTitle").textContent = "Find someone";
         document.getElementById("newMessageSubtitle").textContent =
-            "Browse or search registered users.";
+            "Choose someone to start texting.";
 
         userCatalog.hidden = false;
         userCatalogSearch.value = "";
@@ -299,9 +304,9 @@ if (backToMessageSearch) {
         document.getElementById("newMessageForm").hidden = false;
         document.querySelector(".new-message-main-actions").hidden = false;
 
-        document.getElementById("newMessageTitle").textContent = "New Message";
+        document.getElementById("newMessageTitle").textContent = "New Text";
         document.getElementById("newMessageSubtitle").textContent =
-            "Search for a username or browse users.";
+            "Find someone to start texting.";
     });
 }
 
@@ -316,28 +321,6 @@ if (userCatalogSearch) {
         );
 
         renderUserCatalog(filteredUsers);
-    });
-}
-        if (!username || !username.trim()) {
-            return;
-        }
-
-        const user = await findUserByUsername(username.trim());
-
-        if (!user) {
-            alert("User not found.");
-            return;
-        }
-
-        const userId = user.id || user.user_id;
-        const foundUsername = user.username || username.trim();
-
-        if (!userId) {
-            alert("Could not find that user's ID.");
-            return;
-        }
-
-        await openPrivateConversation(userId, foundUsername);
     });
 }
 // =========================================

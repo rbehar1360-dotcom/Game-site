@@ -100,6 +100,261 @@
 
     window.gameId = gameId;
 
+    const signupReminderStorageKey = "gamehub-signup-reminder-seconds";
+    const signupReminderShownKey = "gamehub-signup-reminder-shown";
+    const signupReminderAfterSeconds = 15 * 60;
+    let gameNotificationChannel = null;
+    let gameNotificationUserId = null;
+
+    function getNotificationContainer() {
+        let container = document.getElementById("gameNotificationContainer");
+
+        if (!container) {
+            container = document.createElement("div");
+            container.id = "gameNotificationContainer";
+            container.className = "game-notification-container";
+            document.body.appendChild(container);
+        }
+
+        return container;
+    }
+
+    function showGameToast(title, message, kind = "info") {
+        const toast = document.createElement("div");
+        toast.className = `game-notification game-notification-${kind}`;
+
+        const content = document.createElement("div");
+        content.className = "game-notification-content";
+
+        const heading = document.createElement("strong");
+        heading.textContent = title;
+        content.appendChild(heading);
+
+        if (message) {
+            const preview = document.createElement("span");
+            preview.textContent = message;
+            content.appendChild(preview);
+        }
+
+        const closeButton = document.createElement("button");
+        closeButton.type = "button";
+        closeButton.className = "game-notification-close";
+        closeButton.setAttribute("aria-label", "Dismiss notification");
+        closeButton.textContent = "×";
+        closeButton.addEventListener("click", () => toast.remove());
+
+        toast.append(content, closeButton);
+        getNotificationContainer().prepend(toast);
+        requestAnimationFrame(() => toast.classList.add("show"));
+
+        window.setTimeout(() => {
+            toast.classList.remove("show");
+            window.setTimeout(() => toast.remove(), 250);
+        }, 6000);
+    }
+
+    function showSignupReminder() {
+        if (document.getElementById("gameSignupReminder")) return;
+
+        const overlay = document.createElement("div");
+        overlay.id = "gameSignupReminder";
+        overlay.className = "game-signup-reminder-overlay";
+        overlay.setAttribute("role", "dialog");
+        overlay.setAttribute("aria-modal", "true");
+        overlay.setAttribute("aria-labelledby", "gameSignupReminderTitle");
+
+        const dialog = document.createElement("div");
+        dialog.className = "game-signup-reminder";
+
+        const heading = document.createElement("h2");
+        heading.id = "gameSignupReminderTitle";
+        heading.textContent = "Keep your progress";
+
+        const description = document.createElement("p");
+        description.textContent = "If you play the site and want to earn rewards and save your progress, sign up for an account.";
+
+        const actions = document.createElement("div");
+        actions.className = "game-signup-reminder-actions";
+
+        const dismissButton = document.createElement("button");
+        dismissButton.type = "button";
+        dismissButton.className = "game-signup-reminder-dismiss";
+        dismissButton.textContent = "Not now";
+        dismissButton.addEventListener("click", () => overlay.remove());
+
+        const signupButton = document.createElement("button");
+        signupButton.type = "button";
+        signupButton.className = "game-signup-reminder-confirm";
+        signupButton.textContent = "Okay";
+        signupButton.addEventListener("click", () => {
+            const signupUrl = new URL("../index.html?signup=1", window.location.href);
+            const signupWindow = window.open(signupUrl.href, "_blank");
+
+            if (signupWindow) {
+                signupWindow.opener = null;
+            } else {
+                window.location.assign(signupUrl.href);
+            }
+        });
+
+        actions.append(dismissButton, signupButton);
+        dialog.append(heading, description, actions);
+        overlay.appendChild(dialog);
+        document.body.appendChild(overlay);
+        signupButton.focus();
+    }
+
+    async function setupGameNotifications() {
+        const supabase = getSupabase();
+        if (!supabase) return;
+
+        try {
+            const { data: { user }, error } = await supabase.auth.getUser();
+            if (error || !user) return;
+            if (gameNotificationUserId === user.id) return;
+
+            if (gameNotificationChannel) {
+                await supabase.removeChannel(gameNotificationChannel);
+            }
+
+            const { data: coinData } = await supabase
+                .from("user_coins")
+                .select("coins")
+                .eq("user_id", user.id)
+                .maybeSingle();
+            let lastCoinBalance = coinData ? Number(coinData.coins) || 0 : null;
+
+            const { data: publicUsers } = await supabase.rpc("get_public_users");
+            const usernameById = new Map(
+                (publicUsers || []).map(publicUser => [
+                    publicUser.id,
+                    publicUser.username || publicUser.name || "Someone"
+                ])
+            );
+
+            gameNotificationUserId = user.id;
+            gameNotificationChannel = supabase
+                .channel(`game-notifications-${user.id}`)
+                .on("postgres_changes", {
+                    event: "INSERT",
+                    schema: "public",
+                    table: "private_messages",
+                    filter: `recipient_id=eq.${user.id}`
+                }, messageEvent => {
+                    const message = messageEvent.new;
+                    if (!message) return;
+
+                    const preview = typeof message.message === "string" &&
+                        message.message.startsWith("[[GIF]]")
+                        ? "GIF"
+                        : (message.message || "").replace(/\s+/g, " ").trim();
+
+                    showGameToast(
+                        usernameById.get(message.sender_id) || "New message",
+                        preview,
+                        "message"
+                    );
+                })
+                .on("postgres_changes", {
+                    event: "UPDATE",
+                    schema: "public",
+                    table: "user_coins",
+                    filter: `user_id=eq.${user.id}`
+                }, coinEvent => {
+                    const newBalance = Number(coinEvent.new?.coins) || 0;
+                    const coinsEarned = lastCoinBalance === null
+                        ? 0
+                        : newBalance - lastCoinBalance;
+                    lastCoinBalance = newBalance;
+
+                    if (coinsEarned > 0) {
+                        showGameToast(`+${coinsEarned} coin${coinsEarned === 1 ? "" : "s"}`, "", "coin");
+                    }
+                })
+                .on("postgres_changes", {
+                    event: "INSERT",
+                    schema: "public",
+                    table: "user_coins",
+                    filter: `user_id=eq.${user.id}`
+                }, coinEvent => {
+                    const newBalance = Number(coinEvent.new?.coins) || 0;
+                    const coinsEarned = newBalance - (lastCoinBalance || 0);
+                    lastCoinBalance = newBalance;
+
+                    if (coinsEarned > 0) {
+                        showGameToast(`+${coinsEarned} coin${coinsEarned === 1 ? "" : "s"}`, "", "coin");
+                    }
+                })
+                .subscribe();
+        } catch (error) {
+            console.error("Game notifications could not be initialized:", error);
+        }
+    }
+
+    setupGameNotifications();
+    const supabase = getSupabase();
+    if (supabase) {
+        supabase.auth.onAuthStateChange(event => {
+            if (event === "SIGNED_IN") {
+                window.setTimeout(setupGameNotifications, 0);
+            } else if (event === "SIGNED_OUT" && gameNotificationChannel) {
+                const channel = gameNotificationChannel;
+                gameNotificationChannel = null;
+                gameNotificationUserId = null;
+                window.setTimeout(() => supabase.removeChannel(channel), 0);
+            }
+        });
+    }
+
+    function readSessionValue(key) {
+        try {
+            return sessionStorage.getItem(key);
+        } catch (_) {
+            return null;
+        }
+    }
+
+    function writeSessionValue(key, value) {
+        try {
+            sessionStorage.setItem(key, value);
+        } catch (_) {}
+    }
+
+    let signupReminderSeconds = Number(readSessionValue(signupReminderStorageKey)) || 0;
+    let signupReminderShown = readSessionValue(signupReminderShownKey) === "true";
+    let signupAuthCheckPending = false;
+
+    window.setInterval(async () => {
+        if (
+            document.visibilityState !== "visible" ||
+            !document.hasFocus() ||
+            signupReminderShown
+        ) return;
+
+        signupReminderSeconds += 1;
+        writeSessionValue(signupReminderStorageKey, String(signupReminderSeconds));
+
+        if (signupReminderSeconds < signupReminderAfterSeconds || signupAuthCheckPending) return;
+
+        const authClient = getSupabase();
+        if (!authClient) return;
+
+        signupAuthCheckPending = true;
+        try {
+            const { data: { session }, error } = await authClient.auth.getSession();
+            if (error) return;
+
+            signupReminderShown = true;
+            writeSessionValue(signupReminderShownKey, "true");
+
+            if (!session?.user) {
+                showSignupReminder();
+            }
+        } finally {
+            signupAuthCheckPending = false;
+        }
+    }, 1000);
+
     const currentScript = document.currentScript;
     if (currentScript && currentScript.src) {
         const commentsScript = document.createElement("script");
@@ -192,13 +447,7 @@
 // TRACKER LOOP
 // =========================================
 function isGameActive() {
-    const cssFullscreen =
-        document.querySelector(".game-container.css-fullscreen");
-
-    return (
-        document.visibilityState === "visible" ||
-        cssFullscreen !== null
-    );
+    return document.visibilityState === "visible" && document.hasFocus();
 }
 async function trackerLoop() {
 
