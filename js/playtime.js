@@ -224,36 +224,9 @@
                 .maybeSingle();
             let lastCoinBalance = coinData ? Number(coinData.coins) || 0 : null;
 
-            const { data: publicUsers } = await supabase.rpc("get_public_users");
-            const usernameById = new Map(
-                (publicUsers || []).map(publicUser => [
-                    publicUser.id,
-                    publicUser.username || publicUser.name || "Someone"
-                ])
-            );
-
             gameNotificationUserId = user.id;
             gameNotificationChannel = supabase
                 .channel(`game-notifications-${user.id}`)
-                .on("postgres_changes", {
-                    event: "INSERT",
-                    schema: "public",
-                    table: "private_messages"
-                }, messageEvent => {
-                    const message = messageEvent.new;
-                    if (!message || message.recipient_id !== user.id) return;
-
-                    const preview = typeof message.message === "string" &&
-                        message.message.startsWith("[[GIF]]")
-                        ? "GIF"
-                        : (message.message || "").replace(/\s+/g, " ").trim();
-
-                    showGameToast(
-                        usernameById.get(message.sender_id) || "New message",
-                        preview,
-                        "message"
-                    );
-                })
                 .on("postgres_changes", {
                     event: "UPDATE",
                     schema: "public",
@@ -363,6 +336,10 @@
         const localGamePageScript = document.createElement("script");
         localGamePageScript.src = new URL("local-game-page.js", currentScript.src).href;
         document.head.appendChild(localGamePageScript);
+
+        const messageNotificationsScript = document.createElement("script");
+        messageNotificationsScript.src = new URL("game-message-notifications.js", currentScript.src).href;
+        document.head.appendChild(messageNotificationsScript);
     }
 
     if (!gameId) {
