@@ -123,6 +123,7 @@
 
         container = document.createElement("div");
         container.id = "gameMessageNotificationContainer";
+        container.className = "message-notification-container";
         container.setAttribute("aria-live", "polite");
         container.setAttribute("aria-atomic", "false");
         document.body.appendChild(container);
