@@ -19,76 +19,103 @@
 
         const style = document.createElement("style");
         style.textContent = `
-            #gameMessageNotificationContainer {
+            #gameMessageNotificationContainer.message-notification-container {
                 position: fixed;
                 top: 16px;
-                right: 16px;
+                left: 50%;
                 z-index: 2147483647;
+                width: min(430px, calc(100vw - 24px));
                 display: flex;
-                width: min(380px, calc(100vw - 32px));
                 flex-direction: column;
                 gap: 8px;
                 pointer-events: none;
-                font-family: system-ui, sans-serif;
+                transform: translateX(-50%);
             }
-            .game-message-notification {
+            #gameMessageNotificationContainer .message-notification {
                 display: flex;
-                align-items: flex-start;
-                gap: 12px;
-                padding: 14px;
-                border: 1px solid rgba(255, 255, 255, 0.2);
-                border-radius: 10px;
-                background: #171a20;
-                color: #f5f6f8;
-                box-shadow: 0 12px 36px rgba(0, 0, 0, 0.45);
+                align-items: center;
+                gap: 11px;
+                min-height: 62px;
+                padding: 10px 11px;
+                box-sizing: border-box;
+                border: 1px solid color-mix(in srgb, var(--accent) 40%, transparent);
+                border-radius: 15px;
+                background: color-mix(in srgb, var(--background-2) 94%, transparent);
+                color: var(--text);
+                box-shadow: 0 18px 50px rgba(0, 0, 0, 0.42), 0 0 24px var(--shadow);
+                backdrop-filter: blur(16px);
                 pointer-events: auto;
-                animation: game-message-notification-in 180ms ease-out;
+                opacity: 0;
+                transform: translateY(-18px) scale(0.98);
+                transition: 0.25s ease;
             }
-            .game-message-notification-content {
+            #gameMessageNotificationContainer .message-notification.show {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+            #gameMessageNotificationContainer .message-notification-avatar {
+                width: 42px;
+                height: 42px;
+                flex: 0 0 42px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                border-radius: 50%;
+                background: linear-gradient(135deg, var(--accent), var(--background-3));
+                color: var(--background-1);
+                font-weight: 800;
+            }
+            #gameMessageNotificationContainer .message-notification-content {
                 display: flex;
                 min-width: 0;
                 flex: 1;
                 flex-direction: column;
+                gap: 3px;
+            }
+            #gameMessageNotificationContainer .message-notification-content strong {
+                color: var(--title);
+                font-size: 13px;
+            }
+            #gameMessageNotificationContainer .message-notification-content span {
+                overflow: hidden;
+                color: var(--text);
+                opacity: 0.68;
+                font-size: 12px;
+                white-space: nowrap;
+                text-overflow: ellipsis;
+            }
+            #gameMessageNotificationContainer .message-notification-actions {
+                display: flex;
+                align-items: center;
                 gap: 4px;
             }
-            .game-message-notification-content strong {
-                overflow: hidden;
-                color: #fff;
-                font-size: 14px;
-                text-overflow: ellipsis;
-                white-space: nowrap;
+            #gameMessageNotificationContainer .message-notification-open,
+            #gameMessageNotificationContainer .message-notification-close {
+                border: 0;
+                border-radius: 8px;
+                cursor: pointer;
             }
-            .game-message-notification-content span {
-                overflow: hidden;
-                color: #c5c9d1;
-                font-size: 13px;
-                line-height: 1.4;
-                overflow-wrap: anywhere;
+            #gameMessageNotificationContainer .message-notification-open {
+                padding: 7px 9px;
+                background: var(--accent);
+                color: var(--background-1);
+                font-size: 11px;
+                font-weight: 700;
             }
-            .game-message-notification-close {
+            #gameMessageNotificationContainer .message-notification-close {
                 width: 28px;
                 height: 28px;
-                flex: 0 0 28px;
-                border: 0;
-                border-radius: 6px;
                 background: transparent;
-                color: #e6e8ec;
+                color: var(--text);
                 cursor: pointer;
-                font-size: 20px;
-                line-height: 1;
+                font-size: 18px;
             }
-            .game-message-notification-close:hover {
-                background: rgba(255, 255, 255, 0.12);
+            #gameMessageNotificationContainer .message-notification-close:hover {
+                background: rgba(255, 255, 255, 0.08);
             }
-            @keyframes game-message-notification-in {
-                from { opacity: 0; transform: translateY(-8px); }
-                to { opacity: 1; transform: translateY(0); }
-            }
-            @media (max-width: 480px) {
-                #gameMessageNotificationContainer {
-                    top: 10px;
-                    right: 10px;
-                    width: calc(100vw - 20px);
+            @media (max-width: 760px) {
+                #gameMessageNotificationContainer.message-notification-container {
+                    width: min(430px, calc(100vw - 24px));
                 }
             }
         `;
@@ -104,33 +131,54 @@
 
     function showNotification(username, message) {
         const toast = document.createElement("div");
-        toast.className = "game-message-notification";
+        toast.className = "message-notification";
         toast.setAttribute("role", "status");
 
+        const avatar = document.createElement("div");
+        avatar.className = "message-notification-avatar";
+        avatar.textContent = username.trim().charAt(0).toUpperCase() || "?";
+
         const content = document.createElement("div");
-        content.className = "game-message-notification-content";
+        content.className = "message-notification-content";
 
         const sender = document.createElement("strong");
         sender.textContent = username;
 
         const preview = document.createElement("span");
         preview.textContent = message.startsWith("[[GIF]]")
-            ? "Sent you a GIF"
-            : message.replace(/\s+/g, " ").trim() || "Sent you a message";
+            ? "GIF"
+            : message.replace(/\s+/g, " ").trim();
+
+        const actions = document.createElement("div");
+        actions.className = "message-notification-actions";
+
+        const open = document.createElement("button");
+        open.type = "button";
+        open.className = "message-notification-open";
+        open.textContent = "Open";
+        open.addEventListener("click", () => {
+            window.open(new URL("../index.html", window.location.href).href, "_blank", "noopener");
+            toast.remove();
+        });
 
         const close = document.createElement("button");
         close.type = "button";
-        close.className = "game-message-notification-close";
+        close.className = "message-notification-close";
         close.setAttribute("aria-label", "Dismiss message notification");
         close.textContent = "×";
         close.addEventListener("click", () => toast.remove());
 
+        actions.append(open, close);
         content.append(sender, preview);
-        toast.append(content, close);
+        toast.append(avatar, content, actions);
         getContainer().prepend(toast);
 
-        window.setTimeout(() => toast.remove(), 8000);
-        return sender;
+        requestAnimationFrame(() => toast.classList.add("show"));
+        window.setTimeout(() => {
+            toast.classList.remove("show");
+            window.setTimeout(() => toast.remove(), 250);
+        }, 6500);
+        return { sender, avatar };
     }
 
     async function showIncomingMessage(message) {
@@ -145,7 +193,7 @@
             }
         }
 
-        const sender = showNotification(
+        const notification = showNotification(
             "New message",
             typeof message.message === "string" ? message.message : ""
         );
@@ -155,7 +203,8 @@
                 search_user_id: message.sender_id
             });
             if (!error && data?.[0]?.username && message.recipient_id === currentUserId) {
-                sender.textContent = data[0].username;
+                notification.sender.textContent = data[0].username;
+                notification.avatar.textContent = data[0].username.trim().charAt(0).toUpperCase() || "?";
             }
         } catch (error) {
             console.warn("Could not load message sender username:", error);
