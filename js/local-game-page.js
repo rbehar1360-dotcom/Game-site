@@ -105,6 +105,7 @@
                 window.exitFullscreen();
             }
         }, true);
+
     }
 
     addStylesheet();

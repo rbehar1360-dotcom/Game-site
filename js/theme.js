@@ -16,6 +16,7 @@ const themes = {
     shadow: "rgba(0, 200, 255, 0.25)",
     glow: "rgba(0, 255, 255, 0.7)"
   },
+
   purple: {
     background1: "#10051c",
     background2: "#261044",
@@ -29,6 +30,7 @@ const themes = {
     shadow: "rgba(180, 77, 255, 0.25)",
     glow: "rgba(200, 80, 255, 0.7)"
   },
+
   red: {
     background1: "#1c060b",
     background2: "#44101a",
@@ -42,6 +44,7 @@ const themes = {
     shadow: "rgba(255, 77, 109, 0.25)",
     glow: "rgba(255, 77, 109, 0.7)"
   },
+
   green: {
     background1: "#03150c",
     background2: "#0b3a20",
@@ -55,6 +58,7 @@ const themes = {
     shadow: "rgba(0, 255, 136, 0.25)",
     glow: "rgba(0, 255, 136, 0.7)"
   },
+
   orange: {
     background1: "#1c0d03",
     background2: "#4a2608",
@@ -68,6 +72,7 @@ const themes = {
     shadow: "rgba(255, 157, 0, 0.25)",
     glow: "rgba(255, 157, 0, 0.7)"
   },
+
   pink: {
     background1: "#1c0617",
     background2: "#44102f",
@@ -85,16 +90,17 @@ const themes = {
 
 
 /* =========================================
-   DEFAULT THEME STATE
+   STORAGE
 ========================================= */
 
 const defaultTheme = "blue";
+
 const savedTheme = localStorage.getItem("gameHubTheme");
 const savedCustomColor = localStorage.getItem("gameHubCustomColor");
 
 
 /* =========================================
-   APPLY PRESET THEME
+   APPLY THEME
 ========================================= */
 
 function applyTheme(themeName) {
@@ -127,41 +133,48 @@ function applyTheme(themeName) {
 
 
 /* =========================================
-   APPLY CUSTOM COLOR
-========================================= */
-
-/* =========================================
-   CUSTOM COLOR + PRESET BLEND
+   CUSTOM COLOR
 ========================================= */
 
 function applyCustomColor(hex) {
   const root = document.documentElement;
 
-  // 1. Keep the base gradient from current preset (or default to blue if none)
-  const currentThemeKey = localStorage.getItem("gameHubTheme") || defaultTheme;
-  const currentTheme = themes[currentThemeKey] || themes[defaultTheme];
+  const currentThemeKey =
+    localStorage.getItem("gameHubTheme") || defaultTheme;
 
-  // Keep dark background base and header/card colors from the preset
+  const currentTheme =
+    themes[currentThemeKey] || themes[defaultTheme];
+
   root.style.setProperty("--background-1", currentTheme.background1);
   root.style.setProperty("--background-2", currentTheme.background2);
   root.style.setProperty("--card", currentTheme.card);
   root.style.setProperty("--header", currentTheme.header);
   root.style.setProperty("--text", currentTheme.text);
 
-  // 2. Override ONLY the bottom-right gradient stop & accents with custom color
   root.style.setProperty("--background-3", hex);
   root.style.setProperty("--accent", hex);
-  root.style.setProperty("--accent-light", lightenColor(hex, 40));
-  root.style.setProperty("--title", lightenColor(hex, 80));
+  root.style.setProperty(
+    "--accent-light",
+    lightenColor(hex, 40)
+  );
 
-  // 3. Update shadows & glows to match your custom color
-  root.style.setProperty("--shadow", hexToRgba(hex, 0.25));
-  root.style.setProperty("--glow", hexToRgba(hex, 0.7));
+  root.style.setProperty(
+    "--title",
+    lightenColor(hex, 80)
+  );
 
-  // Save custom color without clearing the selected preset base
+  root.style.setProperty(
+    "--shadow",
+    hexToRgba(hex, 0.25)
+  );
+
+  root.style.setProperty(
+    "--glow",
+    hexToRgba(hex, 0.7)
+  );
+
   localStorage.setItem("gameHubCustomColor", hex);
 
-  // Keep active button highlight on current preset base
   updateActiveTheme(currentThemeKey);
 }
 
@@ -172,11 +185,14 @@ function applyCustomColor(hex) {
 
 function hexToRgba(hex, alpha) {
   hex = hex.replace("#", "");
+
   const r = parseInt(hex.substring(0, 2), 16);
   const g = parseInt(hex.substring(2, 4), 16);
   const b = parseInt(hex.substring(4, 6), 16);
+
   return `rgba(${r}, ${g}, ${b}, ${alpha})`;
 }
+
 
 function lightenColor(hex, amount) {
   hex = hex.replace("#", "");
@@ -189,12 +205,12 @@ function lightenColor(hex, amount) {
   g = Math.min(255, g + amount);
   b = Math.min(255, b + amount);
 
-  const rr = r.toString(16).padStart(2, "0");
-  const gg = g.toString(16).padStart(2, "0");
-  const bb = b.toString(16).padStart(2, "0");
-
-  return `#${rr}${gg}${bb}`;
+  return "#" +
+    r.toString(16).padStart(2, "0") +
+    g.toString(16).padStart(2, "0") +
+    b.toString(16).padStart(2, "0");
 }
+
 
 function darkenColor(hex, amount) {
   hex = hex.replace("#", "");
@@ -207,25 +223,257 @@ function darkenColor(hex, amount) {
   g = Math.max(0, g - amount);
   b = Math.max(0, b - amount);
 
-  const rr = r.toString(16).padStart(2, "0");
-  const gg = g.toString(16).padStart(2, "0");
-  const bb = b.toString(16).padStart(2, "0");
-
-  return `#${rr}${gg}${bb}`;
+  return "#" +
+    r.toString(16).padStart(2, "0") +
+    g.toString(16).padStart(2, "0") +
+    b.toString(16).padStart(2, "0");
 }
 
 
 /* =========================================
-   ACTIVE THEME BUTTON
+   ACTIVE THEME
 ========================================= */
 
 function updateActiveTheme(themeName) {
   document.querySelectorAll(".theme-option").forEach(button => {
-    button.classList.remove("active");
-    if (button.dataset.theme === themeName) {
-      button.classList.add("active");
-    }
+    button.classList.toggle(
+      "active",
+      button.dataset.theme === themeName
+    );
   });
+}
+
+
+/* =========================================
+   SETTINGS NAVIGATION
+========================================= */
+
+function setupSettingsNavigation() {
+  const tabs = document.querySelectorAll(".settings-tab");
+  const sections = document.querySelectorAll(".settings-page");
+
+  tabs.forEach(tab => {
+    tab.addEventListener("click", () => {
+      const target = tab.dataset.settings;
+
+      tabs.forEach(item => {
+        item.classList.remove("active");
+      });
+
+      sections.forEach(section => {
+        section.classList.remove("active");
+      });
+
+      tab.classList.add("active");
+
+      const targetSection =
+        document.getElementById(`settings-${target}`);
+
+      if (targetSection) {
+        targetSection.classList.add("active");
+      }
+    });
+  });
+}
+
+
+/* =========================================
+   SETTINGS OVERLAY
+========================================= */
+
+function setupSettingsOverlay() {
+  const settingsButton =
+    document.getElementById("settingsButton");
+
+  const settingsOverlay =
+    document.getElementById("settingsOverlay");
+
+  const closeSettings =
+    document.getElementById("closeSettings");
+
+  if (settingsButton && settingsOverlay) {
+    settingsButton.addEventListener("click", () => {
+      settingsOverlay.classList.add("open");
+    });
+  }
+
+  if (closeSettings && settingsOverlay) {
+    closeSettings.addEventListener("click", () => {
+      settingsOverlay.classList.remove("open");
+    });
+  }
+
+  if (settingsOverlay) {
+    settingsOverlay.addEventListener("click", event => {
+      if (event.target === settingsOverlay) {
+        settingsOverlay.classList.remove("open");
+      }
+    });
+  }
+}
+
+
+/* =========================================
+   GAME PREFERENCES
+========================================= */
+
+function setupGamePreferences() {
+  const preferences = [
+    ["autoFullscreenPreference", "gameHubAutoFullscreen"],
+    ["confirmLeavePreference", "gameHubConfirmLeave"]
+  ];
+
+  preferences.forEach(([inputId, storageKey]) => {
+    const input = document.getElementById(inputId);
+    if (!input) return;
+
+    input.checked = localStorage.getItem(storageKey) === "true";
+    input.addEventListener("change", () => {
+      localStorage.setItem(storageKey, String(input.checked));
+    });
+  });
+}
+
+function setupGamePagePreferences() {
+  const frame = document.getElementById("gameFrame") ||
+    document.querySelector("iframe");
+
+  if (!frame) return;
+
+  if (localStorage.getItem("gameHubConfirmLeave") === "true") {
+    window.addEventListener("beforeunload", event => {
+      event.preventDefault();
+      event.returnValue = "";
+    });
+  }
+
+  if (localStorage.getItem("gameHubAutoFullscreen") !== "true") return;
+
+  const container = document.querySelector(".game-container") ||
+    document.getElementById("Calc") ||
+    frame.parentElement ||
+    document.querySelector(".game-wrapper");
+
+  if (!container) return;
+
+  if (!document.getElementById("gameHubFullscreenStyles")) {
+    const style = document.createElement("style");
+    style.id = "gameHubFullscreenStyles";
+    style.textContent = `
+      .local-game-fullscreen {
+        position: fixed !important;
+        z-index: 999999 !important;
+        inset: 0 !important;
+        box-sizing: border-box !important;
+        width: 100vw !important;
+        height: 100vh !important;
+        max-width: none !important;
+        max-height: none !important;
+        margin: 0 !important;
+        overflow: auto;
+        background: #000;
+      }
+      .local-game-fullscreen iframe {
+        width: 100% !important;
+        height: 100% !important;
+        max-width: 100%;
+        max-height: 100%;
+      }
+      .local-game-fullscreen .fullscreen-exit {
+        position: fixed;
+        top: 12px;
+        right: 12px;
+        z-index: 1000000;
+      }
+    `;
+    document.head.appendChild(style);
+  }
+
+  container.classList.add("local-game-fullscreen");
+  document.body.style.overflow = "hidden";
+
+  let exitButton = container.querySelector(".fullscreen-exit");
+  if (!exitButton) {
+    exitButton = document.createElement("button");
+    exitButton.className = "fullscreen-exit";
+    exitButton.type = "button";
+    exitButton.textContent = "Exit Fullscreen";
+    container.appendChild(exitButton);
+  }
+
+  const exitFullscreen = () => {
+    container.classList.remove("local-game-fullscreen");
+    document.body.style.overflow = "";
+  };
+
+  exitButton.addEventListener("click", exitFullscreen);
+  document.addEventListener("keydown", event => {
+    if (event.key === "Escape") exitFullscreen();
+  }, true);
+}
+
+
+/* =========================================
+   THEME SETTINGS
+========================================= */
+
+function setupThemeSettings() {
+  const customColor =
+    document.getElementById("customColor");
+
+  const customColorText =
+    document.getElementById("customColorText");
+
+  const resetTheme =
+    document.getElementById("resetTheme");
+
+
+  document.querySelectorAll(".theme-option").forEach(button => {
+    button.addEventListener("click", () => {
+      applyTheme(button.dataset.theme);
+    });
+  });
+
+
+  if (customColor) {
+    if (savedCustomColor) {
+      customColor.value = savedCustomColor;
+
+      if (customColorText) {
+        customColorText.textContent = savedCustomColor;
+      }
+    }
+
+    customColor.addEventListener("input", () => {
+      const color = customColor.value;
+
+      if (customColorText) {
+        customColorText.textContent = color;
+      }
+
+      applyCustomColor(color);
+    });
+  }
+
+
+  if (resetTheme) {
+    resetTheme.addEventListener("click", () => {
+      applyTheme(defaultTheme);
+
+      if (customColor) {
+        customColor.value = "#00e5ff";
+      }
+
+      if (customColorText) {
+        customColorText.textContent = "#00e5ff";
+      }
+    });
+  }
+
+
+  updateActiveTheme(
+    localStorage.getItem("gameHubTheme") || defaultTheme
+  );
 }
 
 
@@ -249,78 +497,15 @@ function loadSavedTheme() {
 
 
 /* =========================================
-   SETTINGS UI LISTENERS
+   INITIALIZE
 ========================================= */
 
 document.addEventListener("DOMContentLoaded", () => {
-  const settingsButton = document.getElementById("settingsButton");
-  const settingsOverlay = document.getElementById("settingsOverlay");
-  const closeSettings = document.getElementById("closeSettings");
-  const resetTheme = document.getElementById("resetTheme");
-  const customColor = document.getElementById("customColor");
-  const customColorText = document.getElementById("customColorText");
-
-  /* Open settings */
-  if (settingsButton) {
-    settingsButton.addEventListener("click", () => {
-      settingsOverlay.classList.add("open");
-    });
-  }
-
-  /* Close settings */
-  if (closeSettings) {
-    closeSettings.addEventListener("click", () => {
-      settingsOverlay.classList.remove("open");
-    });
-  }
-
-  /* Click outside overlay */
-  if (settingsOverlay) {
-    settingsOverlay.addEventListener("click", event => {
-      if (event.target === settingsOverlay) {
-        settingsOverlay.classList.remove("open");
-      }
-    });
-  }
-
-  /* Preset themes */
-  document.querySelectorAll(".theme-option").forEach(button => {
-    button.addEventListener("click", () => {
-      const themeName = button.dataset.theme;
-      applyTheme(themeName);
-    });
-  });
-
-  /* Custom color */
-  if (customColor) {
-    if (savedCustomColor) {
-      customColor.value = savedCustomColor;
-      if (customColorText) customColorText.textContent = savedCustomColor;
-    }
-
-    customColor.addEventListener("input", () => {
-      const color = customColor.value;
-      if (customColorText) customColorText.textContent = color;
-      applyCustomColor(color);
-    });
-  }
-
-  /* Reset */
-  if (resetTheme) {
-    resetTheme.addEventListener("click", () => {
-      applyTheme(defaultTheme);
-      if (customColor) customColor.value = "#00e5ff";
-      if (customColorText) customColorText.textContent = "#00e5ff";
-    });
-  }
-
-  /* Highlight active theme */
-  updateActiveTheme(localStorage.getItem("gameHubTheme"));
+  setupSettingsOverlay();
+  setupSettingsNavigation();
+  setupThemeSettings();
+  setupGamePreferences();
+  setupGamePagePreferences();
 });
-
-
-/* =========================================
-   APPLY IMMEDIATELY ON LOAD
-========================================= */
 
 loadSavedTheme();

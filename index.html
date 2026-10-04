@@ -577,6 +577,7 @@
 </div>
 
 
+
 <!-- =========================================
      SETTINGS WINDOW
 ========================================= -->
@@ -587,117 +588,626 @@
 
     <div class="settings-header">
 
-      <h2>⚙️ Settings</h2>
+      <div>
+        <h2>⚙️ Settings</h2>
+        <p>Customize your Game Hub experience.</p>
+      </div>
 
       <button
         id="closeSettings"
         class="close-settings"
+        type="button"
       >
         ✕
       </button>
 
     </div>
 
-    <div class="settings-section">
+    <div class="settings-layout">
 
-      <h3>🎨 Theme</h3>
+      <aside class="settings-sidebar">
 
-      <p class="settings-description">
-        Choose a theme for the Game Hub.
-      </p>
-
-      <div class="theme-grid">
-
-        <button
-          class="theme-option"
-          data-theme="blue"
-          style="--preview-color: #00e5ff;"
-        >
-          <span class="theme-preview"></span>
-          <span>Cyber Blue</span>
+        <button class="settings-tab active" data-settings="appearance" type="button">
+          🎨 Appearance
         </button>
 
-        <button
-          class="theme-option"
-          data-theme="purple"
-          style="--preview-color: #b84dff;"
-        >
-          <span class="theme-preview"></span>
-          <span>Galaxy</span>
+        <button class="settings-tab" data-settings="gameplay" type="button">
+          🎮 Gameplay
         </button>
 
-        <button
-          class="theme-option"
-          data-theme="red"
-          style="--preview-color: #ff4d6d;"
-        >
-          <span class="theme-preview"></span>
-          <span>Crimson</span>
+        
+
+        <button class="settings-tab" data-settings="notifications" type="button">
+          🔔 Notifications
         </button>
 
-        <button
-          class="theme-option"
-          data-theme="green"
-          style="--preview-color: #00ff88;"
-        >
-          <span class="theme-preview"></span>
-          <span>Matrix</span>
+        <button class="settings-tab" data-settings="account" type="button">
+          👤 Account
         </button>
 
-        <button
-          class="theme-option"
-          data-theme="orange"
-          style="--preview-color: #ff9d00;"
-        >
-          <span class="theme-preview"></span>
-          <span>Sunset</span>
+        <button class="settings-tab" data-settings="performance" type="button">
+          ⚡ Performance
         </button>
 
-        <button
-          class="theme-option"
-          data-theme="pink"
-          style="--preview-color: #ff4dcc;"
-        >
-          <span class="theme-preview"></span>
-          <span>Pink</span>
+        <button class="settings-tab" data-settings="privacy" type="button">
+          🔒 Privacy
         </button>
 
-      </div>
+        <button class="settings-tab" data-settings="about" type="button">
+          ℹ️ About
+        </button>
 
-      <div class="custom-theme">
+      </aside>
 
-        <label for="customColor">
-          🌈 Custom Color
-        </label>
 
-        <div class="custom-color-row">
+      <main class="settings-content">
 
-          <input
-            type="color"
-            id="customColor"
-            value="#00e5ff"
+
+        <!-- APPEARANCE -->
+
+        <section
+          id="settings-appearance"
+          class="settings-page active"
+        >
+
+          <div class="settings-page-header">
+            <h3>🎨 Appearance</h3>
+            <p>Customize how Game Hub looks.</p>
+          </div>
+
+
+          <div class="settings-card">
+
+            <h4>Theme</h4>
+
+            <p class="settings-description">
+              Choose a theme for the Game Hub.
+            </p>
+
+            <div class="theme-grid">
+
+              <button
+                class="theme-option"
+                data-theme="blue"
+                type="button"
+                style="--preview-color: #00e5ff;"
+              >
+                <span class="theme-preview"></span>
+                <span>Cyber Blue</span>
+              </button>
+
+              <button
+                class="theme-option"
+                data-theme="purple"
+                type="button"
+                style="--preview-color: #b84dff;"
+              >
+                <span class="theme-preview"></span>
+                <span>Galaxy</span>
+              </button>
+
+              <button
+                class="theme-option"
+                data-theme="red"
+                type="button"
+                style="--preview-color: #ff4d6d;"
+              >
+                <span class="theme-preview"></span>
+                <span>Crimson</span>
+              </button>
+
+              <button
+                class="theme-option"
+                data-theme="green"
+                type="button"
+                style="--preview-color: #00ff88;"
+              >
+                <span class="theme-preview"></span>
+                <span>Matrix</span>
+              </button>
+
+              <button
+                class="theme-option"
+                data-theme="orange"
+                type="button"
+                style="--preview-color: #ff9d00;"
+              >
+                <span class="theme-preview"></span>
+                <span>Sunset</span>
+              </button>
+
+              <button
+                class="theme-option"
+                data-theme="pink"
+                type="button"
+                style="--preview-color: #ff4dcc;"
+              >
+                <span class="theme-preview"></span>
+                <span>Pink</span>
+              </button>
+
+            </div>
+
+          </div>
+
+
+          <div class="settings-card">
+
+            <h4>Custom Accent Color</h4>
+
+            <p class="settings-description">
+              Choose your own accent color.
+            </p>
+
+            <div class="custom-color-row">
+
+              <input
+                type="color"
+                id="customColor"
+                value="#00e5ff"
+              >
+
+              <span id="customColorText">
+                #00e5ff
+              </span>
+
+            </div>
+
+          </div>
+
+
+          <button
+            id="resetTheme"
+            class="reset-theme"
+            type="button"
           >
+            ↩ Reset Appearance
+          </button>
 
-          <span id="customColorText">
-            #00e5ff
-          </span>
+        </section>
 
-        </div>
 
-      </div>
+        <!-- GAMEPLAY -->
 
-      <button
-        id="resetTheme"
-        class="reset-theme"
-      >
-        ↩ Reset Theme
-      </button>
+        <section
+          id="settings-gameplay"
+          class="settings-page"
+        >
+
+          <div class="settings-page-header">
+            <h3>🎮 Gameplay</h3>
+            <p>Control how games behave on Game Hub.</p>
+          </div>
+
+
+          <div class="settings-card">
+
+            <h4>Game Preferences</h4>
+
+            
+
+          </div>
+
+
+          <div class="settings-option">
+
+            <div>
+              <strong>Automatically enter fullscreen</strong>
+
+              <p>
+                Automatically fullscreen games when they launch.
+              </p>
+            </div>
+
+            <input
+              id="autoFullscreenPreference"
+              class="settings-checkbox"
+              type="checkbox"
+              aria-label="Automatically enter fullscreen"
+            >
+
+          </div>
+
+
+          <div class="settings-option">
+
+            <div>
+              <strong>Confirm before leaving a game</strong>
+
+              <p>
+                Ask before navigating away from a game.
+              </p>
+            </div>
+
+            <input
+              id="confirmLeavePreference"
+              class="settings-checkbox"
+              type="checkbox"
+              aria-label="Confirm before leaving a game"
+            >
+
+          </div>
+
+        </section>
+
+
+        <!-- AUDIO -->
+
+        <section
+          id="settings-audio"
+          class="settings-page"
+        >
+
+          <div class="settings-page-header">
+            <h3>🔊 Audio</h3>
+            <p>Manage Game Hub sound preferences.</p>
+          </div>
+
+
+          <div class="settings-option">
+
+            <div>
+              <strong>Master Volume</strong>
+
+              <p>
+                Control the overall Game Hub volume.
+              </p>
+            </div>
+
+            <span class="coming-soon">
+              Coming Soon
+            </span>
+
+          </div>
+
+
+          <div class="settings-option">
+
+            <div>
+              <strong>UI Sounds</strong>
+
+              <p>
+                Enable sounds for buttons and menus.
+              </p>
+            </div>
+
+            <span class="coming-soon">
+              Coming Soon
+            </span>
+
+          </div>
+
+
+          <div class="settings-option">
+
+            <div>
+              <strong>Game Sounds</strong>
+
+              <p>
+                Control sounds produced by Game Hub features.
+              </p>
+            </div>
+
+            <span class="coming-soon">
+              Coming Soon
+            </span>
+
+          </div>
+
+        </section>
+
+
+        <!-- NOTIFICATIONS -->
+
+        <section
+          id="settings-notifications"
+          class="settings-page"
+        >
+
+          <div class="settings-page-header">
+            <h3>🔔 Notifications</h3>
+            <p>Control your Game Hub notifications.</p>
+          </div>
+
+
+          <div class="settings-option">
+
+            <div>
+              <strong>Private messages</strong>
+
+              <p>
+                Notify you when someone sends you a message.
+              </p>
+            </div>
+
+            <span class="coming-soon">
+              Coming Soon
+            </span>
+
+          </div>
+
+
+          <div class="settings-option">
+
+            <div>
+              <strong>Achievement notifications</strong>
+
+              <p>
+                Show a notification when you unlock an achievement.
+              </p>
+            </div>
+
+            <span class="coming-soon">
+              Coming Soon
+            </span>
+
+          </div>
+
+
+          <div class="settings-option">
+
+            <div>
+              <strong>Game Hub announcements</strong>
+
+              <p>
+                Receive notifications about major site updates.
+              </p>
+            </div>
+
+            <span class="coming-soon">
+              Coming Soon
+            </span>
+
+          </div>
+
+        </section>
+
+
+        <!-- ACCOUNT -->
+
+        <section
+          id="settings-account"
+          class="settings-page"
+        >
+
+          <div class="settings-page-header">
+            <h3>👤 Account</h3>
+            <p>Manage your Game Hub account.</p>
+          </div>
+
+
+          <div class="settings-card">
+
+            <h4>Account Management</h4>
+
+            <p class="settings-description">
+              Username, email, password, and profile settings.
+            </p>
+
+          </div>
+
+
+          <div class="settings-option">
+
+            <div>
+              <strong>Edit Profile</strong>
+
+              <p>
+                Change your username and profile information.
+              </p>
+            </div>
+
+            <span class="coming-soon">
+              Coming Soon
+            </span>
+
+          </div>
+
+
+          <div class="settings-option">
+
+            <div>
+              <strong>Change Password</strong>
+
+              <p>
+                Change your Game Hub account password.
+              </p>
+            </div>
+
+            <span class="coming-soon">
+              Coming Soon
+            </span>
+
+          </div>
+
+        </section>
+
+
+        <!-- PERFORMANCE -->
+
+        <section
+          id="settings-performance"
+          class="settings-page"
+        >
+
+          <div class="settings-page-header">
+            <h3>⚡ Performance</h3>
+            <p>Optimize Game Hub for your device.</p>
+          </div>
+
+
+          <div class="settings-option">
+
+            <div>
+              <strong>Reduce animations</strong>
+
+              <p>
+                Reduce visual animations throughout the site.
+              </p>
+            </div>
+
+            <span class="coming-soon">
+              Coming Soon
+            </span>
+
+          </div>
+
+
+          <div class="settings-option">
+
+            <div>
+              <strong>Reduce visual effects</strong>
+
+              <p>
+                Reduce glows, shadows, and other effects.
+              </p>
+            </div>
+
+            <span class="coming-soon">
+              Coming Soon
+            </span>
+
+          </div>
+
+
+          <div class="settings-option">
+
+            <div>
+              <strong>Low-performance mode</strong>
+
+              <p>
+                Use a lightweight version of Game Hub.
+              </p>
+            </div>
+
+            <span class="coming-soon">
+              Coming Soon
+            </span>
+
+          </div>
+
+        </section>
+
+
+        <!-- PRIVACY -->
+
+        <section
+          id="settings-privacy"
+          class="settings-page"
+        >
+
+          <div class="settings-page-header">
+            <h3>🔒 Privacy</h3>
+            <p>Control your account visibility.</p>
+          </div>
+
+
+          <div class="settings-option">
+
+            <div>
+              <strong>Show me on leaderboards</strong>
+
+              <p>
+                Allow your account to appear on public leaderboards.
+              </p>
+            </div>
+
+            <span class="coming-soon">
+              Coming Soon
+            </span>
+
+          </div>
+
+
+          <div class="settings-option">
+
+            <div>
+              <strong>Show online status</strong>
+
+              <p>
+                Allow other users to see when you are online.
+              </p>
+            </div>
+
+            <span class="coming-soon">
+              Coming Soon
+            </span>
+
+          </div>
+
+
+          <div class="settings-option">
+
+            <div>
+              <strong>Allow private messages</strong>
+
+              <p>
+                Allow other users to send you private messages.
+              </p>
+            </div>
+
+            <span class="coming-soon">
+              Coming Soon
+            </span>
+
+          </div>
+
+        </section>
+
+
+        <!-- ABOUT -->
+
+        <section
+          id="settings-about"
+          class="settings-page"
+        >
+
+          <div class="settings-page-header">
+            <h3>ℹ️ About</h3>
+            <p>Information about Game Hub.</p>
+          </div>
+
+
+          <div class="settings-card">
+
+            <h4>🎮 Ralph's Unblocked Games</h4>
+
+            <p class="settings-description">
+              Game Hub
+            </p>
+
+
+            <div class="settings-info-row">
+
+              <span>Version</span>
+
+              <strong>1.0.0</strong>
+
+            </div>
+
+
+            <div class="settings-info-row">
+
+              <span>Developer</span>
+
+              <strong>Ralph</strong>
+
+            </div>
+
+          </div>
+
+        </section>
+
+
+      </main>
 
     </div>
 
   </div>
 
 </div>
+
+
 
 <div id="newMessageOverlay" class="new-message-overlay">
     <div class="new-message-modal">
