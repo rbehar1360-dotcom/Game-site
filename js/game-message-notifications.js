@@ -158,7 +158,7 @@
         open.className = "message-notification-open";
         open.textContent = "Open";
         open.addEventListener("click", () => {
-            window.open(new URL("../index.html", window.location.href).href, "noopener");
+            window.location.assign(new URL("../index.html", window.location.href).href);
             toast.remove();
         });
 
