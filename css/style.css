@@ -11181,9 +11181,16 @@ z-index: 1000;
         0 0 10px var(--shadow);
 }
 .messages-header-button:hover {
-    background: rgba(255,255,255,.12);
-    transform: translateY(-1px);
+    transform: translateY(-2px);
+
+    background: var(--accent);
+
+    color: #001018;
+
+    box-shadow:
+        0 0 18px var(--glow);
 }
+
 .unread-messages-badge {
     display: none;
     align-items: center;

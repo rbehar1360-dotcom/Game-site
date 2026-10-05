@@ -102,7 +102,7 @@
 
     const signupReminderStorageKey = "gamehub-signup-reminder-seconds";
     const signupReminderShownKey = "gamehub-signup-reminder-shown";
-    const signupReminderAfterSeconds = 15 * 60;
+    const signupReminderAfterSeconds = 15 * 60; // Restore to 15 * 60 after testing.
     let gameNotificationChannel = null;
     let gameNotificationUserId = null;
 
@@ -185,16 +185,10 @@
         const signupButton = document.createElement("button");
         signupButton.type = "button";
         signupButton.className = "game-signup-reminder-confirm";
-        signupButton.textContent = "Okay";
+        signupButton.textContent = "Sign up";
         signupButton.addEventListener("click", () => {
-            const signupUrl = new URL("../index.html?signup=1", window.location.href);
-            const signupWindow = window.open(signupUrl.href, "_blank");
-
-            if (signupWindow) {
-                signupWindow.opener = null;
-            } else {
-                window.location.assign(signupUrl.href);
-            }
+            overlay.remove();
+            showGameSignupForm();
         });
 
         actions.append(dismissButton, signupButton);
@@ -202,6 +196,240 @@
         overlay.appendChild(dialog);
         document.body.appendChild(overlay);
         signupButton.focus();
+    }
+
+    function showGameSignupForm() {
+        if (document.getElementById("gameSignupFormOverlay")) return;
+
+        if (!document.getElementById("gameSignupFormStyles")) {
+            const style = document.createElement("style");
+            style.id = "gameSignupFormStyles";
+            style.textContent = `
+                .game-signup-form-overlay {
+                    position: fixed;
+                    inset: 0;
+                    z-index: 2147483646;
+                    display: grid;
+                    place-items: center;
+                    padding: 20px;
+                    background: rgba(0, 0, 0, 0.68);
+                    backdrop-filter: blur(5px);
+                }
+                .game-signup-form-dialog {
+                    width: min(400px, 100%);
+                    max-height: calc(100vh - 40px);
+                    overflow-y: auto;
+                    padding: 25px;
+                    border: 1px solid var(--accent);
+                    border-radius: 16px;
+                    background: var(--header, var(--background-2));
+                    color: var(--text);
+                    box-shadow: 0 0 35px var(--shadow);
+                    backdrop-filter: blur(15px);
+                }
+                .game-signup-form-header {
+                    display: flex;
+                    align-items: center;
+                    justify-content: space-between;
+                    gap: 12px;
+                    margin-bottom: 16px;
+                }
+                .game-signup-form-header h2 {
+                    margin: 0;
+                    color: var(--title);
+                    font-size: 21px;
+                }
+                .game-signup-form-close {
+                    width: 34px;
+                    height: 34px;
+                    border: 0;
+                    border-radius: 7px;
+                    background: transparent;
+                    color: var(--text);
+                    cursor: pointer;
+                    font-size: 20px;
+                }
+                .game-signup-form-close:hover {
+                    background: rgba(255, 255, 255, 0.1);
+                }
+                .game-signup-form-description {
+                    margin: 0 0 18px;
+                    line-height: 1.5;
+                }
+                .game-signup-form-fields {
+                    display: grid;
+                    gap: 8px;
+                }
+                .game-signup-form-fields label {
+                    margin-top: 6px;
+                    color: var(--text);
+                    font-size: 14px;
+                    font-weight: 600;
+                }
+                .game-signup-form-fields input {
+                    width: 100%;
+                    min-height: 42px;
+                    box-sizing: border-box;
+                    padding: 9px 11px;
+                    border: 1px solid color-mix(in srgb, var(--text) 24%, transparent);
+                    border-radius: 7px;
+                    outline-color: var(--accent);
+                    background: var(--background-1);
+                    color: var(--text);
+                    font: inherit;
+                }
+                .game-signup-form-submit {
+                    min-height: 42px;
+                    margin-top: 10px;
+                    border: 0;
+                    border-radius: 7px;
+                    background: var(--accent);
+                    color: var(--background-1);
+                    cursor: pointer;
+                    font: inherit;
+                    font-weight: 700;
+                }
+                .game-signup-form-submit:disabled {
+                    cursor: wait;
+                    opacity: 0.65;
+                }
+                .game-signup-form-status {
+                    min-height: 1.4em;
+                    margin: 10px 0 0;
+                    color: var(--text);
+                    font-size: 13px;
+                    line-height: 1.4;
+                }
+            `;
+            document.head.appendChild(style);
+        }
+
+        const overlay = document.createElement("div");
+        overlay.id = "gameSignupFormOverlay";
+        overlay.className = "game-signup-form-overlay";
+        overlay.setAttribute("role", "dialog");
+        overlay.setAttribute("aria-modal", "true");
+        overlay.setAttribute("aria-labelledby", "gameSignupFormTitle");
+
+        const dialog = document.createElement("section");
+        dialog.className = "game-signup-form-dialog";
+
+        const header = document.createElement("div");
+        header.className = "game-signup-form-header";
+
+        const heading = document.createElement("h2");
+        heading.id = "gameSignupFormTitle";
+        heading.textContent = "Create Account";
+
+        const closeButton = document.createElement("button");
+        closeButton.type = "button";
+        closeButton.className = "game-signup-form-close";
+        closeButton.setAttribute("aria-label", "Close sign up");
+        closeButton.textContent = "×";
+        closeButton.addEventListener("click", () => overlay.remove());
+        header.append(heading, closeButton);
+
+        const description = document.createElement("p");
+        description.className = "game-signup-form-description";
+        description.textContent = "Create an account to save your game stats, likes, and favorites.";
+
+        const form = document.createElement("form");
+        form.className = "game-signup-form-fields";
+
+        const usernameLabel = document.createElement("label");
+        usernameLabel.htmlFor = "gameSignupUsername";
+        usernameLabel.textContent = "Username";
+        const usernameInput = document.createElement("input");
+        usernameInput.id = "gameSignupUsername";
+        usernameInput.name = "username";
+        usernameInput.type = "text";
+        usernameInput.autocomplete = "username";
+        usernameInput.placeholder = "Choose a username";
+        usernameInput.required = true;
+
+        const emailLabel = document.createElement("label");
+        emailLabel.htmlFor = "gameSignupEmail";
+        emailLabel.textContent = "Email";
+        const emailInput = document.createElement("input");
+        emailInput.id = "gameSignupEmail";
+        emailInput.name = "email";
+        emailInput.type = "email";
+        emailInput.autocomplete = "email";
+        emailInput.placeholder = "Enter your email";
+        emailInput.required = true;
+
+        const passwordLabel = document.createElement("label");
+        passwordLabel.htmlFor = "gameSignupPassword";
+        passwordLabel.textContent = "Password";
+        const passwordInput = document.createElement("input");
+        passwordInput.id = "gameSignupPassword";
+        passwordInput.name = "password";
+        passwordInput.type = "password";
+        passwordInput.autocomplete = "new-password";
+        passwordInput.placeholder = "Create a password";
+        passwordInput.required = true;
+
+        const submitButton = document.createElement("button");
+        submitButton.type = "submit";
+        submitButton.className = "game-signup-form-submit";
+        submitButton.textContent = "Create Account";
+
+        const status = document.createElement("p");
+        status.className = "game-signup-form-status";
+        status.setAttribute("role", "status");
+        status.setAttribute("aria-live", "polite");
+
+        form.append(
+            usernameLabel,
+            usernameInput,
+            emailLabel,
+            emailInput,
+            passwordLabel,
+            passwordInput,
+            submitButton,
+            status
+        );
+        form.addEventListener("submit", async event => {
+            event.preventDefault();
+            const supabase = getSupabase();
+            if (!supabase) {
+                status.textContent = "Sign up is unavailable right now. Please try again.";
+                return;
+            }
+
+            submitButton.disabled = true;
+            status.textContent = "Creating your account...";
+
+            try {
+                const { error } = await supabase.auth.signUp({
+                    email: emailInput.value.trim(),
+                    password: passwordInput.value,
+                    options: {
+                        data: { username: usernameInput.value.trim() }
+                    }
+                });
+
+                if (error) {
+                    status.textContent = error.message;
+                    return;
+                }
+
+                status.textContent = "Account created! Check your email if confirmation is required.";
+                form.reset();
+            } catch (error) {
+                status.textContent = error.message || "Could not create your account. Please try again.";
+            } finally {
+                submitButton.disabled = false;
+            }
+        });
+
+        dialog.append(header, description, form);
+        overlay.appendChild(dialog);
+        overlay.addEventListener("click", event => {
+            if (event.target === overlay) overlay.remove();
+        });
+        document.body.appendChild(overlay);
+        usernameInput.focus();
     }
 
     async function setupGameNotifications() {
