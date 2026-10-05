@@ -61,7 +61,7 @@
             "FNAF2.html": "FNAF 2",
             "FNAF3.html": "FNAF 3",
             "FNAF4.html": "FNAF 4",
-            "FiveNightsAtEpsteins.html": "Five Nights at Epsteins",
+            "FiveNightsAtEpsteins.html": "Five Nights at Epstein's",
             "Balatro.html": "Balatro",
             "BasketRandom.html": "Basket Random",
             "SoccerRandom.html": "Soccer Random",
