@@ -1,0 +1,43 @@
+.seo-footer {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 8px 20px;
+  width: calc(100% - 32px);
+  max-width: 900px;
+  margin: 28px auto 20px;
+  padding: 14px 18px;
+  border: 1px solid color-mix(in srgb, var(--accent, #00e5ff) 32%, transparent);
+  border-radius: 8px;
+  background: color-mix(in srgb, var(--card, #102b39) 88%, transparent);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.16);
+  color: var(--text, #f4fbff);
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+.seo-footer p {
+  margin: 0;
+  opacity: 0.86;
+}
+
+.seo-footer a {
+  color: var(--accent, #00e5ff);
+  text-decoration: none;
+  text-underline-offset: 3px;
+  transition: color 0.18s ease, text-decoration-color 0.18s ease;
+}
+
+.seo-footer a:hover {
+  color: var(--accent-light, #a7eaff);
+  text-decoration: underline;
+}
+
+@media (max-width: 520px) {
+  .seo-footer {
+    flex-direction: column;
+    gap: 5px;
+    text-align: center;
+  }
+}
