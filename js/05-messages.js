@@ -805,22 +805,10 @@ async function markMessagesRead(
     currentUserId,
     otherUserId
 ) {
-    const { error } =
-        await supabaseClient
-            .from("private_messages")
-            .update({
-                read_at:
-                    new Date().toISOString()
-            })
-            .eq(
-                "recipient_id",
-                currentUserId
-            )
-            .eq(
-                "sender_id",
-                otherUserId
-            )
-            .is("read_at", null);
+    const { error } = await supabaseClient.rpc(
+        "mark_private_messages_read",
+        { p_sender_id: otherUserId }
+    );
 
     if (error) {
         console.error(
