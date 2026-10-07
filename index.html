@@ -1361,7 +1361,7 @@
 
     </div>
 
-    <p class="login-description">
+    <p class="login-description" id="loginDescription">
       Login to save your game stats, likes, and favorites.
     </p>
 
@@ -1403,6 +1403,7 @@
         type="password"
         id="loginPassword"
         placeholder="Enter your password"
+        autocomplete="current-password"
         required
       >
 
@@ -1416,7 +1417,64 @@
 
     </form>
 
-    <p class="signup-text">
+    <button
+      id="forgotPasswordButton"
+      class="auth-link"
+      type="button"
+    >
+      Forgot your password?
+    </button>
+
+    <form id="resetRequestForm" class="auth-reset-form" hidden>
+
+      <label for="resetEmail">Email</label>
+      <input
+        type="email"
+        id="resetEmail"
+        placeholder="Enter your email"
+        autocomplete="email"
+        required
+      >
+
+      <button type="submit" class="login-submit">
+        Send reset link
+      </button>
+
+      <button id="backToLogin" class="auth-link" type="button">
+        Back to login
+      </button>
+
+    </form>
+
+    <form id="updatePasswordForm" class="auth-reset-form" hidden>
+
+      <label for="newPassword">New password</label>
+      <input
+        type="password"
+        id="newPassword"
+        placeholder="Enter a new password"
+        autocomplete="new-password"
+        required
+      >
+
+      <label for="confirmNewPassword">Confirm new password</label>
+      <input
+        type="password"
+        id="confirmNewPassword"
+        placeholder="Confirm your new password"
+        autocomplete="new-password"
+        required
+      >
+
+      <button type="submit" class="login-submit">
+        Update password
+      </button>
+
+    </form>
+
+    <p id="authStatus" class="auth-status" role="status" aria-live="polite" hidden></p>
+
+    <p class="signup-text" id="signupText">
 
       <span id="accountPrompt">
         Don't have an account?

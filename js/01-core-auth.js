@@ -1019,7 +1019,49 @@ const loginSubmit = document.getElementById("loginSubmit");
 
 const accountPrompt = document.getElementById("accountPrompt");
 
+const loginDescription = document.getElementById("loginDescription");
+const forgotPasswordButton = document.getElementById("forgotPasswordButton");
+const resetRequestForm = document.getElementById("resetRequestForm");
+const updatePasswordForm = document.getElementById("updatePasswordForm");
+const authStatus = document.getElementById("authStatus");
+const signupText = document.getElementById("signupText");
+
 let signupMode = false;
+let authView = "login";
+
+function setAuthStatus(message, state = "info") {
+    authStatus.textContent = message;
+    authStatus.dataset.state = state;
+    authStatus.hidden = !message;
+}
+
+function setAuthView(view) {
+    authView = view;
+    const isLogin = view === "login";
+    const isSignup = view === "signup";
+
+    loginForm.hidden = !isLogin && !isSignup;
+    resetRequestForm.hidden = view !== "request-reset";
+    updatePasswordForm.hidden = view !== "update-password";
+    forgotPasswordButton.hidden = !isLogin;
+    signupText.hidden = !isLogin && !isSignup;
+
+    if (view === "request-reset") {
+        document.querySelector(".login-header h2").textContent = "Reset password";
+        loginDescription.textContent = "Enter your email and we’ll send you a password reset link.";
+    } else if (view === "update-password") {
+        document.querySelector(".login-header h2").textContent = "Choose a new password";
+        loginDescription.textContent = "Enter and confirm your new password below.";
+    } else if (isSignup) {
+        document.querySelector(".login-header h2").textContent = "👤 Create Account";
+        loginDescription.textContent = "Create an account to save your game stats, likes, and favorites.";
+    } else {
+        document.querySelector(".login-header h2").textContent = "👤 Login";
+        loginDescription.textContent = "Login to save your game stats, likes, and favorites.";
+    }
+
+    setAuthStatus("");
+}
 
 
 signupButton.addEventListener("click", function() {
@@ -1028,6 +1070,7 @@ signupButton.addEventListener("click", function() {
 
 
     if (signupMode) {
+        setAuthView("signup");
 
         // Switch to signup
 
@@ -1042,8 +1085,9 @@ signupButton.addEventListener("click", function() {
         document.querySelector(".login-header h2").textContent = "👤 Create Account";
 
     } 
-    
+
     else {
+        setAuthView("login");
 
         // Switch back to login
 
@@ -1061,16 +1105,27 @@ signupButton.addEventListener("click", function() {
 
 });
 
-if (new URLSearchParams(window.location.search).get("signup") === "1") {
-    signupButton.click();
-    loginOverlay.classList.add("open");
-}
+forgotPasswordButton.addEventListener("click", function() {
+    document.getElementById("resetEmail").value =
+        document.getElementById("loginEmail").value.trim();
+    setAuthView("request-reset");
+});
+
+document.getElementById("backToLogin").addEventListener("click", function() {
+    signupMode = false;
+    setAuthView("login");
+});
 
 // =========================================
 // SUPABASE AUTHENTICATION
 // =========================================
 
 const loginForm = document.getElementById("loginForm");
+
+if (new URLSearchParams(window.location.search).get("signup") === "1") {
+    signupButton.click();
+    loginOverlay.classList.add("open");
+}
 
 loginForm.addEventListener("submit", async function(event) {
 
@@ -1147,6 +1202,117 @@ await updateAccountUI();
     }
 
 });
+
+resetRequestForm.addEventListener("submit", async function(event) {
+    event.preventDefault();
+
+    const submitButton = resetRequestForm.querySelector('button[type="submit"]');
+    submitButton.disabled = true;
+    setAuthStatus("");
+
+    const redirectUrl = new URL(window.location.href);
+    redirectUrl.searchParams.set("password-reset", "1");
+    redirectUrl.hash = "";
+
+    try {
+        const { error } = await supabaseClient.auth.resetPasswordForEmail(
+            document.getElementById("resetEmail").value.trim(),
+            { redirectTo: redirectUrl.toString() }
+        );
+
+        if (error) {
+            setAuthStatus(error.message, "error");
+            return;
+        }
+
+        setAuthStatus(
+            "If an account exists for that email, you’ll receive a password reset link shortly.",
+            "success"
+        );
+    } catch (error) {
+        console.error("Password reset request failed:", error);
+        setAuthStatus("Could not send the reset email. Please try again.", "error");
+    } finally {
+        submitButton.disabled = false;
+    }
+});
+
+updatePasswordForm.addEventListener("submit", async function(event) {
+    event.preventDefault();
+
+    const newPassword = document.getElementById("newPassword").value;
+    const confirmNewPassword = document.getElementById("confirmNewPassword").value;
+
+    if (newPassword !== confirmNewPassword) {
+        setAuthStatus("The passwords do not match.", "error");
+        return;
+    }
+
+    const submitButton = updatePasswordForm.querySelector('button[type="submit"]');
+    submitButton.disabled = true;
+    setAuthStatus("");
+
+    try {
+        const { error } = await supabaseClient.auth.updateUser({ password: newPassword });
+
+        if (error) {
+            setAuthStatus(error.message, "error");
+            return;
+        }
+
+        const cleanUrl = new URL(window.location.href);
+        cleanUrl.searchParams.delete("password-reset");
+        cleanUrl.hash = "";
+        window.history.replaceState({}, document.title, cleanUrl.toString());
+
+        loginOverlay.classList.remove("open");
+        updatePasswordForm.reset();
+        await updateAccountUI();
+        alert("Your password has been updated.");
+    } catch (error) {
+        console.error("Password update failed:", error);
+        setAuthStatus("Could not update your password. Please try again.", "error");
+    } finally {
+        submitButton.disabled = false;
+    }
+});
+
+const recoveryRequested =
+    new URLSearchParams(window.location.search).get("password-reset") === "1" ||
+    new URLSearchParams(window.location.search).get("type") === "recovery" ||
+    new URLSearchParams(window.location.hash.slice(1)).get("type") === "recovery";
+
+supabaseClient.auth.onAuthStateChange((event, session) => {
+    if (event === "PASSWORD_RECOVERY" && session) {
+        loginOverlay.classList.add("open");
+        setAuthView("update-password");
+    }
+});
+
+if (recoveryRequested) {
+    loginOverlay.classList.add("open");
+
+    supabaseClient.auth.getSession().then(({ data, error }) => {
+        if (error) {
+            console.error("Could not verify password recovery session:", error);
+            setAuthView("login");
+            setAuthStatus("Could not verify this reset link. Please request a new one.", "error");
+            return;
+        }
+
+        if (data.session) {
+            setAuthView("update-password");
+            return;
+        }
+
+        setAuthView("login");
+        setAuthStatus("This reset link is invalid or expired. Request a new one to continue.", "error");
+    }).catch(error => {
+        console.error("Could not load password recovery session:", error);
+        setAuthView("login");
+        setAuthStatus("Could not verify this reset link. Please request a new one.", "error");
+    });
+}
 
 // =========================================
 // ACCOUNT STATE

@@ -1107,8 +1107,22 @@ z-index: 1000;
   text-align: left;
 }
 
+.auth-reset-form:not([hidden]) {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  text-align: left;
+}
 
-#loginForm label {
+#loginForm[hidden],
+.auth-reset-form[hidden],
+.auth-link[hidden] {
+  display: none;
+}
+
+
+#loginForm label,
+.auth-reset-form label {
   font-weight: bold;
 
   font-size: 14px;
@@ -1117,7 +1131,8 @@ z-index: 1000;
 }
 
 
-#loginForm input {
+#loginForm input,
+.auth-reset-form input {
   padding: 12px;
 
   border: 1px solid transparent;
@@ -1136,7 +1151,8 @@ z-index: 1000;
 }
 
 
-#loginForm input:focus {
+#loginForm input:focus,
+.auth-reset-form input:focus {
   border-color: var(--accent);
 
   box-shadow:
@@ -1144,8 +1160,44 @@ z-index: 1000;
 }
 
 
-#loginForm input::placeholder {
+#loginForm input::placeholder,
+.auth-reset-form input::placeholder {
   color: var(--accent-light);
+}
+
+.auth-link {
+  display: block;
+  margin: 12px auto 0;
+  padding: 4px;
+  border: 0;
+  background: transparent;
+  color: var(--accent);
+  font: inherit;
+  cursor: pointer;
+}
+
+.auth-link:hover {
+  text-decoration: underline;
+}
+
+.auth-status {
+  margin: 16px 0 0;
+  color: var(--accent-light);
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+.auth-status[data-state="success"] {
+  color: #8ff0a4;
+}
+
+.auth-status[data-state="error"] {
+  color: #ffb4ab;
+}
+
+.auth-reset-form button:disabled {
+  cursor: wait;
+  opacity: 0.7;
 }
 
 
