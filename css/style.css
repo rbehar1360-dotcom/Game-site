@@ -11354,3 +11354,252 @@ z-index: 1000;
         font-size: 13px;
     }
 }
+
+/* =========================================
+   PHONE LAYOUT
+========================================= */
+
+@media (max-width: 800px) {
+  .site-header {
+    flex-wrap: wrap;
+    gap: 14px;
+  }
+
+  .brand-heading {
+    flex: 1 1 100%;
+  }
+
+  .header-actions {
+    justify-content: center;
+  }
+}
+
+@media (max-width: 600px) {
+  html,
+  body {
+    max-width: 100%;
+    overflow-x: clip;
+  }
+
+  body {
+    background-attachment: scroll;
+  }
+
+  .site-header {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 14px;
+    padding: 14px 12px;
+  }
+
+  .brand-heading {
+    min-width: 0;
+    text-align: center;
+  }
+
+  .site-header h1 {
+    font-size: clamp(18px, 5vw, 22px);
+    overflow-wrap: anywhere;
+  }
+
+  .site-header h2 {
+    padding-left: 0;
+    border-left: 0;
+    font-size: 13px;
+  }
+
+  .site-header p {
+    margin-left: 0;
+  }
+
+  .header-actions {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    width: 100%;
+    gap: 8px;
+  }
+
+  .header-actions > button:not(.settings-button) {
+    width: 100%;
+    min-width: 0;
+    min-height: 42px;
+    padding: 8px 6px;
+    font-size: 12px;
+    white-space: normal;
+  }
+
+  .header-actions .settings-button {
+    width: 42px;
+    height: 42px;
+    justify-self: center;
+  }
+
+  .account-menu {
+    top: calc(100% + 8px);
+    right: 12px;
+    left: 12px;
+    width: auto;
+    max-width: none;
+  }
+
+  .searchInput {
+    min-width: 0;
+    font-size: 16px;
+  }
+
+  .game-discovery {
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
+    margin: 14px auto 18px;
+    padding: 0 10px;
+  }
+
+  .game-filter-row {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    width: 100%;
+    min-width: 0;
+    overflow: visible;
+    gap: 7px;
+  }
+
+  .game-filter {
+    min-width: 0;
+    min-height: 42px;
+    height: auto;
+    padding: 7px 5px;
+    font-size: 11px;
+    line-height: 1.25;
+    white-space: normal;
+  }
+
+  .game-result-count {
+    grid-column: 1 / -1;
+    justify-self: end;
+  }
+
+  .game-grid {
+    width: 100%;
+    max-width: 100%;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px;
+    padding: 8px 10px;
+  }
+
+  .game-card {
+    min-width: 0;
+  }
+
+  .settings-overlay,
+  .login-overlay,
+  .shop-overlay,
+  .stats-overlay,
+  .chat-overlay,
+  .messages-overlay,
+  .owner-overlay,
+  .leaderboard-overlay,
+  .profile-overlay,
+  .support-overlay,
+  .achievements-overlay,
+  .legal-modal {
+    align-items: flex-start;
+    overflow-y: auto;
+    padding: max(12px, env(safe-area-inset-top))
+      max(12px, env(safe-area-inset-right))
+      max(12px, env(safe-area-inset-bottom))
+      max(12px, env(safe-area-inset-left));
+  }
+
+  .login-window {
+    max-width: 100%;
+    max-height: calc(100dvh - 24px);
+    overflow-y: auto;
+    margin: auto;
+    padding: 20px 16px;
+  }
+
+  .chat-window {
+    width: 100%;
+    max-width: 100%;
+    height: min(90dvh, 760px);
+    min-height: 0;
+    margin: auto;
+  }
+
+  .settings-window {
+    width: 100%;
+    max-width: 100%;
+    max-height: calc(100dvh - 24px);
+    margin: auto;
+  }
+
+  .shop-window,
+  .stats-window,
+  .leaderboard-window,
+  .owner-window,
+  .profile-window,
+  .support-modal,
+  .achievements-window,
+  .legal-modal-box,
+  .new-message-modal {
+    width: 100%;
+    max-width: 100%;
+    max-height: calc(100dvh - 24px);
+    margin: auto;
+  }
+
+  .owner-window {
+    overflow-y: auto;
+  }
+
+  .owner-toolbar {
+    flex-wrap: wrap;
+    padding: 12px;
+  }
+
+  .owner-toolbar input {
+    min-width: 0;
+    flex: 1 1 100%;
+  }
+
+  .owner-toolbar button {
+    min-height: 42px;
+    flex: 1 1 40%;
+  }
+
+  .settings-option {
+    align-items: flex-start;
+    gap: 12px;
+    padding: 13px;
+  }
+
+  .settings-content {
+    padding: 18px 14px;
+  }
+
+  .settings-info-row {
+    gap: 10px;
+    overflow-wrap: anywhere;
+  }
+}
+
+@media (max-width: 360px) {
+  .game-filter-row {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .game-result-count {
+    grid-column: 1 / -1;
+  }
+
+  .game-grid {
+    gap: 8px;
+    padding-right: 8px;
+    padding-left: 8px;
+  }
+
+  .header-actions > button:not(.settings-button) {
+    font-size: 11px;
+  }
+}
