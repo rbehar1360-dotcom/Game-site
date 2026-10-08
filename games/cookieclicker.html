@@ -281,6 +281,30 @@ iframe {
     color: var(--accent);
 }
 
+.adrian-mode-toggle {
+    width: 100%;
+    padding: 10px 12px;
+    border: 1px solid var(--accent);
+    border-radius: 8px;
+    background: var(--background-1);
+    color: var(--text);
+    font-weight: bold;
+    text-align: left;
+    cursor: pointer;
+}
+
+.adrian-mode-toggle[aria-pressed="true"] {
+    background: var(--accent);
+    color: #001018;
+}
+
+.adrian-mode-description {
+    margin: 7px 0 16px;
+    font-size: 13px;
+    line-height: 1.5;
+    opacity: 0.8;
+}
+
 
 /* =========================================
    FORM
@@ -652,7 +676,7 @@ async function getCurrentUser() {
    OPEN SAVES
 ========================================= */
 
-function openSaves() {
+async function openSaves() {
 
     document
         .getElementById("savesModal")
@@ -660,7 +684,113 @@ function openSaves() {
 
     resetSaveForm();
 
-    loadSavedGames();
+    updateAdrianModeButton();
+
+    if (isAdrianModeEnabled()) {
+        await updateMostRecentSaveFromClipboard();
+        return;
+    }
+
+    await loadSavedGames();
+}
+
+function isAdrianModeEnabled() {
+    return localStorage.getItem("cookieClickerAdrianMode") === "true";
+}
+
+function updateAdrianModeButton() {
+    const button = document.getElementById("adrianModeToggle");
+    const enabled = isAdrianModeEnabled();
+
+    button.setAttribute("aria-pressed", String(enabled));
+    button.textContent = "Adrian mode: " + (enabled ? "On" : "Off");
+}
+
+function toggleAdrianMode() {
+    const enabled = !isAdrianModeEnabled();
+    localStorage.setItem("cookieClickerAdrianMode", String(enabled));
+    updateAdrianModeButton();
+
+    if (enabled) {
+        showStatus("Adrian mode is on. Clicking Saves will replace your most recently updated save with your clipboard contents.");
+    } else {
+        showStatus("Adrian mode is off. Saves will open normally.");
+    }
+}
+
+async function updateMostRecentSaveFromClipboard() {
+    let saveCode;
+
+    try {
+        if (!navigator.clipboard || !navigator.clipboard.readText) {
+            throw new Error("Clipboard access is unavailable.");
+        }
+
+        saveCode = (await navigator.clipboard.readText()).trim();
+    } catch (error) {
+        console.error("Could not read Cookie Clicker save from clipboard:", error);
+        showStatus("Could not read your clipboard. Allow clipboard access, copy a save in Cookie Clicker, and click Saves again.");
+        await loadSavedGames();
+        return;
+    }
+
+    if (!saveCode) {
+        showStatus("Your clipboard is empty. Copy a Cookie Clicker save first.");
+        await loadSavedGames();
+        return;
+    }
+
+    const user = await getCurrentUser();
+
+    if (!user) {
+        showStatus("Log in to update your saved Cookie Clicker games.");
+        await loadSavedGames();
+        return;
+    }
+
+    const { data: save, error: findError } = await supabaseClient
+        .from("cookie_clicker_saves")
+        .select("id, save_name")
+        .eq("user_id", user.id)
+        .order("updated_at", { ascending: false })
+        .limit(1)
+        .maybeSingle();
+
+    if (findError) {
+        console.error("Could not find the most recently updated Cookie Clicker save:", findError);
+        showStatus("Could not find your most recently updated save.");
+        await loadSavedGames();
+        return;
+    }
+
+    if (!save) {
+        showStatus("You have no saved games to update. Create a save first.");
+        await loadSavedGames();
+        return;
+    }
+
+    const { data: updatedSave, error: updateError } = await supabaseClient
+        .from("cookie_clicker_saves")
+        .update({
+            save_code: saveCode,
+            updated_at: new Date().toISOString()
+        })
+        .eq("id", save.id)
+        .eq("user_id", user.id)
+        .select("id")
+        .maybeSingle();
+
+    if (updateError || !updatedSave) {
+        if (updateError) {
+            console.error("Could not update the most recently updated Cookie Clicker save:", updateError);
+        }
+        showStatus("Could not update your most recently updated save.");
+        await loadSavedGames();
+        return;
+    }
+
+    showStatus('Updated "' + save.save_name + '" from your clipboard.');
+    await loadSavedGames();
 }
 
 
@@ -1352,6 +1482,18 @@ document.addEventListener(
 
         </div>
 
+        <button
+            type="button"
+            class="adrian-mode-toggle"
+            id="adrianModeToggle"
+            aria-pressed="false"
+            onclick="toggleAdrianMode()"
+        >
+            Adrian mode: Off
+        </button>
+        <p class="adrian-mode-description">
+            When on, clicking Saves reads your clipboard and replaces your most recently updated save. Copy a fresh save in Cookie Clicker first.
+        </p>
 
         <div
             class="status-message"
