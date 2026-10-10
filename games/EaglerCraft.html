@@ -408,6 +408,114 @@
 
 
         /* =========================================
+           END REVOKED PLAY SESSION
+        ========================================= */
+
+        function endRevokedPlaySession() {
+
+            const message =
+                document.createElement("main");
+
+            message.style.cssText =
+                "min-height:100vh;display:grid;place-items:center;padding:24px;box-sizing:border-box;background:#111;color:#fff;font:16px Arial,sans-serif;text-align:center";
+
+            const notice =
+                document.createElement("div");
+
+            notice.innerHTML =
+                '<h1>Session ended</h1><p>Your account is no longer signed in. Sign in again to continue playing.</p><a href="../index.html" style="color:#8ab4ff">Return to Game Hub</a>';
+
+            message.appendChild(notice);
+            document.body.replaceChildren(message);
+
+        }
+
+
+        /* =========================================
+           MONITOR SIGNED-IN GAME SESSIONS
+        ========================================= */
+
+        function monitorSignedInGameSession() {
+
+            if (!currentUser) {
+                return;
+            }
+
+
+            let sessionEnded = false;
+
+
+            function endSession() {
+
+                if (sessionEnded) {
+                    return;
+                }
+
+                sessionEnded = true;
+                endRevokedPlaySession();
+
+            }
+
+
+            supabaseClient.auth.onAuthStateChange(
+                function (event) {
+
+                    if (event === "SIGNED_OUT") {
+                        endSession();
+                    }
+
+                }
+            );
+
+
+            window.setInterval(async function () {
+
+                if (sessionEnded) {
+                    return;
+                }
+
+
+                try {
+
+                    const {
+                        data: {
+                            user
+                        },
+                        error
+                    } = await supabaseClient.auth.getUser();
+
+
+                    if (error) {
+
+                        console.error(
+                            "Could not verify the active Eaglercraft session:",
+                            error
+                        );
+
+                        return;
+
+                    }
+
+
+                    if (!user || user.id !== currentUser.id) {
+                        endSession();
+                    }
+
+                } catch (error) {
+
+                    console.error(
+                        "Could not verify the active Eaglercraft session:",
+                        error
+                    );
+
+                }
+
+            }, 60 * 1000);
+
+        }
+
+
+        /* =========================================
            INITIALIZE
         ========================================= */
 
@@ -434,6 +542,8 @@
 
 
                 currentUser = user || null;
+
+                monitorSignedInGameSession();
 
             } catch (error) {
 
