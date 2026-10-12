@@ -1,0 +1,33 @@
+# Ralph's Unblocked Games
+
+> Official website: https://ralphsunblockedgames.vercel.app/
+>
+> Ralph's Unblocked Games is a browser-based directory of free online games. Visitors can browse the public game list and open individual game pages to play in a web browser. Availability of embedded games can depend on the game provider and the visitor's device or network.
+
+## Main features
+
+- Browse a public directory of browser games from the homepage.
+- Open individual game pages, with fullscreen controls on supported games.
+- Optional account features include favorites, likes, and playtime tracking.
+- Read about the website and its maintainer.
+
+## Game styles represented
+
+The current library includes arcade, action, puzzle, sports, racing, platform, simulation, and casual games. These are descriptive groupings, not separate category pages or filters.
+
+## Important public pages
+
+- [Homepage](https://ralphsunblockedgames.vercel.app/)
+- [About Ralph's Unblocked Games](https://ralphsunblockedgames.vercel.app/about/index.html)
+- [Geometry Dash](https://ralphsunblockedgames.vercel.app/games/GeometryDash.html)
+- [Basketball Legends 2020](https://ralphsunblockedgames.vercel.app/games/BasketBallLegends2020.html)
+- [Cookie Clicker](https://ralphsunblockedgames.vercel.app/games/cookieclicker.html)
+- [Chess](https://ralphsunblockedgames.vercel.app/games/Chess.html)
+- [Run 3](https://ralphsunblockedgames.vercel.app/games/Run3.html)
+- [Complete public-page sitemap](https://ralphsunblockedgames.vercel.app/sitemap.xml)
+
+Visitors can use the homepage to explore the complete current game directory. The sitemap lists the public HTML pages, including game pages.
+
+## Notes
+
+This file follows the emerging `llms.txt` convention. AI services may or may not consume it; it does not guarantee crawling, indexing, or recommendations. The game directory is maintained as static site pages. Supabase is used for account-related features such as favorites and likes, not as the public game catalog.

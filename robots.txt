@@ -1,3 +1,39 @@
+# Search discovery crawlers
+User-agent: Googlebot
+Allow: /
+
+User-agent: Bingbot
+Allow: /
+
+# AI search crawlers
+User-agent: OAI-SearchBot
+Allow: /
+
+User-agent: PerplexityBot
+Allow: /
+
+User-agent: Claude-SearchBot
+Allow: /
+
+# User-requested retrieval crawlers
+User-agent: ChatGPT-User
+Allow: /
+
+User-agent: Claude-User
+Allow: /
+
+# AI training crawlers; these rules apply to public site content only.
+User-agent: GPTBot
+Allow: /
+
+User-agent: ClaudeBot
+Allow: /
+
+User-agent: Google-Extended
+Allow: /
+
+# No separate private URL routes are published by this static site.
+# robots.txt is not access control; keep private Supabase data behind authenticated policies.
 User-agent: *
 Allow: /
 
