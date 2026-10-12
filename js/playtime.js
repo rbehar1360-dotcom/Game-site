@@ -651,7 +651,13 @@
 // TRACKER LOOP
 // =========================================
 function isGameActive() {
-    return document.visibilityState === "visible" && document.hasFocus();
+    const gameFrame = gameId === "eaglercraft"
+        ? document.getElementById("gameFrame")
+        : null;
+    const gameFrameFocused = gameFrame !== null && document.activeElement === gameFrame;
+
+    return document.visibilityState === "visible" &&
+        (document.hasFocus() || gameFrameFocused);
 }
 async function trackerLoop() {
 
@@ -684,4 +690,3 @@ async function trackerLoop() {
     console.log(`⏱️ Playtime tracking initialized for: ${gameId}`);
 
 })();
-
