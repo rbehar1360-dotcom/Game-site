@@ -1,5 +1,5 @@
 const StickmanHookURL = "https://totalclick.org/games/stickmanhook/game/index.html";
-const EaglerCraftURL = "../GameFiles/clEaglercraftX188(u29).html";
+const EaglerCraftURL = "https://eaglercraft.q13x.com/1.8.8_2/wasm/?retina=true";
 const BasketBallLegends2020URL = "https://pinkdev.d13qic2f6zga3.amplifyapp.com/games/clbasketballstars.html";
 const SlopeURL = "https://slopeonline.online/xlope-game.embed";
 const snowball = "https://totalclick.org/games/snowball/game/index.html";
