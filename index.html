@@ -55,6 +55,7 @@
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="js/supabase.js" defer></script>
 
+  <script src="js/overlay-stack.js" defer></script>
   <script src="js/01-core-auth.js" defer></script>
 <script src="js/02-games.js" defer></script>
 <script src="js/03-stats-shop.js" defer></script>
@@ -185,39 +186,88 @@
 
     </div>
 
-    <div class="owner-toolbar">
-
-  <input
-    type="text"
-    id="ownerUserSearch"
-    placeholder="Search users..."
-  >
-
-  <input
-    type="number"
-    id="ownerGiveAllAmount"
-    min="1"
-    step="1"
-    placeholder="Coins for everyone"
-  >
-
-  <button id="ownerGiveAll">
-    🪙 Give All
-  </button>
-
-  <button id="refreshOwnerUsers">
-    ↻ Refresh
-  </button>
-
-</div>
-
-    <div id="ownerUserList" class="owner-user-list">
-
-      <p class="owner-loading">
-        Loading users...
-      </p>
-
+    <div class="owner-tabs" role="tablist" aria-label="Owner panel sections">
+      <button
+        id="ownerUsersTab"
+        class="owner-tab active"
+        type="button"
+        role="tab"
+        aria-selected="true"
+        aria-controls="ownerUsersView"
+      >
+        Users
+      </button>
+      <button
+        id="ownerSuggestionsTab"
+        class="owner-tab"
+        type="button"
+        role="tab"
+        aria-selected="false"
+        aria-controls="ownerSuggestionsView"
+      >
+        Suggestions
+      </button>
     </div>
+
+    <section
+      id="ownerUsersView"
+      class="owner-panel-view"
+      role="tabpanel"
+      aria-labelledby="ownerUsersTab"
+    >
+      <div class="owner-toolbar">
+        <input
+          type="text"
+          id="ownerUserSearch"
+          placeholder="Search users..."
+        >
+
+        <input
+          type="number"
+          id="ownerGiveAllAmount"
+          min="1"
+          step="1"
+          placeholder="Coins for everyone"
+        >
+
+        <button id="ownerGiveAll">
+          🪙 Give All
+        </button>
+
+        <button id="refreshOwnerUsers">
+          ↻ Refresh
+        </button>
+      </div>
+
+      <div class="owner-user-total" role="status" aria-live="polite">
+        <span>Total users</span>
+        <strong id="ownerTotalUsers">—</strong>
+      </div>
+
+      <div id="ownerUserList" class="owner-user-list">
+
+        <p class="owner-loading">
+          Loading users...
+        </p>
+
+      </div>
+    </section>
+
+    <section
+      id="ownerSuggestionsView"
+      class="owner-panel-view"
+      role="tabpanel"
+      aria-labelledby="ownerSuggestionsTab"
+      hidden
+    >
+      <div class="owner-suggestions-toolbar">
+        <p>Suggestions sent by players.</p>
+        <button id="refreshOwnerSuggestions" type="button">↻ Refresh</button>
+      </div>
+      <div id="ownerSuggestionsList" class="owner-suggestions-list" aria-live="polite">
+        <p class="owner-loading">Open this tab to load suggestions.</p>
+      </div>
+    </section>
 
   </div>
 

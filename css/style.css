@@ -4018,6 +4018,33 @@ z-index: 1000;
     opacity: 0.65;
 }
 
+.owner-tabs {
+    display: flex;
+    gap: 8px;
+    padding: 12px 20px 0;
+}
+
+.owner-tab {
+    padding: 9px 14px;
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: 9px 9px 0 0;
+    background: transparent;
+    color: var(--text);
+    cursor: pointer;
+    transition: 0.2s ease;
+}
+
+.owner-tab:hover,
+.owner-tab.active {
+    border-color: var(--accent);
+    background: var(--card);
+    color: var(--accent);
+}
+
+.owner-panel-view[hidden] {
+    display: none;
+}
+
 .close-owner {
     width: 34px;
     height: 34px;
@@ -4078,6 +4105,103 @@ z-index: 1000;
     box-shadow: 0 0 15px var(--glow);
 }
 
+.owner-user-total {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    margin: 0 20px 14px;
+    padding: 11px 14px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 9px;
+    background: var(--card);
+    color: var(--text);
+}
+
+.owner-user-total strong {
+    color: var(--accent);
+    font-size: 18px;
+}
+
+.owner-suggestions-toolbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 12px 20px;
+}
+
+.owner-suggestions-toolbar p {
+    margin: 0;
+    color: var(--text);
+    opacity: 0.7;
+}
+
+.owner-suggestions-toolbar button {
+    padding: 10px 16px;
+    border: none;
+    border-radius: 9px;
+    background: var(--accent);
+    color: #001018;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+.owner-suggestions-list {
+    display: grid;
+    gap: 10px;
+    padding: 0 20px 20px;
+    max-height: 60vh;
+    overflow-y: auto;
+}
+
+.owner-suggestion-card {
+    padding: 14px 16px;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 12px;
+    background: var(--card);
+    color: var(--text);
+}
+
+.owner-suggestion-heading {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 8px;
+}
+
+.owner-suggestion-heading h3 {
+    margin: 0;
+    color: var(--accent);
+    font-size: 17px;
+}
+
+.owner-suggestion-username {
+    opacity: 0.7;
+    font-size: 13px;
+}
+
+.owner-suggestion-link,
+.owner-suggestion-no-link,
+.owner-suggestion-reason {
+    overflow-wrap: anywhere;
+}
+
+.owner-suggestion-link {
+    color: var(--accent-light);
+}
+
+.owner-suggestion-reason {
+    margin: 10px 0 0;
+    white-space: pre-wrap;
+}
+
+.owner-suggestion-no-link {
+    opacity: 0.6;
+    font-size: 13px;
+}
+
 .owner-user-list {
     padding: 0 20px 20px;
     max-height: 60vh;
@@ -4116,6 +4240,27 @@ z-index: 1000;
     font-weight: 600;
     font-size: 16px;
     color: var(--text);
+}
+
+.owner-profile-link {
+    display: block;
+    padding: 0;
+    border: 0;
+    background: transparent;
+    font: inherit;
+    text-align: left;
+    cursor: pointer;
+}
+
+.owner-profile-link:hover,
+.owner-profile-link:focus-visible {
+    color: var(--accent);
+    text-decoration: underline;
+}
+
+.owner-profile-link:disabled {
+    cursor: default;
+    text-decoration: none;
 }
 
 .owner-coins {

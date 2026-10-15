@@ -300,6 +300,27 @@ const closeOwnerPanel =
 const ownerUserList =
     document.getElementById("ownerUserList");
 
+const ownerUsersTab =
+    document.getElementById("ownerUsersTab");
+
+const ownerSuggestionsTab =
+    document.getElementById("ownerSuggestionsTab");
+
+const ownerUsersView =
+    document.getElementById("ownerUsersView");
+
+const ownerSuggestionsView =
+    document.getElementById("ownerSuggestionsView");
+
+const ownerSuggestionsList =
+    document.getElementById("ownerSuggestionsList");
+
+const refreshOwnerSuggestions =
+    document.getElementById("refreshOwnerSuggestions");
+
+const ownerTotalUsers =
+    document.getElementById("ownerTotalUsers");
+
 const ownerUserSearch =
     document.getElementById("ownerUserSearch");
 
@@ -313,6 +334,7 @@ const ownerGiveAll =
     document.getElementById("ownerGiveAll");
 
 let ownerUsers = [];
+let ownerSuggestions = [];
 
 
 // =========================================
@@ -483,6 +505,10 @@ async function loadOwnerUsers() {
         return;
     }
 
+    if (ownerTotalUsers) {
+        ownerTotalUsers.textContent = "Loading…";
+    }
+
     ownerUserList.innerHTML = `
         <p class="owner-loading">
             Loading users...
@@ -507,6 +533,10 @@ async function loadOwnerUsers() {
             </p>
         `;
 
+        if (ownerTotalUsers) {
+            ownerTotalUsers.textContent = "Unavailable";
+        }
+
         showOwnerNotification(
             "Could not load users.",
             "error"
@@ -515,12 +545,163 @@ async function loadOwnerUsers() {
         return;
     }
 
-    ownerUsers =
-        Array.isArray(data)
-            ? data
-            : [];
+    if (!Array.isArray(data)) {
+        console.error(
+            "Could not count users: admin_list_users returned an invalid response.",
+            data
+        );
+
+        ownerUserList.innerHTML = `
+            <p class="owner-error">
+                The user list returned an invalid response.
+            </p>
+        `;
+
+        if (ownerTotalUsers) {
+            ownerTotalUsers.textContent = "Unavailable";
+        }
+
+        showOwnerNotification(
+            "Could not load the user count.",
+            "error"
+        );
+
+        return;
+    }
+
+    ownerUsers = data;
+
+    if (ownerTotalUsers) {
+        ownerTotalUsers.textContent =
+            ownerUsers.length.toLocaleString();
+    }
 
     renderOwnerUsers();
+}
+
+async function loadOwnerSuggestions() {
+
+    if (!ownerSuggestionsList) {
+        return;
+    }
+
+    ownerSuggestionsList.innerHTML = `
+        <p class="owner-loading">Loading suggestions...</p>
+    `;
+
+    const isAdmin = await checkAdmin();
+
+    if (!isAdmin) {
+        ownerSuggestionsList.innerHTML = `
+            <p class="owner-error">You don't have permission to view suggestions.</p>
+        `;
+        return;
+    }
+
+    const { data, error } = await supabaseClient
+        .rpc("admin_list_game_suggestions");
+
+    if (error) {
+        console.error("Could not load game suggestions:", error);
+        ownerSuggestionsList.innerHTML = `
+            <p class="owner-error">Could not load suggestions. Apply the owner suggestions database migration, then refresh.</p>
+        `;
+        showOwnerNotification("Could not load suggestions.", "error");
+        return;
+    }
+
+    if (!Array.isArray(data)) {
+        console.error("Could not load game suggestions: invalid response.", data);
+        ownerSuggestionsList.innerHTML = `
+            <p class="owner-error">The suggestions query returned an invalid response.</p>
+        `;
+        return;
+    }
+
+    ownerSuggestions = data;
+    renderOwnerSuggestions();
+}
+
+function renderOwnerSuggestions() {
+
+    if (!ownerSuggestionsList) {
+        return;
+    }
+
+    ownerSuggestionsList.replaceChildren();
+
+    if (ownerSuggestions.length === 0) {
+        const emptyMessage = document.createElement("p");
+        emptyMessage.className = "owner-loading";
+        emptyMessage.textContent = "No game suggestions yet.";
+        ownerSuggestionsList.appendChild(emptyMessage);
+        return;
+    }
+
+    const usernamesById = new Map(
+        ownerUsers.map(user => [
+            String(user.user_id),
+            String(user.username || "Unknown user")
+        ])
+    );
+
+    ownerSuggestions.forEach(suggestion => {
+        const card = document.createElement("article");
+        card.className = "owner-suggestion-card";
+
+        const heading = document.createElement("div");
+        heading.className = "owner-suggestion-heading";
+
+        const gameName = document.createElement("h3");
+        gameName.textContent = suggestion.game_name || "Untitled suggestion";
+
+        const username = document.createElement("span");
+        username.className = "owner-suggestion-username";
+        username.textContent = usernamesById.get(String(suggestion.user_id)) || "Unknown user";
+
+        heading.append(gameName, username);
+        card.appendChild(heading);
+
+        const gameUrl = String(suggestion.game_url || "").trim();
+        const linkLabel = document.createElement("div");
+
+        if (gameUrl) {
+            try {
+                const parsedUrl = new URL(gameUrl);
+                if (parsedUrl.protocol !== "https:" && parsedUrl.protocol !== "http:") {
+                    throw new TypeError("Unsupported URL protocol");
+                }
+
+                const link = document.createElement("a");
+                link.className = "owner-suggestion-link";
+                link.href = parsedUrl.href;
+                link.target = "_blank";
+                link.rel = "noopener noreferrer";
+                link.textContent = gameUrl;
+                linkLabel.appendChild(link);
+            } catch (error) {
+                console.warn("Skipped invalid game suggestion URL:", gameUrl, error);
+                linkLabel.className = "owner-suggestion-no-link";
+                linkLabel.textContent = "Invalid game link";
+                card.appendChild(linkLabel);
+            }
+        } else {
+            linkLabel.className = "owner-suggestion-no-link";
+            linkLabel.textContent = "No link provided";
+            card.appendChild(linkLabel);
+        }
+
+        if (linkLabel.childElementCount > 0) {
+            card.appendChild(linkLabel);
+        }
+
+        const reason = document.createElement("p");
+        reason.className = "owner-suggestion-reason";
+        reason.textContent = suggestion.reason || "No reason provided.";
+        card.appendChild(reason);
+
+        ownerSuggestionsList.appendChild(card);
+    });
 }
 
 
@@ -574,11 +755,18 @@ function renderOwnerUsers() {
         row.innerHTML = `
             <div class="owner-user-info">
 
-                <div class="owner-username">
+                <button
+                    type="button"
+                    class="owner-username owner-profile-link"
+                    aria-label="View ${escapeOwnerHTML(
+                        user.username || "Unknown User"
+                    )}'s profile"
+                    ${user.user_id ? `data-user-id="${escapeOwnerHTML(user.user_id)}"` : "disabled"}
+                >
                     ${escapeOwnerHTML(
                         user.username || "Unknown User"
                     )}
-                </div>
+                </button>
 
                 <div class="owner-coins">
                     🪙 ${Number(
@@ -617,6 +805,26 @@ function renderOwnerUsers() {
 
             </div>
         `;
+
+        const profileButton =
+            row.querySelector(".owner-profile-link");
+
+        if (profileButton && user.user_id) {
+            profileButton.addEventListener("click", () => {
+                if (typeof openUserProfile === "function") {
+                    openUserProfile(
+                        user.user_id,
+                        user.username || "Unknown User"
+                    );
+                } else {
+                    console.error("User profile interface is unavailable.");
+                    showOwnerNotification(
+                        "Could not open this user's profile.",
+                        "error"
+                    );
+                }
+            });
+        }
 
         ownerUserList.appendChild(row);
     });
@@ -1051,11 +1259,71 @@ if (ownerPanelButton) {
                     "open"
                 );
 
+                if (ownerUsersView) {
+                    ownerUsersView.hidden = false;
+                }
+
+                if (ownerSuggestionsView) {
+                    ownerSuggestionsView.hidden = true;
+                }
+
+                if (ownerUsersTab) {
+                    ownerUsersTab.classList.add("active");
+                    ownerUsersTab.setAttribute("aria-selected", "true");
+                }
+
+                if (ownerSuggestionsTab) {
+                    ownerSuggestionsTab.classList.remove("active");
+                    ownerSuggestionsTab.setAttribute("aria-selected", "false");
+                }
+
                 await loadOwnerUsers();
             }
 
         }
     );
+}
+
+if (ownerUsersTab) {
+    ownerUsersTab.addEventListener("click", () => {
+        if (ownerUsersView) {
+            ownerUsersView.hidden = false;
+        }
+
+        if (ownerSuggestionsView) {
+            ownerSuggestionsView.hidden = true;
+        }
+
+        ownerUsersTab.classList.add("active");
+        ownerUsersTab.setAttribute("aria-selected", "true");
+
+        if (ownerSuggestionsTab) {
+            ownerSuggestionsTab.classList.remove("active");
+            ownerSuggestionsTab.setAttribute("aria-selected", "false");
+        }
+    });
+}
+
+if (ownerSuggestionsTab) {
+    ownerSuggestionsTab.addEventListener("click", async () => {
+        if (ownerUsersView) {
+            ownerUsersView.hidden = true;
+        }
+
+        if (ownerSuggestionsView) {
+            ownerSuggestionsView.hidden = false;
+        }
+
+        ownerSuggestionsTab.classList.add("active");
+        ownerSuggestionsTab.setAttribute("aria-selected", "true");
+
+        if (ownerUsersTab) {
+            ownerUsersTab.classList.remove("active");
+            ownerUsersTab.setAttribute("aria-selected", "false");
+        }
+
+        await loadOwnerSuggestions();
+    });
 }
 
 
@@ -1144,6 +1412,12 @@ if (refreshOwnerUsers) {
     );
 }
 
+if (refreshOwnerSuggestions) {
+    refreshOwnerSuggestions.addEventListener("click", async () => {
+        await loadOwnerSuggestions();
+    });
+}
+
 
 // =========================================
 // ESCAPE
@@ -1186,6 +1460,12 @@ supabaseClient.auth.onAuthStateChange(
         if (
             event === "SIGNED_OUT"
         ) {
+
+            ownerUsers = [];
+
+            if (ownerTotalUsers) {
+                ownerTotalUsers.textContent = "—";
+            }
 
             if (ownerPanelButton) {
 
