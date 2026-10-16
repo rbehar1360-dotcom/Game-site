@@ -1786,12 +1786,24 @@ if (messagesButton) {
     );
 }
 
+function closeMessagesOverlay() {
+    messagesOverlay?.classList.remove("open");
+
+    if (
+        new URLSearchParams(window.location.search)
+            .has("gameMessagesOverlay") &&
+        window.parent !== window
+    ) {
+        window.parent.postMessage(
+            "gamehub-close-message-overlay",
+            window.location.origin
+        );
+    }
+}
+
 closeMessages?.addEventListener(
     "click",
-    () =>
-        messagesOverlay?.classList.remove(
-            "open"
-        )
+    closeMessagesOverlay
 );
 
 messagesOverlay?.addEventListener(
@@ -1801,9 +1813,7 @@ messagesOverlay?.addEventListener(
             event.target ===
             messagesOverlay
         ) {
-            messagesOverlay.classList.remove(
-                "open"
-            );
+            closeMessagesOverlay();
         }
     }
 );
@@ -1856,6 +1866,55 @@ document.addEventListener("visibilitychange", () => {
 window.addEventListener("focus", refreshMessageState);
 
 setupMessageUI();
+
+async function openMessagesFromGameNotification() {
+    const params = new URLSearchParams(window.location.search);
+    if (!params.has("gameMessagesOverlay") || !messagesOverlay) {
+        return;
+    }
+
+    messagesOverlay.classList.add("open");
+
+    const user = await getCurrentUser();
+    if (!safeUser(user)) {
+        if (privateChatStatus) {
+            privateChatStatus.textContent = "Sign in to view your texts.";
+        }
+        return;
+    }
+
+    await loadConversations();
+    await updateUnreadCount();
+
+    const targetUserId = params.get("messageUserId");
+    if (!targetUserId) {
+        return;
+    }
+
+    let conversation = conversationData.find(
+        item => item.userId === targetUserId
+    );
+
+    if (!conversation) {
+        conversation = await loadConversationUser(targetUserId, {
+            userId: targetUserId,
+            username: "Unknown User"
+        });
+    }
+
+    if (conversation) {
+        await openPrivateConversation(
+            conversation.userId,
+            conversation.username
+        );
+    }
+}
+
+if (new URLSearchParams(window.location.search).has("gameMessagesOverlay")) {
+    window.setTimeout(() => {
+        void openMessagesFromGameNotification();
+    }, 0);
+}
 
 supabaseClient.auth.onAuthStateChange((_event, session) => {
     const nextUserId = session?.user?.id || null;

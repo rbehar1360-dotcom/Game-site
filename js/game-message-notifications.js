@@ -12,6 +12,16 @@
     let channel = null;
     let currentUserId = null;
     let connectionAttempt = 0;
+    const popupPreferenceKey = "gameHubInGameMessagePopups";
+
+    function areGameMessagePopupsEnabled() {
+        try {
+            return window.localStorage.getItem(popupPreferenceKey) !== "false";
+        } catch (error) {
+            console.error("Could not read the in-game message popup setting:", error);
+            return true;
+        }
+    }
 
     function getContainer() {
         let container = document.getElementById("gameMessageNotificationContainer");
@@ -130,6 +140,129 @@
         return container;
     }
 
+    function openGameMessages(senderId) {
+        let overlay = document.getElementById("gameMessageOverlay");
+        if (overlay) {
+            overlay.remove();
+        }
+
+        overlay = document.createElement("div");
+        overlay.id = "gameMessageOverlay";
+        overlay.style.cssText = [
+            "position:fixed",
+            "inset:0",
+            "z-index:2147483646",
+            "background:rgba(0,0,0,.72)",
+            "backdrop-filter:blur(5px)"
+        ].join(";");
+
+        const closeButton = document.createElement("button");
+        closeButton.type = "button";
+        closeButton.textContent = "×";
+        closeButton.setAttribute("aria-label", "Close texting");
+        closeButton.style.cssText = [
+            "position:absolute",
+            "top:12px",
+            "right:16px",
+            "z-index:2",
+            "width:42px",
+            "height:42px",
+            "border:1px solid rgba(255,255,255,.35)",
+            "border-radius:50%",
+            "background:#102532",
+            "color:#fff",
+            "font-size:28px",
+            "cursor:pointer"
+        ].join(";");
+
+        const frame = document.createElement("iframe");
+        frame.title = "Texting";
+        frame.style.cssText = [
+            "position:absolute",
+            "inset:0",
+            "width:100%",
+            "height:100%",
+            "border:0",
+            "background:transparent"
+        ].join(";");
+
+        const pageUrl = new URL("../index.html", window.location.href);
+        pageUrl.searchParams.set("gameMessagesOverlay", "1");
+        if (senderId) {
+            pageUrl.searchParams.set("messageUserId", senderId);
+        }
+
+        const handleEscape = event => {
+            if (event.key === "Escape" && overlay?.isConnected) {
+                closeOverlay();
+            }
+        };
+
+        const closeOverlay = () => {
+            window.removeEventListener("message", handleFrameMessage);
+            document.removeEventListener("keydown", handleEscape);
+            overlay?.remove();
+        };
+
+        closeButton.addEventListener("click", closeOverlay);
+        overlay.addEventListener("click", event => {
+            if (event.target === overlay) {
+                closeOverlay();
+            }
+        });
+
+        const handleFrameMessage = event => {
+            if (
+                event.origin === window.location.origin &&
+                event.source === frame.contentWindow &&
+                event.data === "gamehub-close-message-overlay"
+            ) {
+                closeOverlay();
+            }
+        };
+
+        window.addEventListener("message", handleFrameMessage);
+        frame.addEventListener("load", () => {
+            try {
+                const style = frame.contentDocument.createElement("style");
+                style.textContent = `
+                    html, body {
+                        width: 100%;
+                        height: 100%;
+                        min-height: 0 !important;
+                        margin: 0 !important;
+                        overflow: hidden !important;
+                        background: transparent !important;
+                    }
+                    body > :not(#messagesOverlay) {
+                        display: none !important;
+                    }
+                    #messagesOverlay {
+                        position: fixed !important;
+                        inset: 0 !important;
+                        display: flex !important;
+                        z-index: 1 !important;
+                    }
+                    #messagesOverlay .messages-window {
+                        max-height: calc(100% - 32px);
+                    }
+                    #messagesOverlay .close-messages {
+                        display: none !important;
+                    }
+                `;
+                frame.contentDocument.head.appendChild(style);
+            } catch (error) {
+                console.error("Could not prepare the in-game texting overlay:", error);
+            }
+        });
+
+        document.addEventListener("keydown", handleEscape);
+
+        overlay.append(closeButton, frame);
+        document.body.appendChild(overlay);
+        frame.src = pageUrl.href;
+    }
+
     function showNotification(username, message) {
         const toast = document.createElement("div");
         toast.className = "message-notification";
@@ -158,7 +291,7 @@
         open.className = "message-notification-open";
         open.textContent = "Open";
         open.addEventListener("click", () => {
-            window.location.assign(new URL("../index.html", window.location.href).href);
+            openGameMessages(open.dataset.senderId || "");
             toast.remove();
         });
 
@@ -179,12 +312,13 @@
             toast.classList.remove("show");
             window.setTimeout(() => toast.remove(), 250);
         }, 6500);
-        return { sender, avatar };
+        return { sender, avatar, open };
     }
 
     async function showIncomingMessage(message) {
         if (!message || message.recipient_id !== currentUserId) return;
         if (message.sender_id === currentUserId) return;
+        if (!areGameMessagePopupsEnabled()) return;
         if (message.id && seenMessageIds.has(message.id)) return;
 
         if (message.id) {
@@ -198,6 +332,7 @@
             "New message",
             typeof message.message === "string" ? message.message : ""
         );
+        notification.open.dataset.senderId = message.sender_id || "";
 
         try {
             const { data, error } = await supabase.rpc("find_username_by_id", {
@@ -211,6 +346,15 @@
             console.warn("Could not load message sender username:", error);
         }
     }
+
+    window.addEventListener("storage", event => {
+        if (
+            event.key === popupPreferenceKey &&
+            !areGameMessagePopupsEnabled()
+        ) {
+            document.getElementById("gameMessageNotificationContainer")?.remove();
+        }
+    });
 
     async function connectToUser(userId) {
         if (userId === currentUserId && channel) return;

@@ -334,6 +334,27 @@ function setupGamePreferences() {
   });
 }
 
+function setupGameMessagePopupPreference() {
+  const button = document.getElementById("gameMessagePopupPreference");
+  if (!button) return;
+
+  const storageKey = "gameHubInGameMessagePopups";
+
+  const updateButton = enabled => {
+    button.textContent = enabled ? "🔔 On" : "🔕 Off";
+    button.classList.toggle("enabled", enabled);
+    button.setAttribute("aria-pressed", String(enabled));
+  };
+
+  updateButton(localStorage.getItem(storageKey) !== "false");
+
+  button.addEventListener("click", () => {
+    const enabled = localStorage.getItem(storageKey) === "false";
+    localStorage.setItem(storageKey, String(enabled));
+    updateButton(enabled);
+  });
+}
+
 function setupGamePagePreferences() {
   const frame = document.getElementById("gameFrame") ||
     document.querySelector("iframe");
@@ -505,6 +526,7 @@ document.addEventListener("DOMContentLoaded", () => {
   setupSettingsNavigation();
   setupThemeSettings();
   setupGamePreferences();
+  setupGameMessagePopupPreference();
   setupGamePagePreferences();
 });
 
