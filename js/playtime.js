@@ -90,7 +90,29 @@
             "Wheely7.html": "Wheely7",
             "Wheely8.html": "Wheely8",
             "WorldsHardestGame.html": "WorldsHardestGame",
-            "YouVS100Skibidi.html": "YouVS100Skibidi"
+            "YouVS100Skibidi.html": "YouVS100Skibidi",
+            "clangrybirds.html": "AngryBirds",
+            "clangrybirds2.html": "AngryBirds2",
+            "clbindingofisaccsheeptime.html": "BindingOfIsaac",
+            "clbitlife.html": "BitLife",
+            "clblockblast.html": "BlockBlast",
+            "clblockblastv2.html": "BlockBlast2",
+            "clbloonsTD1.html": "BTD1",
+            "clbloonsTD2.html": "BTD2",
+            "clbloonsTD3.html": "BTD3",
+            "clbloonsTD4.html": "BTD4",
+            "clbtd5.html": "BTD5",
+            "clcapybaraclicker.html": "CapyClicker",
+            "clcoreball.html": "CoreBall",
+            "climpossiblequiz.html": "ImpossibleQuiz",
+            "clrun-2.html": "Run2",
+            "clrun.html": "Run1",
+            "clStreetFighter2Arcade.html": "StreetFighter2",
+            "doodle-jump.html": "DoodleJump",
+            "plinko.html": "Plinko",
+            "pokemon-emerald.html": "PokemonEmerald",
+            "google-feud.html": "GoogleFeud",
+            "wordle.html": "Wordle"
         };
 
         return gameMap[filename] || null;
