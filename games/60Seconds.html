@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="icon" href="../Game%20Images/favicon-96.png?v=4">
+  <script src="../js/theme.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="../js/supabase.js"></script>
+  <script src="../js/playtime.js"></script>
+  <link rel="stylesheet" href="../css/local-game-page.css">
+  <title>60 Seconds | Ralph’s Unblocked Games</title>
+  <meta name="description" content="Play 60 Seconds online on Ralph’s Unblocked Games.">
+  <meta name="robots" content="index, follow">
+  <link rel="canonical" href="https://ralphsunblockedgames.vercel.app/games/60Seconds.html">
+</head>
+<body>
+  <header class="header"><h1>🎮 60 Seconds</h1><a href="../index.html">⬅ Back to Hub</a></header>
+  <main class="game-wrapper">
+    <div class="game-container">
+      <div class="loading" id="loading">Loading Game...</div>
+      <button class="fullscreen-exit" onclick="window.exitFullscreen()" title="Exit Fullscreen">✕ Exit Fullscreen</button>
+      <iframe id="gameFrame" src="../GameFiles/cl60Seconds.html" title="60 Seconds" allowfullscreen tabindex="0" onload="gameLoaded()"></iframe>
+    </div>
+    <div class="controls"><button onclick="goFullscreen()">Fullscreen</button></div>
+  </main>
+  <script src="../js/local-game-page.js"></script>
+  <footer class="seo-footer"><p>Play more games at <a href="../index.html">Ralph’s Unblocked Games</a>.</p><a href="../about/index.html">About Ralph’s Unblocked Games</a></footer>
+</body>
+</html>

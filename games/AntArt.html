@@ -728,7 +728,8 @@ function gameLoaded() {
 
         <iframe
             id="gameFrame"
-            src="https://totalclick.org/games/antarttycoon/game/index.html"
+            sandbox="allow-scripts allow-same-origin"
+            src="../GameFiles/clantarttycoon.html"
             allowfullscreen
             onload="gameLoaded()">
         </iframe>
@@ -739,7 +740,7 @@ function gameLoaded() {
             document
                 .getElementById("gameFrame")
                 .src =
-                AntArtURL;
+                "../GameFiles/clantarttycoon.html";
 
         </script>
 
