@@ -264,7 +264,7 @@ async function loadUserLeaderboard() {
             "get_playtime_leaderboard",
             {
                 p_game_id: gameId,
-                p_limit: 25
+                p_limit: 50
             }
         );
 
