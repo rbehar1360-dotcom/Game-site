@@ -437,84 +437,111 @@
            MONITOR SIGNED-IN GAME SESSIONS
         ========================================= */
 
-        function monitorSignedInGameSession() {
+        
+function monitorSignedInGameSession() {
+    if (!currentUser || !supabaseClient) {
+        return;
+    }
 
-            if (!currentUser) {
+    let sessionEnded = false;
+    let checkingSession = false;
+
+    function endSession() {
+        if (sessionEnded) return;
+
+        sessionEnded = true;
+
+        console.warn("EaglerCraft session ended. Unloading game.");
+
+        // Stop the game immediately.
+        const frame = document.getElementById("gameFrame");
+
+        if (frame) {
+            frame.src = "about:blank";
+            frame.remove();
+        }
+
+        // Replace the page with the session-ended notice.
+        endRevokedPlaySession();
+    }
+
+    // Detect sign-outs and invalidated sessions.
+    const { data: authListener } =
+        supabaseClient.auth.onAuthStateChange(
+            (event, session) => {
+                if (event === "SIGNED_OUT" || !session) {
+                    endSession();
+                }
+            }
+        );
+
+    // Check periodically in case a session expires or
+    // another tab signs the user out.
+    async function verifySession() {
+        if (sessionEnded || checkingSession) return;
+
+        checkingSession = true;
+
+        try {
+            const { data, error } =
+                await supabaseClient.auth.getUser();
+
+            if (sessionEnded) return;
+
+            if (!error && (
+                !data.user ||
+                data.user.id !== currentUser.id
+            )) {
+                endSession();
                 return;
             }
 
-
-            let sessionEnded = false;
-
-
-            function endSession() {
-
-                if (sessionEnded) {
-                    return;
-                }
-
-                sessionEnded = true;
-                endRevokedPlaySession();
-
+            // A missing local session means the user is signed out.
+            if (
+                error &&
+                (
+                    error.name === "AuthSessionMissingError" ||
+                    /session.*missing|missing.*session/i.test(
+                        error.message || ""
+                    )
+                )
+            ) {
+                endSession();
+                return;
             }
 
-
-            supabaseClient.auth.onAuthStateChange(
-                function (event) {
-
-                    if (event === "SIGNED_OUT") {
-                        endSession();
-                    }
-
-                }
+            if (error) {
+                // Do not kick players for temporary network errors.
+                console.error(
+                    "Could not verify EaglerCraft session:",
+                    error
+                );
+            }
+        } catch (error) {
+            console.error(
+                "Session verification failed:",
+                error
             );
-
-
-            window.setInterval(async function () {
-
-                if (sessionEnded) {
-                    return;
-                }
-
-
-                try {
-
-                    const {
-                        data: {
-                            user
-                        },
-                        error
-                    } = await supabaseClient.auth.getUser();
-
-
-                    if (error) {
-
-                        console.error(
-                            "Could not verify the active Eaglercraft session:",
-                            error
-                        );
-
-                        return;
-
-                    }
-
-
-                    if (!user || user.id !== currentUser.id) {
-                        endSession();
-                    }
-
-                } catch (error) {
-
-                    console.error(
-                        "Could not verify the active Eaglercraft session:",
-                        error
-                    );
-
-                }
-
-            }, 60 * 1000);
-
+        } finally {
+            checkingSession = false;
         }
+    }
+
+    // Verify promptly, then check every 10 seconds.
+    verifySession();
+
+    const sessionCheckInterval = window.setInterval(
+        verifySession,
+        10 * 1000
+    );
+
+    // Stop monitoring if this page is unloaded.
+    window.addEventListener("pagehide", () => {
+        clearInterval(sessionCheckInterval);
+        authListener.subscription.unsubscribe();
+    }, { once: true });
+}
+
 
 
         /* =========================================
