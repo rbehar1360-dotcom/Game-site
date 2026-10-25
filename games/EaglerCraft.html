@@ -510,13 +510,28 @@ function monitorSignedInGameSession() {
                 return;
             }
 
-            if (error) {
-                // Do not kick players for temporary network errors.
-                console.error(
-                    "Could not verify EaglerCraft session:",
-                    error
-                );
-            }
+            
+if (error) {
+    const isRevoked =
+        error.status === 403 ||
+        error.code === "user_banned" ||
+        /user is banned|session.*missing|missing.*session/i.test(
+            error.message || ""
+        );
+
+    if (isRevoked) {
+        console.warn("EaglerCraft session revoked:", error.message);
+        endSession();
+        return;
+    }
+
+    console.error(
+        "Could not verify EaglerCraft session:",
+        error
+    );
+    return;
+}
+
         } catch (error) {
             console.error(
                 "Session verification failed:",
