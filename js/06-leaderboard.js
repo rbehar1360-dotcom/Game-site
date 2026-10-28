@@ -464,7 +464,7 @@ async function loadGameLeaderboard() {
         await supabaseClient.rpc(
             "get_game_playtime_leaderboard",
             {
-                p_limit: 100
+                p_limit: 150
             }
         );
 
