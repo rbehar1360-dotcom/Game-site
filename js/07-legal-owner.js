@@ -306,17 +306,32 @@ const ownerUsersTab =
 const ownerSuggestionsTab =
     document.getElementById("ownerSuggestionsTab");
 
+const ownerCoinsHistoryTab =
+    document.getElementById("ownerCoinsHistoryTab");
+
 const ownerUsersView =
     document.getElementById("ownerUsersView");
 
 const ownerSuggestionsView =
     document.getElementById("ownerSuggestionsView");
 
+const ownerCoinsHistoryView =
+    document.getElementById("ownerCoinsHistoryView");
+
 const ownerSuggestionsList =
     document.getElementById("ownerSuggestionsList");
 
 const refreshOwnerSuggestions =
     document.getElementById("refreshOwnerSuggestions");
+
+const ownerCoinsHistoryStatus =
+    document.getElementById("ownerCoinsHistoryStatus");
+
+const ownerCoinsHistoryStats =
+    document.getElementById("ownerCoinsHistoryStats");
+
+const refreshOwnerCoinsHistory =
+    document.getElementById("refreshOwnerCoinsHistory");
 
 const ownerTotalUsers =
     document.getElementById("ownerTotalUsers");
@@ -620,6 +635,99 @@ async function loadOwnerSuggestions() {
 
     ownerSuggestions = data;
     renderOwnerSuggestions();
+}
+
+async function loadOwnerCoinsHistory() {
+
+    if (!ownerCoinsHistoryStatus || !ownerCoinsHistoryStats) {
+        return;
+    }
+
+    ownerCoinsHistoryStatus.textContent = "Loading coin totals...";
+    ownerCoinsHistoryStats.replaceChildren();
+
+    if (!await checkAdmin()) {
+        ownerCoinsHistoryStatus.textContent = "You don't have permission to view coin totals.";
+        return;
+    }
+
+    const { data, error } = await supabaseClient.rpc("admin_get_coin_history_stats");
+
+    if (error) {
+        console.error("Could not load coin history:", error);
+        ownerCoinsHistoryStatus.textContent =
+            "Could not load coin totals. Apply sql/migrations/20261101_owner_coin_history.sql in Supabase, then refresh.";
+        showOwnerNotification("Could not load coin totals. Check the owner coin-history SQL migration.", "error");
+        return;
+    }
+
+    const stats = Array.isArray(data) ? data[0] : data;
+    if (!stats) {
+        console.error("Could not load coin history: the stats query returned no result.", data);
+        ownerCoinsHistoryStatus.textContent = "The coin-history query returned no totals.";
+        return;
+    }
+
+    const values = [
+        ["Coins currently held", stats.total_current_coins],
+        ["Coins ever issued (tracked)", stats.total_coins_ever],
+        ["Coins removed (tracked)", stats.total_coins_removed]
+    ];
+
+    for (const [label, rawValue] of values) {
+        const value = Number(rawValue);
+        if (!Number.isFinite(value)) {
+            console.error("Could not load coin history: invalid total.", stats);
+            ownerCoinsHistoryStatus.textContent = "The coin-history query returned invalid totals.";
+            ownerCoinsHistoryStats.replaceChildren();
+            return;
+        }
+
+        const card = document.createElement("div");
+        card.className = "owner-coins-stat";
+
+        const caption = document.createElement("span");
+        caption.textContent = label;
+
+        const amount = document.createElement("strong");
+        amount.textContent = value.toLocaleString();
+
+        card.append(caption, amount);
+        ownerCoinsHistoryStats.appendChild(card);
+    }
+
+    const trackingSince = stats.tracking_since
+        ? new Date(stats.tracking_since)
+        : null;
+    ownerCoinsHistoryStatus.textContent = trackingSince && !Number.isNaN(trackingSince.getTime())
+        ? `Tracking changes since ${trackingSince.toLocaleString()}.`
+        : "Coin totals loaded.";
+}
+
+async function activateOwnerTab(selectedTab) {
+
+    const sections = [
+        [ownerUsersTab, ownerUsersView],
+        [ownerSuggestionsTab, ownerSuggestionsView],
+        [ownerCoinsHistoryTab, ownerCoinsHistoryView]
+    ];
+
+    sections.forEach(([tab, view]) => {
+        if (!tab || !view) {
+            return;
+        }
+
+        const selected = tab === selectedTab;
+        tab.classList.toggle("active", selected);
+        tab.setAttribute("aria-selected", String(selected));
+        view.hidden = !selected;
+    });
+
+    if (selectedTab === ownerSuggestionsTab) {
+        await loadOwnerSuggestions();
+    } else if (selectedTab === ownerCoinsHistoryTab) {
+        await loadOwnerCoinsHistory();
+    }
 }
 
 function renderOwnerSuggestions() {
@@ -1259,23 +1367,7 @@ if (ownerPanelButton) {
                     "open"
                 );
 
-                if (ownerUsersView) {
-                    ownerUsersView.hidden = false;
-                }
-
-                if (ownerSuggestionsView) {
-                    ownerSuggestionsView.hidden = true;
-                }
-
-                if (ownerUsersTab) {
-                    ownerUsersTab.classList.add("active");
-                    ownerUsersTab.setAttribute("aria-selected", "true");
-                }
-
-                if (ownerSuggestionsTab) {
-                    ownerSuggestionsTab.classList.remove("active");
-                    ownerSuggestionsTab.setAttribute("aria-selected", "false");
-                }
+                await activateOwnerTab(ownerUsersTab);
 
                 await loadOwnerUsers();
             }
@@ -1284,46 +1376,18 @@ if (ownerPanelButton) {
     );
 }
 
-if (ownerUsersTab) {
-    ownerUsersTab.addEventListener("click", () => {
-        if (ownerUsersView) {
-            ownerUsersView.hidden = false;
-        }
-
-        if (ownerSuggestionsView) {
-            ownerSuggestionsView.hidden = true;
-        }
-
-        ownerUsersTab.classList.add("active");
-        ownerUsersTab.setAttribute("aria-selected", "true");
-
-        if (ownerSuggestionsTab) {
-            ownerSuggestionsTab.classList.remove("active");
-            ownerSuggestionsTab.setAttribute("aria-selected", "false");
-        }
+[
+    ownerUsersTab,
+    ownerSuggestionsTab,
+    ownerCoinsHistoryTab
+].filter(Boolean).forEach(tab => {
+    tab.addEventListener("click", async () => {
+        await activateOwnerTab(tab);
     });
-}
+});
 
-if (ownerSuggestionsTab) {
-    ownerSuggestionsTab.addEventListener("click", async () => {
-        if (ownerUsersView) {
-            ownerUsersView.hidden = true;
-        }
-
-        if (ownerSuggestionsView) {
-            ownerSuggestionsView.hidden = false;
-        }
-
-        ownerSuggestionsTab.classList.add("active");
-        ownerSuggestionsTab.setAttribute("aria-selected", "true");
-
-        if (ownerUsersTab) {
-            ownerUsersTab.classList.remove("active");
-            ownerUsersTab.setAttribute("aria-selected", "false");
-        }
-
-        await loadOwnerSuggestions();
-    });
+if (refreshOwnerCoinsHistory) {
+    refreshOwnerCoinsHistory.addEventListener("click", loadOwnerCoinsHistory);
 }
 
 

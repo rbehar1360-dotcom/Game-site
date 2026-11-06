@@ -4041,6 +4041,78 @@ z-index: 1000;
     color: var(--accent);
 }
 
+.owner-coins-toolbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 14px;
+    padding: 14px 20px;
+}
+
+.owner-coins-toolbar p,
+.owner-coins-note {
+    margin: 6px 0 0;
+    color: var(--text);
+    opacity: 0.72;
+    line-height: 1.5;
+}
+
+.owner-coins-toolbar > div {
+    flex: 1;
+}
+
+.owner-coins-toolbar button {
+    padding: 10px 14px;
+    border: 0;
+    border-radius: 9px;
+    background: var(--accent);
+    color: #001018;
+    font-weight: bold;
+    cursor: pointer;
+    white-space: nowrap;
+}
+
+.owner-coins-toolbar button:disabled {
+    cursor: wait;
+    opacity: 0.65;
+}
+
+.owner-coins-status {
+    margin: 0 20px 10px;
+    color: var(--accent);
+}
+
+.owner-coins-note {
+    margin: 0 20px 14px;
+}
+
+.owner-coins-stats {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+    gap: 12px;
+    padding: 0 20px 14px;
+}
+
+.owner-coins-stat {
+    padding: 16px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 10px;
+    background: var(--card);
+}
+
+.owner-coins-stat span {
+    display: block;
+    color: var(--text);
+    opacity: 0.72;
+}
+
+.owner-coins-stat strong {
+    display: block;
+    margin-top: 8px;
+    color: var(--accent);
+    font-size: 22px;
+}
+
 .owner-panel-view[hidden] {
     display: none;
 }
@@ -11711,6 +11783,33 @@ z-index: 1000;
   .owner-toolbar button {
     min-height: 42px;
     flex: 1 1 40%;
+  }
+
+  .owner-tabs {
+    flex-wrap: wrap;
+    padding-right: 12px;
+    padding-left: 12px;
+  }
+
+  .owner-coins-toolbar {
+    align-items: stretch;
+    flex-direction: column;
+    padding: 12px;
+  }
+
+  .owner-coins-toolbar button {
+    min-height: 42px;
+  }
+
+  .owner-coins-status,
+  .owner-coins-note {
+    margin-right: 12px;
+    margin-left: 12px;
+  }
+
+  .owner-coins-stats {
+    padding-right: 12px;
+    padding-left: 12px;
   }
 
   .settings-option {

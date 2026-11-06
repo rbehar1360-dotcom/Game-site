@@ -206,16 +206,6 @@
         Suggestions
       </button>
       <button
-        id="ownerDiagnosticsTab"
-        class="owner-tab"
-        type="button"
-        role="tab"
-        aria-selected="false"
-        aria-controls="ownerDiagnosticsView"
-      >
-        Diagnostics
-      </button>
-      <button
         id="ownerCoinsHistoryTab"
         class="owner-tab"
         type="button"
@@ -285,6 +275,29 @@
       <div id="ownerSuggestionsList" class="owner-suggestions-list" aria-live="polite">
         <p class="owner-loading">Open this tab to load suggestions.</p>
       </div>
+    </section>
+
+    <section
+      id="ownerCoinsHistoryView"
+      class="owner-panel-view"
+      role="tabpanel"
+      aria-labelledby="ownerCoinsHistoryTab"
+      hidden
+    >
+      <div class="owner-coins-toolbar">
+        <div>
+          <strong>Coin totals</strong>
+          <p>Lifetime totals are tracked from the date the coin-history SQL migration is installed.</p>
+        </div>
+        <button id="refreshOwnerCoinsHistory" type="button">↻ Refresh</button>
+      </div>
+      <p id="ownerCoinsHistoryStatus" class="owner-coins-status" role="status" aria-live="polite">
+        Open this tab to load coin totals.
+      </p>
+      <div id="ownerCoinsHistoryStats" class="owner-coins-stats"></div>
+      <p class="owner-coins-note">
+        “Coins removed” includes coin balance decreases such as purchases and owner adjustments. Older spending cannot be reconstructed because no transaction history was recorded before this migration.
+      </p>
     </section>
 
   </div>
