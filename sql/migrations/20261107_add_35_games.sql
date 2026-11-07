@@ -1,0 +1,41 @@
+-- Add the 35 games whose cards were added to the homepage.
+-- Image values are intentionally empty so you can add your chosen image paths.
+-- Existing rows with matching IDs are left unchanged.
+INSERT INTO public.games (id, name, url, image)
+VALUES
+    ('ADifficultGameAboutClimbing', 'A Difficult Game About Climbing', 'games/ADifficultGameAboutClimbing.html', ''),
+    ('AnimalCrossing', 'Animal Crossing', 'games/AnimalCrossing.html', ''),
+    ('BallBlast', 'Ball Blast', 'games/BallBlast.html', ''),
+    ('BeatBlock', 'Beat Block', 'games/BeatBlock.html', ''),
+    ('BottleJump3D', 'Bottle Jump 3D', 'games/BottleJump3D.html', ''),
+    ('BowMasters', 'Bow Masters', 'games/BowMasters.html', ''),
+    ('LevelDevil', 'Level Devil', 'games/LevelDevil.html', ''),
+    ('NubbysNumberFactory', 'Nubbys Number Factory', 'games/NubbysNumberFactory.html', ''),
+    ('RetroBowl', 'Retro Bowl', 'games/RetroBowl.html', ''),
+    ('ColorMatch', 'Color Match', 'games/ColorMatch.html', ''),
+    ('ColorWaterSort', 'Color Water Sort', 'games/ColorWaterSort.html', ''),
+    ('CookingMama', 'Cooking Mama', 'games/CookingMama.html', ''),
+    ('CookingMama2', 'Cooking Mama 2', 'games/CookingMama2.html', ''),
+    ('CookingMama3', 'Cooking Mama 3', 'games/CookingMama3.html', ''),
+    ('CrossyRoad', 'Crossy Road', 'games/CrossyRoad.html', ''),
+    ('DigDeep', 'Dig Deep', 'games/DigDeep.html', ''),
+    ('DOOM', 'DOOM', 'games/DOOM.html', ''),
+    ('FeedAndGrowFish', 'Feed and Grow Fish', 'games/FeedAndGrowFish.html', ''),
+    ('Fih', 'Fih', 'games/Fih.html', ''),
+    ('FindTheAlien', 'Find the Alien', 'games/FindTheAlien.html', ''),
+    ('FireBoyAndWaterGirl2', 'Fire Boy and Water Girl 2', 'games/FireBoyAndWaterGirl2.html', ''),
+    ('FireBoyAndWaterGirl3', 'Fire Boy and Water Girl 3', 'games/FireBoyAndWaterGirl3.html', ''),
+    ('FlappyDunk', 'Flappy Dunk', 'games/FlappyDunk.html', ''),
+    ('ForknSausage', 'Fork and Sausage', 'games/ForknSausage.html', ''),
+    ('UltraKill', 'Ultra Kill', 'games/UltraKill.html', ''),
+    ('HouseOfHazards', 'House of Hazards', 'games/HouseOfHazards.html', ''),
+    ('IronLung', 'Iron Lung', 'games/IronLung.html', ''),
+    ('JourneyDownhill', 'Journey Downhill', 'games/JourneyDownhill.html', ''),
+    ('MobControl', 'Mob Control', 'games/MobControl.html', ''),
+    ('SpaceBarClicker', 'Space Bar Clicker', 'games/SpaceBarClicker.html', ''),
+    ('State.io', 'State.io', 'games/State.io.html', ''),
+    ('SuikaGame', 'Suika Game', 'games/SuikaGame.html', ''),
+    ('Tetris', 'Tetris', 'games/Tetris.html', ''),
+    ('TwerkRace3D', 'Twerk Race 3D', 'games/TwerkRace3D.html', ''),
+    ('WebFishing', 'Web Fishing', 'games/WebFishing.html', '')
+ON CONFLICT (id) DO NOTHING;
