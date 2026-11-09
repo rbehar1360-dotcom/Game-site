@@ -339,7 +339,11 @@
                 search_user_id: message.sender_id
             });
             if (!error && data?.[0]?.username && message.recipient_id === currentUserId) {
-                notification.sender.textContent = data[0].username;
+                setRankedUsername(
+                    notification.sender,
+                    data[0].username,
+                    message.sender_id
+                );
                 notification.avatar.textContent = data[0].username.trim().charAt(0).toUpperCase() || "?";
             }
         } catch (error) {

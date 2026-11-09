@@ -352,13 +352,12 @@ async function loadUserLeaderboard() {
             player.display_name ||
             "User";
 
-        username.textContent =
-            playerUsername;
-
         const profileUserId =
             player.user_id ||
             player.id ||
             null;
+
+        setRankedUsername(username, playerUsername, profileUserId);
 
         const time =
             document.createElement("div");
@@ -848,10 +847,6 @@ async function openGamePlaytime(gameId) {
             player.display_name ||
             "User";
 
-        username.textContent =
-            playerUsername;
-
-
         const time =
             document.createElement("div");
 
@@ -873,6 +868,8 @@ async function openGamePlaytime(gameId) {
             player.user_id ||
             player.id ||
             null;
+
+        setRankedUsername(username, playerUsername, profileUserId);
 
 
         if (profileUserId) {

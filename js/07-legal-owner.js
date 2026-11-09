@@ -500,6 +500,26 @@ async function checkAdmin() {
         ownerPanelButton.style.display =
             "block";
 
+        const { error: syncError } = await supabaseClient.rpc(
+            "admin_sync_owner_rank"
+        );
+
+        if (syncError) {
+            console.error(
+                "Could not sync the OWNER rank. Apply sql/migrations/20261108_user_ranks.sql in Supabase:",
+                syncError
+            );
+        } else {
+            try {
+                await refreshUserRanks();
+            } catch (error) {
+                console.error(
+                    "Could not refresh user ranks. Apply sql/migrations/20261108_user_ranks.sql in Supabase:",
+                    error
+                );
+            }
+        }
+
         return true;
     }
 
@@ -589,6 +609,19 @@ async function loadOwnerUsers() {
     if (ownerTotalUsers) {
         ownerTotalUsers.textContent =
             ownerUsers.length.toLocaleString();
+    }
+
+    try {
+        await refreshUserRanks();
+    } catch (error) {
+        console.error(
+            "Could not load ranks. Apply sql/migrations/20261108_user_ranks.sql in Supabase:",
+            error
+        );
+        showOwnerNotification(
+            "Could not load ranks. Apply the user-ranks SQL migration in Supabase.",
+            "error"
+        );
     }
 
     renderOwnerUsers();
@@ -765,7 +798,11 @@ function renderOwnerSuggestions() {
 
         const username = document.createElement("span");
         username.className = "owner-suggestion-username";
-        username.textContent = usernamesById.get(String(suggestion.user_id)) || "Unknown user";
+        setRankedUsername(
+            username,
+            usernamesById.get(String(suggestion.user_id)) || "Unknown user",
+            suggestion.user_id
+        );
 
         heading.append(gameName, username);
         card.appendChild(heading);
@@ -871,9 +908,7 @@ function renderOwnerUsers() {
                     )}'s profile"
                     ${user.user_id ? `data-user-id="${escapeOwnerHTML(user.user_id)}"` : "disabled"}
                 >
-                    ${escapeOwnerHTML(
-                        user.username || "Unknown User"
-                    )}
+                    ${escapeOwnerHTML(user.username || "Unknown User")}
                 </button>
 
                 <div class="owner-coins">
@@ -885,6 +920,24 @@ function renderOwnerUsers() {
             </div>
 
             <div class="owner-actions">
+
+                <select
+                    class="owner-rank-select"
+                    aria-label="Rank for ${escapeOwnerHTML(user.username || "Unknown User")}"
+                    data-user-id="${escapeOwnerHTML(user.user_id)}"
+                >
+                    <option value="NONE">No rank</option>
+                    <option value="MODERATOR">MODERATOR</option>
+                    <option value="OWNER" disabled>OWNER (automatic)</option>
+                </select>
+
+                <button
+                    type="button"
+                    class="owner-rank-save"
+                    data-user-id="${escapeOwnerHTML(user.user_id)}"
+                >
+                    Save rank
+                </button>
 
                 <input
                     type="number"
@@ -916,6 +969,66 @@ function renderOwnerUsers() {
 
         const profileButton =
             row.querySelector(".owner-profile-link");
+
+        const userRank = getCachedUserRank(user.user_id);
+        const rankSelect = row.querySelector(".owner-rank-select");
+        const rankSaveButton = row.querySelector(".owner-rank-save");
+        if (rankSelect && rankSaveButton) {
+            rankSelect.value = userRank || "NONE";
+            const isOwner = userRank === "OWNER";
+            rankSelect.disabled = isOwner;
+            rankSaveButton.disabled = isOwner;
+            rankSaveButton.addEventListener("click", async () => {
+                rankSelect.disabled = true;
+                rankSaveButton.disabled = true;
+
+                const { error } = await supabaseClient.rpc(
+                    "admin_set_user_rank",
+                    {
+                        target_user_id: user.user_id,
+                        new_rank: rankSelect.value
+                    }
+                );
+
+                if (error) {
+                    console.error("Could not update user rank:", error);
+                    showOwnerNotification(
+                        error.message || "Could not update this user's rank.",
+                        "error"
+                    );
+                    rankSelect.disabled = false;
+                    rankSaveButton.disabled = false;
+                    return;
+                }
+
+                try {
+                    await refreshUserRanks();
+                    renderOwnerUsers();
+                    showOwnerNotification(
+                        rankSelect.value === "MODERATOR"
+                            ? `${user.username || "User"} is now a MODERATOR.`
+                            : `Removed the rank from ${user.username || "this user"}.`,
+                        "success"
+                    );
+                } catch (refreshError) {
+                    console.error("Could not refresh user ranks:", refreshError);
+                    showOwnerNotification(
+                        "The rank was saved, but the rank list could not be refreshed.",
+                        "error"
+                    );
+                    rankSelect.disabled = false;
+                    rankSaveButton.disabled = false;
+                }
+            });
+        }
+
+        if (profileButton) {
+            setRankedUsername(
+                profileButton,
+                user.username || "Unknown User",
+                user.user_id
+            );
+        }
 
         if (profileButton && user.user_id) {
             profileButton.addEventListener("click", () => {

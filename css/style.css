@@ -4314,6 +4314,21 @@ z-index: 1000;
     color: var(--text);
 }
 
+.rank-owner {
+    color: #8b0000 !important;
+}
+
+.rank-moderator {
+    color: #3278d4 !important;
+}
+
+.owner-rank-note {
+    margin: 0 20px 12px;
+    color: var(--text);
+    opacity: 0.7;
+    font-size: 13px;
+}
+
 .owner-profile-link {
     display: block;
     padding: 0;
@@ -4345,7 +4360,17 @@ z-index: 1000;
 .owner-actions {
     display: flex;
     align-items: center;
+    flex-wrap: wrap;
     gap: 6px;
+}
+
+.owner-rank-select {
+    min-width: 125px;
+    padding: 9px 10px;
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: 8px;
+    background: var(--header);
+    color: var(--text);
 }
 
 .owner-amount {
@@ -4377,6 +4402,16 @@ z-index: 1000;
 .owner-actions button:hover {
     transform: translateY(-1px);
     filter: brightness(1.12);
+}
+
+.owner-rank-save {
+    background: var(--accent);
+}
+
+.owner-actions button:disabled,
+.owner-rank-select:disabled {
+    cursor: not-allowed;
+    opacity: 0.65;
 }
 
 .owner-give {

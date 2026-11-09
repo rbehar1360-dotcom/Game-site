@@ -601,8 +601,11 @@ function renderConversations(filter = "") {
         top.className = "conversation-top";
 
         const name = document.createElement("strong");
-        name.textContent =
-            conversation.username;
+        setRankedUsername(
+            name,
+            conversation.username,
+            conversation.userId
+        );
 
         const time = document.createElement("time");
         time.textContent =
