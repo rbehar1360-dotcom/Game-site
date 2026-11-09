@@ -339,19 +339,37 @@ function setupGameMessagePopupPreference() {
   if (!button) return;
 
   const storageKey = "gameHubInGameMessagePopups";
+  let enabled = true;
 
-  const updateButton = enabled => {
-    button.textContent = enabled ? "🔔 On" : "🔕 Off";
-    button.classList.toggle("enabled", enabled);
-    button.setAttribute("aria-pressed", String(enabled));
+  const updateButton = value => {
+    enabled = value;
+    button.textContent = value ? "🔔 On" : "🔕 Off";
+    button.classList.toggle("enabled", value);
+    button.setAttribute("aria-pressed", String(value));
   };
 
-  updateButton(localStorage.getItem(storageKey) !== "false");
+  try {
+    updateButton(localStorage.getItem(storageKey) !== "false");
+  } catch (error) {
+    console.error("Could not read the in-game message setting:", error);
+    updateButton(true);
+  }
 
   button.addEventListener("click", () => {
-    const enabled = localStorage.getItem(storageKey) === "false";
-    localStorage.setItem(storageKey, String(enabled));
-    updateButton(enabled);
+    const nextEnabled = !enabled;
+
+    try {
+      localStorage.setItem(storageKey, String(nextEnabled));
+    } catch (error) {
+      console.error("Could not save the in-game message setting:", error);
+      return;
+    }
+
+    updateButton(nextEnabled);
+    window.dispatchEvent(new CustomEvent(
+      "gamehub:message-popup-preference",
+      { detail: { enabled: nextEnabled } }
+    ));
   });
 }
 

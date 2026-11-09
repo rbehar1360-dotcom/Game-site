@@ -23,6 +23,8 @@ let audioContext = null;
 let conversationData = [];
 let conversationLoadSequence = 0;
 let activeMessageUserId = null;
+let messageNotifications = [];
+let messageNotificationMenuOpen = false;
 
 const GIF_PREFIX = "[[GIF]]";
 
@@ -162,56 +164,143 @@ function updateNotificationButton() {
         return;
     }
 
-    if (Notification.permission === "granted") {
-        enableMessageNotifications.textContent = "✓ Notifications On";
+    if (Notification.permission === "granted" && areBrowserMessageNotificationsEnabled()) {
+        enableMessageNotifications.textContent = "✓ Browser Notifications On";
         enableMessageNotifications.classList.add("enabled");
-        enableMessageNotifications.title =
-            "Browser notifications are enabled for incoming texts.";
+        enableMessageNotifications.setAttribute("aria-pressed", "true");
+        enableMessageNotifications.title = "Click to turn browser notifications off.";
     } else if (Notification.permission === "denied") {
-        enableMessageNotifications.textContent = "Notifications Blocked";
+        enableMessageNotifications.textContent = "Browser Notifications Blocked";
         enableMessageNotifications.classList.remove("enabled");
+        enableMessageNotifications.setAttribute("aria-pressed", "false");
         enableMessageNotifications.title =
             "Allow notifications for this site in your browser settings.";
-    } else {
-        enableMessageNotifications.textContent = "🔔 Enable Notifications";
+    } else if (Notification.permission === "granted") {
+        enableMessageNotifications.textContent = "🔕 Browser Notifications Off";
         enableMessageNotifications.classList.remove("enabled");
+        enableMessageNotifications.setAttribute("aria-pressed", "false");
+        enableMessageNotifications.title = "Click to turn browser notifications on.";
+    } else {
+        enableMessageNotifications.textContent = "🔔 Enable Browser Notifications";
+        enableMessageNotifications.classList.remove("enabled");
+        enableMessageNotifications.setAttribute("aria-pressed", "false");
         enableMessageNotifications.title =
             "Allow browser notifications for incoming texts.";
     }
 }
 
-async function requestMessageNotifications() {
+function areBrowserMessageNotificationsEnabled() {
+    try {
+        return localStorage.getItem("gameHubBrowserMessageNotifications") !== "false";
+    } catch (error) {
+        console.error("Could not read the browser notification setting:", error);
+        return false;
+    }
+}
+
+async function toggleMessageNotifications() {
     if (!("Notification" in window)) return;
+
+    if (Notification.permission === "granted") {
+        const enabled = !areBrowserMessageNotificationsEnabled();
+        try {
+            localStorage.setItem(
+                "gameHubBrowserMessageNotifications",
+                String(enabled)
+            );
+        } catch (error) {
+            console.error("Could not save the browser notification setting:", error);
+            return;
+        }
+
+        updateNotificationButton();
+        return;
+    }
+
+    if (Notification.permission === "denied") {
+        updateNotificationButton();
+        return;
+    }
 
     try {
         const permission = await Notification.requestPermission();
 
+        if (permission === "granted") {
+            localStorage.setItem("gameHubBrowserMessageNotifications", "true");
+        }
         updateNotificationButton();
 
-        if (permission === "granted") {
-            showMessageToast(
-                "Notifications enabled",
-                "You will be alerted when new messages arrive.",
-                null,
-                false
-            );
-        }
     } catch (error) {
         console.error("Notification permission error:", error);
     }
 }
 
-function showMessageToast(username, message, messageId, allowOpen = true) {
+function getMessageNotificationContainer() {
     let container = document.getElementById(
         "messageNotificationContainer"
     );
 
-    if (!container) {
-        container = document.createElement("div");
-        container.id = "messageNotificationContainer";
-        container.className = "message-notification-container";
-        document.body.appendChild(container);
+    if (!container) return null;
+
+    if (!container.querySelector(".message-notification-toggle")) {
+        const toggle = document.createElement("button");
+        toggle.type = "button";
+        toggle.className = "message-notification-toggle";
+        toggle.setAttribute("aria-expanded", "false");
+        toggle.setAttribute("aria-controls", "messageNotificationList");
+        toggle.textContent = "🔔 Messages";
+
+        const count = document.createElement("span");
+        count.className = "message-notification-count";
+        count.setAttribute("aria-label", "Unread message notifications");
+        toggle.appendChild(count);
+
+        const list = document.createElement("div");
+        list.id = "messageNotificationList";
+        list.className = "message-notification-list";
+        list.hidden = true;
+        list.setAttribute("aria-live", "polite");
+
+        toggle.addEventListener("click", () => {
+            messageNotificationMenuOpen = !messageNotificationMenuOpen;
+            toggle.setAttribute(
+                "aria-expanded",
+                String(messageNotificationMenuOpen)
+            );
+            list.hidden = !messageNotificationMenuOpen;
+        });
+
+        container.append(toggle, list);
     }
+
+    return container;
+}
+
+function renderMessageNotifications() {
+    const container = getMessageNotificationContainer();
+    if (!container) return;
+
+    const toggle = container.querySelector(".message-notification-toggle");
+    const count = toggle.querySelector(".message-notification-count");
+    const list = container.querySelector(".message-notification-list");
+
+    count.textContent = String(messageNotifications.length);
+    count.hidden = messageNotifications.length === 0;
+    list.replaceChildren();
+    messageNotifications.forEach(notification => {
+        list.appendChild(notification.element);
+    });
+
+    list.hidden = !messageNotificationMenuOpen;
+    toggle.setAttribute(
+        "aria-expanded",
+        String(messageNotificationMenuOpen)
+    );
+}
+
+function showMessageToast(username, message, messageId, allowOpen = true) {
+    const container = getMessageNotificationContainer();
+    if (!container) return;
 
     const toast = document.createElement("div");
     toast.className = "message-notification";
@@ -246,7 +335,7 @@ function showMessageToast(username, message, messageId, allowOpen = true) {
         openButton.textContent = "Open";
 
         openButton.addEventListener("click", async () => {
-            toast.remove();
+            removeMessageNotification(toast);
 
             if (messagesOverlay) {
                 messagesOverlay.classList.add("open");
@@ -281,32 +370,36 @@ function showMessageToast(username, message, messageId, allowOpen = true) {
         "Dismiss notification"
     );
 
-    closeButton.addEventListener("click", () => {
-        toast.remove();
-    });
+    closeButton.addEventListener("click", () => removeMessageNotification(toast));
 
     actions.appendChild(closeButton);
 
     toast.append(avatar, content, actions);
-    container.prepend(toast);
+    messageNotifications.unshift({ element: toast });
+    if (messageNotifications.length > 50) {
+        messageNotifications.pop();
+    }
 
-    requestAnimationFrame(() => {
-        toast.classList.add("show");
-    });
+    renderMessageNotifications();
+}
 
-    setTimeout(() => {
-        toast.classList.remove("show");
+function removeMessageNotification(element) {
+    const index = messageNotifications.findIndex(
+        notification => notification.element === element
+    );
 
-        setTimeout(() => {
-            toast.remove();
-        }, 250);
-    }, 6500);
+    if (index !== -1) {
+        messageNotifications.splice(index, 1);
+    }
+    renderMessageNotifications();
 }
 
 function showBrowserMessageNotification(username, message) {
     if (
         !("Notification" in window) ||
-        Notification.permission !== "granted"
+        Notification.permission !== "granted" ||
+        !areBrowserMessageNotificationsEnabled() ||
+        document.visibilityState === "visible"
     ) {
         return;
     }
@@ -330,7 +423,9 @@ function showBrowserMessageNotification(username, message) {
 
             notification.close();
         };
-    } catch (_) {}
+    } catch (error) {
+        console.error("Could not show the browser message notification:", error);
+    }
 }
 
 function scrollPrivateMessages() {
@@ -1027,8 +1122,6 @@ function setupPrivateMessageRealtime() {
                                 "New message";
 
                             if (shouldToast) {
-                                createNotificationSound();
-
                                 showMessageToast(
                                     senderName,
                                     message.message,
@@ -1735,12 +1828,20 @@ function setupMessageUI() {
     if (enableMessageNotifications) {
         enableMessageNotifications.addEventListener(
             "click",
-            requestMessageNotifications
+            toggleMessageNotifications
         );
 
         updateNotificationButton();
     }
+
+    getMessageNotificationContainer();
 }
+
+window.addEventListener("storage", event => {
+    if (event.key === "gameHubBrowserMessageNotifications") {
+        updateNotificationButton();
+    }
+});
 
 if (messagesButton) {
     messagesButton.addEventListener(
