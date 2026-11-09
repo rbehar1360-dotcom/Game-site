@@ -8,17 +8,18 @@
         return;
     }
 
-    const seenMessageIds = new Set();
     const notifications = [];
+    const recentlyReadMessageIds = new Set();
     let channel = null;
     let currentUserId = null;
     let connectionAttempt = 0;
     let isMenuOpen = false;
+    let messageEventVersion = 0;
     const popupPreferenceKey = "gameHubInGameMessagePopups";
 
     function areGameMessagePopupsEnabled() {
         try {
-            return window.localStorage.getItem(popupPreferenceKey) !== "false";
+            return window.localStorage.getItem(popupPreferenceKey) === "true";
         } catch (error) {
             console.error("Could not read the in-game message popup setting:", error);
             return false;
@@ -166,6 +167,12 @@
     }
 
     function renderNotifications() {
+        if (notifications.length === 0) {
+            isMenuOpen = false;
+            document.getElementById("gameMessageNotificationContainer")?.remove();
+            return;
+        }
+
         const container = getContainer();
         const toggle = container.querySelector(".message-notification-toggle");
         const count = toggle.querySelector(".message-notification-count");
@@ -305,7 +312,7 @@
         frame.src = pageUrl.href;
     }
 
-    function showNotification(username, message) {
+    function showNotification(username, message, messageId, senderId) {
         const toast = document.createElement("div");
         toast.className = "message-notification";
 
@@ -332,28 +339,20 @@
         open.className = "message-notification-open";
         open.textContent = "Open";
         open.addEventListener("click", () => {
-            openGameMessages(open.dataset.senderId || "");
-            const index = notifications.findIndex(item => item.element === toast);
-            if (index !== -1) notifications.splice(index, 1);
-            renderNotifications();
+            void openAndReadMessages(open.dataset.senderId || "");
         });
 
-        const close = document.createElement("button");
-        close.type = "button";
-        close.className = "message-notification-close";
-        close.setAttribute("aria-label", "Dismiss message notification");
-        close.textContent = "×";
-        close.addEventListener("click", () => {
-            const index = notifications.findIndex(item => item.element === toast);
-            if (index !== -1) notifications.splice(index, 1);
-            renderNotifications();
-        });
-
-        actions.append(open, close);
+        actions.append(open);
         content.append(sender, preview);
         toast.append(avatar, content, actions);
-        notifications.unshift({ element: toast, sender, avatar, open });
-        if (notifications.length > 50) notifications.pop();
+        notifications.unshift({
+            id: messageId,
+            senderId,
+            element: toast,
+            sender,
+            avatar,
+            open
+        });
         renderNotifications();
         return { sender, avatar, open };
     }
@@ -361,19 +360,25 @@
     async function showIncomingMessage(message) {
         if (!message || message.recipient_id !== currentUserId) return;
         if (message.sender_id === currentUserId) return;
+        if (
+            message.read_at ||
+            recentlyReadMessageIds.has(String(message.id))
+        ) {
+            removeNotification(message.id);
+            return;
+        }
         if (!areGameMessagePopupsEnabled()) return;
-        if (message.id && seenMessageIds.has(message.id)) return;
-
-        if (message.id) {
-            seenMessageIds.add(message.id);
-            if (seenMessageIds.size > 100) {
-                seenMessageIds.delete(seenMessageIds.values().next().value);
-            }
+        if (notifications.some(notification =>
+            String(notification.id) === String(message.id)
+        )) {
+            return;
         }
 
         const notification = showNotification(
             "New message",
-            typeof message.message === "string" ? message.message : ""
+            typeof message.message === "string" ? message.message : "",
+            message.id,
+            message.sender_id
         );
         notification.open.dataset.senderId = message.sender_id || "";
 
@@ -398,6 +403,87 @@
         }
     }
 
+    function removeNotification(messageId) {
+        if (!messageId) return;
+
+        const index = notifications.findIndex(
+            notification => String(notification.id) === String(messageId)
+        );
+        if (index !== -1) {
+            notifications.splice(index, 1);
+            renderNotifications();
+        }
+    }
+
+    async function openAndReadMessages(senderId) {
+        openGameMessages(senderId);
+        if (!senderId) return;
+
+        const { error } = await supabase.rpc(
+            "mark_private_messages_read",
+            { p_sender_id: senderId }
+        );
+
+        if (error) {
+            console.error("Could not mark opened game messages as read:", error);
+            return;
+        }
+
+        notifications.forEach(notification => {
+            if (notification.senderId === senderId) {
+                recentlyReadMessageIds.add(String(notification.id));
+            }
+        });
+        const remaining = notifications.filter(
+            notification => notification.senderId !== senderId
+        );
+        if (remaining.length !== notifications.length) {
+            notifications.splice(0, notifications.length, ...remaining);
+            renderNotifications();
+        }
+    }
+
+    async function loadUnreadMessages(userId, attempt) {
+        if (!userId || !areGameMessagePopupsEnabled()) return;
+
+        const eventVersionAtStart = messageEventVersion;
+        const { data, error } = await supabase
+            .from("private_messages")
+            .select("id, sender_id, recipient_id, message, read_at")
+            .eq("recipient_id", userId)
+            .is("read_at", null);
+
+        if (error) {
+            console.error("Could not load unread game messages:", error);
+            return;
+        }
+
+        if (
+            attempt !== connectionAttempt ||
+            userId !== currentUserId ||
+            !areGameMessagePopupsEnabled()
+        ) {
+            return;
+        }
+
+        for (const message of data || []) {
+            await showIncomingMessage(message);
+        }
+
+        if (eventVersionAtStart === messageEventVersion) {
+            const unreadIds = new Set(
+                (data || []).map(message => String(message.id))
+            );
+            const remaining = notifications.filter(notification =>
+                unreadIds.has(String(notification.id))
+            );
+            if (remaining.length !== notifications.length) {
+                notifications.splice(0, notifications.length, ...remaining);
+                renderNotifications();
+            }
+        }
+    }
+
     window.addEventListener("storage", event => {
         if (event.key === popupPreferenceKey) {
             applyPopupPreference(areGameMessagePopupsEnabled());
@@ -416,8 +502,17 @@
             return;
         }
 
-        if (notifications.length) renderNotifications();
+        void loadUnreadMessages(currentUserId, connectionAttempt);
     }
+
+    function refreshUnreadMessages() {
+        if (document.visibilityState === "visible") {
+            void loadUnreadMessages(currentUserId, connectionAttempt);
+        }
+    }
+
+    document.addEventListener("visibilitychange", refreshUnreadMessages);
+    window.addEventListener("focus", refreshUnreadMessages);
 
     async function connectToUser(userId) {
         if (userId === currentUserId && channel) return;
@@ -434,9 +529,14 @@
                 console.warn("Could not clean up previous message channel:", error);
             }
         }
-        if (attempt !== connectionAttempt || !userId) return;
+        if (attempt !== connectionAttempt) return;
 
+        notifications.splice(0, notifications.length);
+        isMenuOpen = false;
+        document.getElementById("gameMessageNotificationContainer")?.remove();
         currentUserId = userId;
+        if (!userId) return;
+
         channel = supabase
             .channel(`game-private-messages-${userId}`)
             .on("postgres_changes", {
@@ -444,11 +544,38 @@
                 schema: "public",
                 table: "private_messages"
             }, payload => {
+                messageEventVersion++;
                 void showIncomingMessage(payload.new);
+            })
+            .on("postgres_changes", {
+                event: "UPDATE",
+                schema: "public",
+                table: "private_messages"
+            }, payload => {
+                const message = payload.new;
+                if (!message || message.recipient_id !== currentUserId) return;
+                messageEventVersion++;
+                if (message.read_at) {
+                    recentlyReadMessageIds.add(String(message.id));
+                    removeNotification(message.id);
+                } else {
+                    recentlyReadMessageIds.delete(String(message.id));
+                    void showIncomingMessage(message);
+                }
+            })
+            .on("postgres_changes", {
+                event: "DELETE",
+                schema: "public",
+                table: "private_messages"
+            }, payload => {
+                messageEventVersion++;
+                removeNotification(payload.old?.id);
             })
             .subscribe(status => {
                 console.log("Game private messages realtime:", status);
             });
+
+        await loadUnreadMessages(userId, attempt);
     }
 
     supabase.auth.onAuthStateChange((_event, session) => {

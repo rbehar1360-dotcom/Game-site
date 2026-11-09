@@ -1065,10 +1065,10 @@
           <div class="settings-option message-notification-option">
 
             <div>
-              <strong>In-game message menu</strong>
+              <strong>Unread message menu</strong>
 
               <p>
-                Keep new texts in the top-left menu instead of interrupting your game.
+              Optionally show a top-left menu for unread texts. Off by default; it hides when you read them.
               </p>
             </div>
 
@@ -1076,9 +1076,9 @@
               id="gameMessagePopupPreference"
               class="message-notification-setting"
               type="button"
-              aria-pressed="true"
+              aria-pressed="false"
             >
-              🔔 On
+              🔕 Off
             </button>
 
           </div>
@@ -4461,6 +4461,7 @@
 <div
   id="messageNotificationContainer"
   class="message-notification-container"
+  hidden
   aria-live="polite"
   aria-atomic="false"
 ></div>

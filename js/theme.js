@@ -339,7 +339,7 @@ function setupGameMessagePopupPreference() {
   if (!button) return;
 
   const storageKey = "gameHubInGameMessagePopups";
-  let enabled = true;
+  let enabled = false;
 
   const updateButton = value => {
     enabled = value;
@@ -349,10 +349,10 @@ function setupGameMessagePopupPreference() {
   };
 
   try {
-    updateButton(localStorage.getItem(storageKey) !== "false");
+    updateButton(localStorage.getItem(storageKey) === "true");
   } catch (error) {
     console.error("Could not read the in-game message setting:", error);
-    updateButton(true);
+    updateButton(false);
   }
 
   button.addEventListener("click", () => {

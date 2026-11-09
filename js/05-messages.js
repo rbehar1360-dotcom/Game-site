@@ -25,6 +25,8 @@ let conversationLoadSequence = 0;
 let activeMessageUserId = null;
 let messageNotifications = [];
 let messageNotificationMenuOpen = false;
+let unreadMessageRecords = [];
+const inGameMessagePopupPreferenceKey = "gameHubInGameMessagePopups";
 
 const GIF_PREFIX = "[[GIF]]";
 
@@ -280,6 +282,13 @@ function renderMessageNotifications() {
     const container = getMessageNotificationContainer();
     if (!container) return;
 
+    if (messageNotifications.length === 0) {
+        messageNotificationMenuOpen = false;
+        container.hidden = true;
+    } else {
+        container.hidden = false;
+    }
+
     const toggle = container.querySelector(".message-notification-toggle");
     const count = toggle.querySelector(".message-notification-count");
     const list = container.querySelector(".message-notification-list");
@@ -298,7 +307,24 @@ function renderMessageNotifications() {
     );
 }
 
-function showMessageToast(username, message, messageId, allowOpen = true) {
+function showMessageToast(
+    username,
+    message,
+    messageId,
+    allowOpen = true,
+    senderId = ""
+) {
+    if (
+        !allowOpen ||
+        !messageId ||
+        !areInGameMessageNotificationsEnabled() ||
+        messageNotifications.some(
+            notification => String(notification.id) === String(messageId)
+        )
+    ) {
+        return;
+    }
+
     const container = getMessageNotificationContainer();
     if (!container) return;
 
@@ -335,62 +361,82 @@ function showMessageToast(username, message, messageId, allowOpen = true) {
         openButton.textContent = "Open";
 
         openButton.addEventListener("click", async () => {
-            removeMessageNotification(toast);
-
             if (messagesOverlay) {
                 messagesOverlay.classList.add("open");
             }
 
             await loadConversations();
 
-            if (messageId) {
-                const conversation = conversationData.find(
-                    item => item.latest?.id === messageId
-                );
+            const conversation = conversationData.find(
+                item => item.userId === senderId
+            );
 
-                if (conversation) {
-                    await openPrivateConversation(
-                        conversation.userId,
-                        conversation.username
-                    );
-                }
+            if (conversation) {
+                await openPrivateConversation(
+                    conversation.userId,
+                    conversation.username
+                );
             }
         });
 
         actions.appendChild(openButton);
     }
 
-    const closeButton = document.createElement("button");
-
-    closeButton.type = "button";
-    closeButton.className = "message-notification-close";
-    closeButton.textContent = "×";
-    closeButton.setAttribute(
-        "aria-label",
-        "Dismiss notification"
-    );
-
-    closeButton.addEventListener("click", () => removeMessageNotification(toast));
-
-    actions.appendChild(closeButton);
-
     toast.append(avatar, content, actions);
-    messageNotifications.unshift({ element: toast });
-    if (messageNotifications.length > 50) {
-        messageNotifications.pop();
-    }
+    messageNotifications.unshift({
+        id: messageId,
+        senderId,
+        element: toast
+    });
 
     renderMessageNotifications();
 }
 
-function removeMessageNotification(element) {
-    const index = messageNotifications.findIndex(
-        notification => notification.element === element
+function areInGameMessageNotificationsEnabled() {
+    try {
+        return localStorage.getItem(inGameMessagePopupPreferenceKey) === "true";
+    } catch (error) {
+        console.error("Could not read the in-game message setting:", error);
+        return false;
+    }
+}
+
+function syncMessageNotifications(unreadMessages, currentUserId) {
+    unreadMessageRecords = (unreadMessages || []).filter(message =>
+        message.recipient_id === currentUserId && !message.read_at
     );
 
-    if (index !== -1) {
-        messageNotifications.splice(index, 1);
+    if (!areInGameMessageNotificationsEnabled()) {
+        messageNotifications = [];
+        renderMessageNotifications();
+        return;
     }
+
+    const unreadIds = new Set(
+        unreadMessageRecords.map(message => String(message.id))
+    );
+    messageNotifications = messageNotifications.filter(notification =>
+        unreadIds.has(String(notification.id))
+    );
+
+    unreadMessageRecords.forEach(message => {
+        const existing = messageNotifications.some(
+            notification => String(notification.id) === String(message.id)
+        );
+        if (existing) return;
+
+        const conversation = conversationData.find(
+            item => item.userId === message.sender_id
+        );
+        showMessageToast(
+            conversation?.username || "New message",
+            message.message || "",
+            message.id,
+            true,
+            message.sender_id
+        );
+    });
+
     renderMessageNotifications();
 }
 
@@ -758,6 +804,7 @@ async function loadConversations() {
 
     if (!safeUser(user) || !conversationList) {
         conversationData = [];
+        syncMessageNotifications([], user?.id);
         updateUnreadCount();
         return;
     }
@@ -785,6 +832,7 @@ async function loadConversations() {
         );
 
         conversationData = [];
+        syncMessageNotifications([], user.id);
 
         conversationList.innerHTML =
             `<div class="messages-loading">Could not load messages.</div>`;
@@ -835,6 +883,8 @@ async function loadConversations() {
     if (requestId !== conversationLoadSequence) return;
 
     conversationData = nextConversationData;
+
+    syncMessageNotifications(data || [], user.id);
 
     conversationData.sort(
         (a, b) =>
@@ -1126,7 +1176,8 @@ function setupPrivateMessageRealtime() {
                                     senderName,
                                     message.message,
                                     message.id,
-                                    true
+                                    true,
+                                    message.sender_id
                                 );
 
                                 showBrowserMessageNotification(
@@ -1253,12 +1304,7 @@ async function sendPrivateMessage(
             error
         );
 
-        showMessageToast(
-            "Message failed",
-            "Could not send your message.",
-            null,
-            false
-        );
+        alert("Could not send your message.");
     } else {
         privateMessageInput.value = "";
     }
@@ -1834,8 +1880,27 @@ function setupMessageUI() {
         updateNotificationButton();
     }
 
-    getMessageNotificationContainer();
 }
+
+window.addEventListener("gamehub:message-popup-preference", () => {
+    if (areInGameMessageNotificationsEnabled()) {
+        void loadConversations();
+    } else {
+        messageNotifications = [];
+        renderMessageNotifications();
+    }
+});
+
+window.addEventListener("storage", event => {
+    if (event.key !== inGameMessagePopupPreferenceKey) return;
+
+    if (areInGameMessageNotificationsEnabled()) {
+        void loadConversations();
+    } else {
+        messageNotifications = [];
+        renderMessageNotifications();
+    }
+});
 
 window.addEventListener("storage", event => {
     if (event.key === "gameHubBrowserMessageNotifications") {

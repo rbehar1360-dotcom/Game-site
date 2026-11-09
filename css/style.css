@@ -11382,6 +11382,10 @@ z-index: 1000;
     color: var(--text);
 }
 
+.message-notification-container[hidden] {
+    display: none;
+}
+
 .message-notification-toggle {
     display: flex;
     align-items: center;
