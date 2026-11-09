@@ -306,17 +306,32 @@ const ownerUsersTab =
 const ownerSuggestionsTab =
     document.getElementById("ownerSuggestionsTab");
 
+const ownerCoinsHistoryTab =
+    document.getElementById("ownerCoinsHistoryTab");
+
 const ownerUsersView =
     document.getElementById("ownerUsersView");
 
 const ownerSuggestionsView =
     document.getElementById("ownerSuggestionsView");
 
+const ownerCoinsHistoryView =
+    document.getElementById("ownerCoinsHistoryView");
+
 const ownerSuggestionsList =
     document.getElementById("ownerSuggestionsList");
 
 const refreshOwnerSuggestions =
     document.getElementById("refreshOwnerSuggestions");
+
+const ownerCoinsHistoryStatus =
+    document.getElementById("ownerCoinsHistoryStatus");
+
+const ownerCoinsHistoryStats =
+    document.getElementById("ownerCoinsHistoryStats");
+
+const refreshOwnerCoinsHistory =
+    document.getElementById("refreshOwnerCoinsHistory");
 
 const ownerTotalUsers =
     document.getElementById("ownerTotalUsers");
@@ -485,6 +500,26 @@ async function checkAdmin() {
         ownerPanelButton.style.display =
             "block";
 
+        const { error: syncError } = await supabaseClient.rpc(
+            "admin_sync_owner_rank"
+        );
+
+        if (syncError) {
+            console.error(
+                "Could not sync the OWNER rank. Apply sql/migrations/20261108_user_ranks.sql in Supabase:",
+                syncError
+            );
+        } else {
+            try {
+                await refreshUserRanks();
+            } catch (error) {
+                console.error(
+                    "Could not refresh user ranks. Apply sql/migrations/20261108_user_ranks.sql in Supabase:",
+                    error
+                );
+            }
+        }
+
         return true;
     }
 
@@ -576,6 +611,19 @@ async function loadOwnerUsers() {
             ownerUsers.length.toLocaleString();
     }
 
+    try {
+        await refreshUserRanks();
+    } catch (error) {
+        console.error(
+            "Could not load ranks. Apply sql/migrations/20261108_user_ranks.sql in Supabase:",
+            error
+        );
+        showOwnerNotification(
+            "Could not load ranks. Apply the user-ranks SQL migration in Supabase.",
+            "error"
+        );
+    }
+
     renderOwnerUsers();
 }
 
@@ -622,6 +670,99 @@ async function loadOwnerSuggestions() {
     renderOwnerSuggestions();
 }
 
+async function loadOwnerCoinsHistory() {
+
+    if (!ownerCoinsHistoryStatus || !ownerCoinsHistoryStats) {
+        return;
+    }
+
+    ownerCoinsHistoryStatus.textContent = "Loading coin totals...";
+    ownerCoinsHistoryStats.replaceChildren();
+
+    if (!await checkAdmin()) {
+        ownerCoinsHistoryStatus.textContent = "You don't have permission to view coin totals.";
+        return;
+    }
+
+    const { data, error } = await supabaseClient.rpc("admin_get_coin_history_stats");
+
+    if (error) {
+        console.error("Could not load coin history:", error);
+        ownerCoinsHistoryStatus.textContent =
+            "Could not load coin totals. Apply sql/migrations/20261101_owner_coin_history.sql in Supabase, then refresh.";
+        showOwnerNotification("Could not load coin totals. Check the owner coin-history SQL migration.", "error");
+        return;
+    }
+
+    const stats = Array.isArray(data) ? data[0] : data;
+    if (!stats) {
+        console.error("Could not load coin history: the stats query returned no result.", data);
+        ownerCoinsHistoryStatus.textContent = "The coin-history query returned no totals.";
+        return;
+    }
+
+    const values = [
+        ["Coins currently held", stats.total_current_coins],
+        ["Coins ever issued (tracked)", stats.total_coins_ever],
+        ["Coins removed (tracked)", stats.total_coins_removed]
+    ];
+
+    for (const [label, rawValue] of values) {
+        const value = Number(rawValue);
+        if (!Number.isFinite(value)) {
+            console.error("Could not load coin history: invalid total.", stats);
+            ownerCoinsHistoryStatus.textContent = "The coin-history query returned invalid totals.";
+            ownerCoinsHistoryStats.replaceChildren();
+            return;
+        }
+
+        const card = document.createElement("div");
+        card.className = "owner-coins-stat";
+
+        const caption = document.createElement("span");
+        caption.textContent = label;
+
+        const amount = document.createElement("strong");
+        amount.textContent = value.toLocaleString();
+
+        card.append(caption, amount);
+        ownerCoinsHistoryStats.appendChild(card);
+    }
+
+    const trackingSince = stats.tracking_since
+        ? new Date(stats.tracking_since)
+        : null;
+    ownerCoinsHistoryStatus.textContent = trackingSince && !Number.isNaN(trackingSince.getTime())
+        ? `Tracking changes since ${trackingSince.toLocaleString()}.`
+        : "Coin totals loaded.";
+}
+
+async function activateOwnerTab(selectedTab) {
+
+    const sections = [
+        [ownerUsersTab, ownerUsersView],
+        [ownerSuggestionsTab, ownerSuggestionsView],
+        [ownerCoinsHistoryTab, ownerCoinsHistoryView]
+    ];
+
+    sections.forEach(([tab, view]) => {
+        if (!tab || !view) {
+            return;
+        }
+
+        const selected = tab === selectedTab;
+        tab.classList.toggle("active", selected);
+        tab.setAttribute("aria-selected", String(selected));
+        view.hidden = !selected;
+    });
+
+    if (selectedTab === ownerSuggestionsTab) {
+        await loadOwnerSuggestions();
+    } else if (selectedTab === ownerCoinsHistoryTab) {
+        await loadOwnerCoinsHistory();
+    }
+}
+
 function renderOwnerSuggestions() {
 
     if (!ownerSuggestionsList) {
@@ -657,7 +798,11 @@ function renderOwnerSuggestions() {
 
         const username = document.createElement("span");
         username.className = "owner-suggestion-username";
-        username.textContent = usernamesById.get(String(suggestion.user_id)) || "Unknown user";
+        setRankedUsername(
+            username,
+            usernamesById.get(String(suggestion.user_id)) || "Unknown user",
+            suggestion.user_id
+        );
 
         heading.append(gameName, username);
         card.appendChild(heading);
@@ -763,9 +908,7 @@ function renderOwnerUsers() {
                     )}'s profile"
                     ${user.user_id ? `data-user-id="${escapeOwnerHTML(user.user_id)}"` : "disabled"}
                 >
-                    ${escapeOwnerHTML(
-                        user.username || "Unknown User"
-                    )}
+                    ${escapeOwnerHTML(user.username || "Unknown User")}
                 </button>
 
                 <div class="owner-coins">
@@ -777,6 +920,24 @@ function renderOwnerUsers() {
             </div>
 
             <div class="owner-actions">
+
+                <select
+                    class="owner-rank-select"
+                    aria-label="Rank for ${escapeOwnerHTML(user.username || "Unknown User")}"
+                    data-user-id="${escapeOwnerHTML(user.user_id)}"
+                >
+                    <option value="NONE">No rank</option>
+                    <option value="MODERATOR">MODERATOR</option>
+                    <option value="OWNER" disabled>OWNER (automatic)</option>
+                </select>
+
+                <button
+                    type="button"
+                    class="owner-rank-save"
+                    data-user-id="${escapeOwnerHTML(user.user_id)}"
+                >
+                    Save rank
+                </button>
 
                 <input
                     type="number"
@@ -808,6 +969,66 @@ function renderOwnerUsers() {
 
         const profileButton =
             row.querySelector(".owner-profile-link");
+
+        const userRank = getCachedUserRank(user.user_id);
+        const rankSelect = row.querySelector(".owner-rank-select");
+        const rankSaveButton = row.querySelector(".owner-rank-save");
+        if (rankSelect && rankSaveButton) {
+            rankSelect.value = userRank || "NONE";
+            const isOwner = userRank === "OWNER";
+            rankSelect.disabled = isOwner;
+            rankSaveButton.disabled = isOwner;
+            rankSaveButton.addEventListener("click", async () => {
+                rankSelect.disabled = true;
+                rankSaveButton.disabled = true;
+
+                const { error } = await supabaseClient.rpc(
+                    "admin_set_user_rank",
+                    {
+                        target_user_id: user.user_id,
+                        new_rank: rankSelect.value
+                    }
+                );
+
+                if (error) {
+                    console.error("Could not update user rank:", error);
+                    showOwnerNotification(
+                        error.message || "Could not update this user's rank.",
+                        "error"
+                    );
+                    rankSelect.disabled = false;
+                    rankSaveButton.disabled = false;
+                    return;
+                }
+
+                try {
+                    await refreshUserRanks();
+                    renderOwnerUsers();
+                    showOwnerNotification(
+                        rankSelect.value === "MODERATOR"
+                            ? `${user.username || "User"} is now a MODERATOR.`
+                            : `Removed the rank from ${user.username || "this user"}.`,
+                        "success"
+                    );
+                } catch (refreshError) {
+                    console.error("Could not refresh user ranks:", refreshError);
+                    showOwnerNotification(
+                        "The rank was saved, but the rank list could not be refreshed.",
+                        "error"
+                    );
+                    rankSelect.disabled = false;
+                    rankSaveButton.disabled = false;
+                }
+            });
+        }
+
+        if (profileButton) {
+            setRankedUsername(
+                profileButton,
+                user.username || "Unknown User",
+                user.user_id
+            );
+        }
 
         if (profileButton && user.user_id) {
             profileButton.addEventListener("click", () => {
@@ -1259,23 +1480,7 @@ if (ownerPanelButton) {
                     "open"
                 );
 
-                if (ownerUsersView) {
-                    ownerUsersView.hidden = false;
-                }
-
-                if (ownerSuggestionsView) {
-                    ownerSuggestionsView.hidden = true;
-                }
-
-                if (ownerUsersTab) {
-                    ownerUsersTab.classList.add("active");
-                    ownerUsersTab.setAttribute("aria-selected", "true");
-                }
-
-                if (ownerSuggestionsTab) {
-                    ownerSuggestionsTab.classList.remove("active");
-                    ownerSuggestionsTab.setAttribute("aria-selected", "false");
-                }
+                await activateOwnerTab(ownerUsersTab);
 
                 await loadOwnerUsers();
             }
@@ -1284,46 +1489,18 @@ if (ownerPanelButton) {
     );
 }
 
-if (ownerUsersTab) {
-    ownerUsersTab.addEventListener("click", () => {
-        if (ownerUsersView) {
-            ownerUsersView.hidden = false;
-        }
-
-        if (ownerSuggestionsView) {
-            ownerSuggestionsView.hidden = true;
-        }
-
-        ownerUsersTab.classList.add("active");
-        ownerUsersTab.setAttribute("aria-selected", "true");
-
-        if (ownerSuggestionsTab) {
-            ownerSuggestionsTab.classList.remove("active");
-            ownerSuggestionsTab.setAttribute("aria-selected", "false");
-        }
+[
+    ownerUsersTab,
+    ownerSuggestionsTab,
+    ownerCoinsHistoryTab
+].filter(Boolean).forEach(tab => {
+    tab.addEventListener("click", async () => {
+        await activateOwnerTab(tab);
     });
-}
+});
 
-if (ownerSuggestionsTab) {
-    ownerSuggestionsTab.addEventListener("click", async () => {
-        if (ownerUsersView) {
-            ownerUsersView.hidden = true;
-        }
-
-        if (ownerSuggestionsView) {
-            ownerSuggestionsView.hidden = false;
-        }
-
-        ownerSuggestionsTab.classList.add("active");
-        ownerSuggestionsTab.setAttribute("aria-selected", "true");
-
-        if (ownerUsersTab) {
-            ownerUsersTab.classList.remove("active");
-            ownerUsersTab.setAttribute("aria-selected", "false");
-        }
-
-        await loadOwnerSuggestions();
-    });
+if (refreshOwnerCoinsHistory) {
+    refreshOwnerCoinsHistory.addEventListener("click", loadOwnerCoinsHistory);
 }
 
 

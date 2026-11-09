@@ -394,21 +394,24 @@ async function openUserProfile(
     };
 
     if (profileUsername) {
-        profileUsername.textContent =
-            currentProfileUser.username;
+        setRankedUsername(
+            profileUsername,
+            currentProfileUser.username,
+            currentProfileUser.id
+        );
     }
 
-    // Owner badge
-    if (
-        currentProfileUser.username
-            .toLowerCase() === "ralph"
-    ) {
+    const profileUserRank = await ensureUserRanksLoaded()
+        .then(() => getCachedUserRank(currentProfileUser.id))
+        .catch(error => {
+            console.error("Could not load the profile user's rank:", error);
+            return "";
+        });
 
-        if (profileBadge) {
-            profileBadge.textContent =
-                "👑 Owner";
-        }
-
+    if (profileBadge) {
+        profileBadge.textContent = profileUserRank === "OWNER"
+            ? "👑 Owner"
+            : "";
     }
 
     if (profileRank) {

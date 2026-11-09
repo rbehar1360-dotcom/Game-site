@@ -400,8 +400,7 @@ function addChatMessage(message) {
 
     const playerUsername = message.username || "User";
 
-    username.textContent = playerUsername;
-    username.dataset.userId = message.user_id || "";
+    setRankedUsername(username, playerUsername, message.user_id);
     username.dataset.username = playerUsername;
     username.classList.add("clickable-profile");
 

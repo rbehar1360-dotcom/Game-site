@@ -20,7 +20,6 @@
   "GeometryDash.html": "geometry-dash",
   "BasketBallLegends2020.html": "basketball-legends",
   "cookieclicker.html": "cookie-clicker",
-  "EaglerCraft.html": "eaglercraft",
   "Chess.html": "chess",
   "Snowball.html": "snowball",
   "SpaceWaves.html": "space-waves",
@@ -134,7 +133,44 @@
   "Kindergarten3.html": "Kindergarten3",
   "PizzeriaSim.html": "PizzeriaSim",
   "RedBall4.html": "RedBall4",
-  "Terraria.html": "Terraria"
+  "Terraria.html": "Terraria",
+  "ADifficultGameAboutClimbing.html": "ADifficultGameAboutClimbing",
+  "AnimalCrossing.html": "AnimalCrossing",
+  "BallBlast.html": "BallBlast",
+  "BeatBlock.html": "BeatBlock",
+  "BottleJump3D.html": "BottleJump3D",
+  "BowMasters.html": "BowMasters",
+  "LevelDevil.html": "LevelDevil",
+  "NubbysNumberFactory.html": "NubbysNumberFactory",
+  "RetroBowl.html": "RetroBowl",
+  "ColorMatch.html": "ColorMatch",
+  "ColorWaterSort.html": "ColorWaterSort",
+  "CookingMama.html": "CookingMama",
+  "CookingMama2.html": "CookingMama2",
+  "CookingMama3.html": "CookingMama3",
+  "CrossyRoad.html": "CrossyRoad",
+  "DigDeep.html": "DigDeep",
+  "DOOM.html": "DOOM",
+  "FeedAndGrowFish.html": "FeedAndGrowFish",
+  "Fih.html": "Fih",
+  "FindTheAlien.html": "FindTheAlien",
+  "FireBoyAndWaterGirl2.html": "FireBoyAndWaterGirl2",
+  "FireBoyAndWaterGirl3.html": "FireBoyAndWaterGirl3",
+  "FlappyDunk.html": "FlappyDunk",
+  "ForknSausage.html": "ForknSausage",
+  "UltraKill.html": "UltraKill",
+  "HouseOfHazards.html": "HouseOfHazards",
+  "IronLung.html": "IronLung",
+  "JourneyDownhill.html": "JourneyDownhill",
+  "MobControl.html": "MobControl",
+  "SpaceBarClicker.html": "SpaceBarClicker",
+  "State.io.html": "State.io",
+  "SuikaGame.html": "SuikaGame",
+  "Tetris.html": "Tetris",
+  "TwerkRace3D.html": "TwerkRace3D",
+  "WebFishing.html": "WebFishing",
+  "ChessEngine.html": "chess",
+  "OldSlimeRancher.html": "slime-rancher"
 };
 
         return gameMap[filename] || null;
@@ -624,6 +660,7 @@
     // =========================================
 
     let lastSaveTime = Date.now();
+    let pendingPlaytimeSeconds = 0;
     let isSaving = false;
 
     function getSupabase() {
@@ -638,28 +675,37 @@
     // SAVE PLAYTIME
     // =========================================
 
-    async function savePlaytime() {
-        // Prevent overlapping runs
-        if (isSaving) return;
+    function collectPlaytime(now) {
+        const seconds = Math.floor((now - lastSaveTime) / 1000);
+        if (seconds > 0) {
+            pendingPlaytimeSeconds += seconds;
+        }
+        lastSaveTime = now;
+    }
+
+    async function savePlaytime(forceCollect = false) {
+        const now = Date.now();
+        if (forceCollect || isGameActive()) {
+            collectPlaytime(now);
+        } else {
+            lastSaveTime = now;
+            return;
+        }
+
+        if (isSaving || pendingPlaytimeSeconds <= 0) return;
 
         const supabase = getSupabase();
         if (!supabase) return;
 
-        const now = Date.now();
-        const seconds = Math.floor((now - lastSaveTime) / 1000);
-
-        // Don't issue requests for 0 seconds
-        if (seconds <= 0) return;
-
         isSaving = true;
+        const seconds = pendingPlaytimeSeconds;
 
         try {
             // Check auth user
             const { data: { user }, error: authError } = await supabase.auth.getUser();
 
             if (authError || !user) {
-                // Advance lastSaveTime so we don't accumulate unsaved time for logged-out users
-                lastSaveTime = now;
+                pendingPlaytimeSeconds = Math.max(0, pendingPlaytimeSeconds - seconds);
                 return;
             }
 
@@ -671,12 +717,12 @@
 
             if (rpcError) {
                 console.error("⏱️ RPC Save Error:", rpcError.message);
-                // We do NOT update lastSaveTime here so it retries these seconds on the next loop
+                // Keep the pending seconds so the next active loop can retry them.
                 return;
             }
 
-            // Success: update timestamp
-            lastSaveTime = now;
+            // Preserve any active time collected while the request was in flight.
+            pendingPlaytimeSeconds = Math.max(0, pendingPlaytimeSeconds - seconds);
             console.log(`⏱️ Successfully saved +${seconds}s for ${gameId}`);
 
         } catch (err) {
@@ -695,20 +741,10 @@
 // TRACKER LOOP
 // =========================================
 function isGameActive() {
-    const gameFrame = gameId === "eaglercraft"
-        ? document.getElementById("gameFrame")
-        : null;
-    const gameFrameFocused = gameFrame !== null && document.activeElement === gameFrame;
-
-    return document.visibilityState === "visible" &&
-        (document.hasFocus() || gameFrameFocused);
+    return document.visibilityState === "visible" && document.hasFocus();
 }
 async function trackerLoop() {
-
-    if (isGameActive()) {
-        await savePlaytime();
-    }
-
+    await savePlaytime();
     setTimeout(trackerLoop, 5000);
 }
     // Start loop
@@ -720,15 +756,23 @@ async function trackerLoop() {
 
     document.addEventListener("visibilitychange", () => {
         if (document.visibilityState === "hidden") {
-            savePlaytime();
+            savePlaytime(true);
         } else {
             // Reset anchor when returning to tab so background time isn't counted
             lastSaveTime = Date.now();
         }
     });
 
+    window.addEventListener("blur", () => {
+        savePlaytime(true);
+    });
+
+    window.addEventListener("focus", () => {
+        lastSaveTime = Date.now();
+    });
+
     window.addEventListener("pagehide", () => {
-        savePlaytime();
+        savePlaytime(true);
     });
 
     console.log(`⏱️ Playtime tracking initialized for: ${gameId}`);

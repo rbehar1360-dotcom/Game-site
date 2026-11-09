@@ -4041,6 +4041,78 @@ z-index: 1000;
     color: var(--accent);
 }
 
+.owner-coins-toolbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 14px;
+    padding: 14px 20px;
+}
+
+.owner-coins-toolbar p,
+.owner-coins-note {
+    margin: 6px 0 0;
+    color: var(--text);
+    opacity: 0.72;
+    line-height: 1.5;
+}
+
+.owner-coins-toolbar > div {
+    flex: 1;
+}
+
+.owner-coins-toolbar button {
+    padding: 10px 14px;
+    border: 0;
+    border-radius: 9px;
+    background: var(--accent);
+    color: #001018;
+    font-weight: bold;
+    cursor: pointer;
+    white-space: nowrap;
+}
+
+.owner-coins-toolbar button:disabled {
+    cursor: wait;
+    opacity: 0.65;
+}
+
+.owner-coins-status {
+    margin: 0 20px 10px;
+    color: var(--accent);
+}
+
+.owner-coins-note {
+    margin: 0 20px 14px;
+}
+
+.owner-coins-stats {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+    gap: 12px;
+    padding: 0 20px 14px;
+}
+
+.owner-coins-stat {
+    padding: 16px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 10px;
+    background: var(--card);
+}
+
+.owner-coins-stat span {
+    display: block;
+    color: var(--text);
+    opacity: 0.72;
+}
+
+.owner-coins-stat strong {
+    display: block;
+    margin-top: 8px;
+    color: var(--accent);
+    font-size: 22px;
+}
+
 .owner-panel-view[hidden] {
     display: none;
 }
@@ -4242,6 +4314,21 @@ z-index: 1000;
     color: var(--text);
 }
 
+.rank-owner {
+    color: #8b0000 !important;
+}
+
+.rank-moderator {
+    color: #3278d4 !important;
+}
+
+.owner-rank-note {
+    margin: 0 20px 12px;
+    color: var(--text);
+    opacity: 0.7;
+    font-size: 13px;
+}
+
 .owner-profile-link {
     display: block;
     padding: 0;
@@ -4273,7 +4360,17 @@ z-index: 1000;
 .owner-actions {
     display: flex;
     align-items: center;
+    flex-wrap: wrap;
     gap: 6px;
+}
+
+.owner-rank-select {
+    min-width: 125px;
+    padding: 9px 10px;
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: 8px;
+    background: var(--header);
+    color: var(--text);
 }
 
 .owner-amount {
@@ -4305,6 +4402,16 @@ z-index: 1000;
 .owner-actions button:hover {
     transform: translateY(-1px);
     filter: brightness(1.12);
+}
+
+.owner-rank-save {
+    background: var(--accent);
+}
+
+.owner-actions button:disabled,
+.owner-rank-select:disabled {
+    cursor: not-allowed;
+    opacity: 0.65;
 }
 
 .owner-give {
@@ -11264,43 +11371,78 @@ z-index: 1000;
     cursor: pointer;
 }
 
-/* Top-of-screen incoming message notifications */
+/* Top-left, user-opened message notification menu */
 
 .message-notification-container {
     position: fixed;
     top: 16px;
-    left: 50%;
+    left: 16px;
     z-index: 30000;
-    width: min(430px, calc(100vw - 24px));
+    width: min(360px, calc(100vw - 32px));
+    color: var(--text);
+}
+
+.message-notification-container[hidden] {
+    display: none;
+}
+
+.message-notification-toggle {
     display: flex;
+    align-items: center;
+    gap: 9px;
+    min-height: 42px;
+    padding: 0 14px;
+    border: 1px solid rgba(255, 255, 255, 0.18);
+    border-radius: 10px;
+    background: color-mix(in srgb, var(--background-2) 96%, transparent);
+    color: var(--text);
+    box-shadow: 0 8px 26px rgba(0, 0, 0, 0.35);
+    cursor: pointer;
+    font-weight: 700;
+}
+
+.message-notification-count {
+    display: inline-grid;
+    min-width: 20px;
+    height: 20px;
+    place-items: center;
+    padding: 0 5px;
+    border-radius: 10px;
+    background: #d94343;
+    color: #fff;
+    font-size: 11px;
+}
+
+.message-notification-count[hidden] {
+    display: none;
+}
+
+.message-notification-list {
+    display: flex;
+    max-height: min(55vh, 420px);
     flex-direction: column;
-    gap: 8px;
-    pointer-events: none;
-    transform: translateX(-50%);
+    gap: 7px;
+    margin-top: 8px;
+    overflow-y: auto;
+}
+
+.message-notification-list[hidden] {
+    display: none;
 }
 
 .message-notification {
     display: flex;
     align-items: center;
     gap: 11px;
-    min-height: 62px;
-    padding: 10px 11px;
+    min-height: 56px;
+    padding: 10px;
     box-sizing: border-box;
     border: 1px solid color-mix(in srgb, var(--accent) 40%, transparent);
-    border-radius: 15px;
+    border-radius: 10px;
     background: color-mix(in srgb, var(--background-2) 94%, transparent);
     color: var(--text);
     box-shadow: 0 18px 50px rgba(0, 0, 0, 0.42), 0 0 24px var(--shadow);
     backdrop-filter: blur(16px);
-    pointer-events: auto;
-    opacity: 0;
-    transform: translateY(-18px) scale(0.98);
-    transition: 0.25s ease;
-}
-
-.message-notification.show {
-    opacity: 1;
-    transform: translateY(0) scale(1);
 }
 
 .message-notification-content {
@@ -11359,6 +11501,12 @@ z-index: 1000;
 }
 
 @media (max-width: 760px) {
+    .message-notification-container {
+        top: 10px;
+        left: 10px;
+        width: min(360px, calc(100vw - 20px));
+    }
+
     .messages-window {
         width: 98vw;
         height: 94vh;
@@ -11711,6 +11859,33 @@ z-index: 1000;
   .owner-toolbar button {
     min-height: 42px;
     flex: 1 1 40%;
+  }
+
+  .owner-tabs {
+    flex-wrap: wrap;
+    padding-right: 12px;
+    padding-left: 12px;
+  }
+
+  .owner-coins-toolbar {
+    align-items: stretch;
+    flex-direction: column;
+    padding: 12px;
+  }
+
+  .owner-coins-toolbar button {
+    min-height: 42px;
+  }
+
+  .owner-coins-status,
+  .owner-coins-note {
+    margin-right: 12px;
+    margin-left: 12px;
+  }
+
+  .owner-coins-stats {
+    padding-right: 12px;
+    padding-left: 12px;
   }
 
   .settings-option {

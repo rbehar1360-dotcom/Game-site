@@ -352,13 +352,12 @@ async function loadUserLeaderboard() {
             player.display_name ||
             "User";
 
-        username.textContent =
-            playerUsername;
-
         const profileUserId =
             player.user_id ||
             player.id ||
             null;
+
+        setRankedUsername(username, playerUsername, profileUserId);
 
         const time =
             document.createElement("div");
@@ -464,7 +463,7 @@ async function loadGameLeaderboard() {
         await supabaseClient.rpc(
             "get_game_playtime_leaderboard",
             {
-                p_limit: 150
+                p_limit: 1000
             }
         );
 
@@ -848,10 +847,6 @@ async function openGamePlaytime(gameId) {
             player.display_name ||
             "User";
 
-        username.textContent =
-            playerUsername;
-
-
         const time =
             document.createElement("div");
 
@@ -873,6 +868,8 @@ async function openGamePlaytime(gameId) {
             player.user_id ||
             player.id ||
             null;
+
+        setRankedUsername(username, playerUsername, profileUserId);
 
 
         if (profileUserId) {

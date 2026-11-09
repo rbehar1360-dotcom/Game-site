@@ -855,8 +855,11 @@
             const name =
                 document.createElement("strong");
 
-            name.textContent =
-                comment.username || "Player";
+            setRankedUsername(
+                name,
+                comment.username || "Player",
+                comment.user_id
+            );
 
             const date =
                 document.createElement("span");

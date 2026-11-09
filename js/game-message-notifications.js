@@ -8,18 +8,21 @@
         return;
     }
 
-    const seenMessageIds = new Set();
+    const notifications = [];
+    const recentlyReadMessageIds = new Set();
     let channel = null;
     let currentUserId = null;
     let connectionAttempt = 0;
+    let isMenuOpen = false;
+    let messageEventVersion = 0;
     const popupPreferenceKey = "gameHubInGameMessagePopups";
 
     function areGameMessagePopupsEnabled() {
         try {
-            return window.localStorage.getItem(popupPreferenceKey) !== "false";
+            return window.localStorage.getItem(popupPreferenceKey) === "true";
         } catch (error) {
             console.error("Could not read the in-game message popup setting:", error);
-            return true;
+            return false;
         }
     }
 
@@ -32,48 +35,63 @@
             #gameMessageNotificationContainer.message-notification-container {
                 position: fixed;
                 top: 16px;
-                left: 50%;
+                left: 16px;
                 z-index: 2147483647;
-                width: min(430px, calc(100vw - 24px));
+                width: min(360px, calc(100vw - 32px));
+                color: var(--text, #fff);
+                font-family: Arial, sans-serif;
+            }
+            #gameMessageNotificationContainer .message-notification-toggle {
                 display: flex;
+                align-items: center;
+                gap: 9px;
+                min-height: 42px;
+                padding: 0 14px;
+                box-sizing: border-box;
+                border: 1px solid rgba(255,255,255,.2);
+                border-radius: 10px;
+                background: rgba(8, 20, 29, .92);
+                color: inherit;
+                box-shadow: 0 8px 26px rgba(0,0,0,.35);
+                cursor: pointer;
+                font-size: 13px;
+                font-weight: 700;
+            }
+            #gameMessageNotificationContainer .message-notification-count {
+                display: inline-grid;
+                min-width: 20px;
+                height: 20px;
+                place-items: center;
+                padding: 0 5px;
+                border-radius: 10px;
+                background: #e44;
+                color: white;
+                font-size: 11px;
+            }
+            #gameMessageNotificationContainer .message-notification-count[hidden] {
+                display: none;
+            }
+            #gameMessageNotificationContainer .message-notification-list {
+                display: flex;
+                max-height: min(55vh, 420px);
                 flex-direction: column;
-                gap: 8px;
-                pointer-events: none;
-                transform: translateX(-50%);
+                gap: 7px;
+                margin-top: 8px;
+                overflow-y: auto;
+            }
+            #gameMessageNotificationContainer .message-notification-list[hidden] {
+                display: none;
             }
             #gameMessageNotificationContainer .message-notification {
                 display: flex;
                 align-items: center;
-                gap: 11px;
-                min-height: 62px;
-                padding: 10px 11px;
-                box-sizing: border-box;
-                border: 1px solid color-mix(in srgb, var(--accent) 40%, transparent);
-                border-radius: 15px;
-                background: color-mix(in srgb, var(--background-2) 94%, transparent);
-                color: var(--text);
-                box-shadow: 0 18px 50px rgba(0, 0, 0, 0.42), 0 0 24px var(--shadow);
-                backdrop-filter: blur(16px);
-                pointer-events: auto;
-                opacity: 0;
-                transform: translateY(-18px) scale(0.98);
-                transition: 0.25s ease;
-            }
-            #gameMessageNotificationContainer .message-notification.show {
-                opacity: 1;
-                transform: translateY(0) scale(1);
-            }
-            #gameMessageNotificationContainer .message-notification-avatar {
-                width: 42px;
-                height: 42px;
-                flex: 0 0 42px;
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                border-radius: 50%;
-                background: linear-gradient(135deg, var(--accent), var(--background-3));
-                color: var(--background-1);
-                font-weight: 800;
+                gap: 10px;
+                padding: 10px;
+                border: 1px solid rgba(255,255,255,.16);
+                border-radius: 10px;
+                background: rgba(8, 20, 29, .96);
+                color: inherit;
+                box-shadow: 0 8px 26px rgba(0,0,0,.35);
             }
             #gameMessageNotificationContainer .message-notification-content {
                 display: flex;
@@ -83,50 +101,36 @@
                 gap: 3px;
             }
             #gameMessageNotificationContainer .message-notification-content strong {
-                color: var(--title);
                 font-size: 13px;
             }
             #gameMessageNotificationContainer .message-notification-content span {
                 overflow: hidden;
-                color: var(--text);
-                opacity: 0.68;
+                opacity: .75;
                 font-size: 12px;
-                white-space: nowrap;
                 text-overflow: ellipsis;
+                white-space: nowrap;
             }
             #gameMessageNotificationContainer .message-notification-actions {
                 display: flex;
                 align-items: center;
-                gap: 4px;
+                gap: 5px;
             }
             #gameMessageNotificationContainer .message-notification-open,
             #gameMessageNotificationContainer .message-notification-close {
+                min-height: 30px;
+                padding: 0 9px;
                 border: 0;
-                border-radius: 8px;
+                border-radius: 7px;
                 cursor: pointer;
             }
             #gameMessageNotificationContainer .message-notification-open {
-                padding: 7px 9px;
-                background: var(--accent);
-                color: var(--background-1);
-                font-size: 11px;
+                background: var(--accent, #00bcd4);
+                color: #06121a;
                 font-weight: 700;
             }
             #gameMessageNotificationContainer .message-notification-close {
-                width: 28px;
-                height: 28px;
-                background: transparent;
-                color: var(--text);
-                cursor: pointer;
-                font-size: 18px;
-            }
-            #gameMessageNotificationContainer .message-notification-close:hover {
-                background: rgba(255, 255, 255, 0.08);
-            }
-            @media (max-width: 760px) {
-                #gameMessageNotificationContainer.message-notification-container {
-                    width: min(430px, calc(100vw - 24px));
-                }
+                background: rgba(255,255,255,.1);
+                color: inherit;
             }
         `;
         document.head.appendChild(style);
@@ -134,10 +138,55 @@
         container = document.createElement("div");
         container.id = "gameMessageNotificationContainer";
         container.className = "message-notification-container";
-        container.setAttribute("aria-live", "polite");
-        container.setAttribute("aria-atomic", "false");
+        const toggle = document.createElement("button");
+        toggle.type = "button";
+        toggle.className = "message-notification-toggle";
+        toggle.setAttribute("aria-expanded", "false");
+        toggle.setAttribute("aria-controls", "gameMessageNotificationList");
+        toggle.textContent = "🔔 Messages";
+
+        const count = document.createElement("span");
+        count.className = "message-notification-count";
+        count.setAttribute("aria-label", "Unread message notifications");
+        toggle.appendChild(count);
+
+        const list = document.createElement("div");
+        list.id = "gameMessageNotificationList";
+        list.className = "message-notification-list";
+        list.hidden = true;
+        list.setAttribute("aria-live", "polite");
+        toggle.addEventListener("click", () => {
+            isMenuOpen = !isMenuOpen;
+            toggle.setAttribute("aria-expanded", String(isMenuOpen));
+            list.hidden = !isMenuOpen;
+        });
+
+        container.append(toggle, list);
         document.body.appendChild(container);
         return container;
+    }
+
+    function renderNotifications() {
+        if (notifications.length === 0) {
+            isMenuOpen = false;
+            document.getElementById("gameMessageNotificationContainer")?.remove();
+            return;
+        }
+
+        const container = getContainer();
+        const toggle = container.querySelector(".message-notification-toggle");
+        const count = toggle.querySelector(".message-notification-count");
+        const list = container.querySelector(".message-notification-list");
+
+        count.textContent = String(notifications.length);
+        count.hidden = notifications.length === 0;
+        list.replaceChildren();
+
+        notifications.forEach(notification => {
+            list.appendChild(notification.element);
+        });
+        list.hidden = !isMenuOpen;
+        toggle.setAttribute("aria-expanded", String(isMenuOpen));
     }
 
     function openGameMessages(senderId) {
@@ -263,10 +312,9 @@
         frame.src = pageUrl.href;
     }
 
-    function showNotification(username, message) {
+    function showNotification(username, message, messageId, senderId) {
         const toast = document.createElement("div");
         toast.className = "message-notification";
-        toast.setAttribute("role", "status");
 
         const avatar = document.createElement("div");
         avatar.className = "message-notification-avatar";
@@ -291,46 +339,46 @@
         open.className = "message-notification-open";
         open.textContent = "Open";
         open.addEventListener("click", () => {
-            openGameMessages(open.dataset.senderId || "");
-            toast.remove();
+            void openAndReadMessages(open.dataset.senderId || "");
         });
 
-        const close = document.createElement("button");
-        close.type = "button";
-        close.className = "message-notification-close";
-        close.setAttribute("aria-label", "Dismiss message notification");
-        close.textContent = "×";
-        close.addEventListener("click", () => toast.remove());
-
-        actions.append(open, close);
+        actions.append(open);
         content.append(sender, preview);
         toast.append(avatar, content, actions);
-        getContainer().prepend(toast);
-
-        requestAnimationFrame(() => toast.classList.add("show"));
-        window.setTimeout(() => {
-            toast.classList.remove("show");
-            window.setTimeout(() => toast.remove(), 250);
-        }, 6500);
+        notifications.unshift({
+            id: messageId,
+            senderId,
+            element: toast,
+            sender,
+            avatar,
+            open
+        });
+        renderNotifications();
         return { sender, avatar, open };
     }
 
     async function showIncomingMessage(message) {
         if (!message || message.recipient_id !== currentUserId) return;
         if (message.sender_id === currentUserId) return;
+        if (
+            message.read_at ||
+            recentlyReadMessageIds.has(String(message.id))
+        ) {
+            removeNotification(message.id);
+            return;
+        }
         if (!areGameMessagePopupsEnabled()) return;
-        if (message.id && seenMessageIds.has(message.id)) return;
-
-        if (message.id) {
-            seenMessageIds.add(message.id);
-            if (seenMessageIds.size > 100) {
-                seenMessageIds.delete(seenMessageIds.values().next().value);
-            }
+        if (notifications.some(notification =>
+            String(notification.id) === String(message.id)
+        )) {
+            return;
         }
 
         const notification = showNotification(
             "New message",
-            typeof message.message === "string" ? message.message : ""
+            typeof message.message === "string" ? message.message : "",
+            message.id,
+            message.sender_id
         );
         notification.open.dataset.senderId = message.sender_id || "";
 
@@ -339,7 +387,15 @@
                 search_user_id: message.sender_id
             });
             if (!error && data?.[0]?.username && message.recipient_id === currentUserId) {
-                notification.sender.textContent = data[0].username;
+                if (typeof setRankedUsername === "function") {
+                    setRankedUsername(
+                        notification.sender,
+                        data[0].username,
+                        message.sender_id
+                    );
+                } else {
+                    notification.sender.textContent = data[0].username;
+                }
                 notification.avatar.textContent = data[0].username.trim().charAt(0).toUpperCase() || "?";
             }
         } catch (error) {
@@ -347,14 +403,116 @@
         }
     }
 
-    window.addEventListener("storage", event => {
+    function removeNotification(messageId) {
+        if (!messageId) return;
+
+        const index = notifications.findIndex(
+            notification => String(notification.id) === String(messageId)
+        );
+        if (index !== -1) {
+            notifications.splice(index, 1);
+            renderNotifications();
+        }
+    }
+
+    async function openAndReadMessages(senderId) {
+        openGameMessages(senderId);
+        if (!senderId) return;
+
+        const { error } = await supabase.rpc(
+            "mark_private_messages_read",
+            { p_sender_id: senderId }
+        );
+
+        if (error) {
+            console.error("Could not mark opened game messages as read:", error);
+            return;
+        }
+
+        notifications.forEach(notification => {
+            if (notification.senderId === senderId) {
+                recentlyReadMessageIds.add(String(notification.id));
+            }
+        });
+        const remaining = notifications.filter(
+            notification => notification.senderId !== senderId
+        );
+        if (remaining.length !== notifications.length) {
+            notifications.splice(0, notifications.length, ...remaining);
+            renderNotifications();
+        }
+    }
+
+    async function loadUnreadMessages(userId, attempt) {
+        if (!userId || !areGameMessagePopupsEnabled()) return;
+
+        const eventVersionAtStart = messageEventVersion;
+        const { data, error } = await supabase
+            .from("private_messages")
+            .select("id, sender_id, recipient_id, message, read_at")
+            .eq("recipient_id", userId)
+            .is("read_at", null);
+
+        if (error) {
+            console.error("Could not load unread game messages:", error);
+            return;
+        }
+
         if (
-            event.key === popupPreferenceKey &&
+            attempt !== connectionAttempt ||
+            userId !== currentUserId ||
             !areGameMessagePopupsEnabled()
         ) {
-            document.getElementById("gameMessageNotificationContainer")?.remove();
+            return;
+        }
+
+        for (const message of data || []) {
+            await showIncomingMessage(message);
+        }
+
+        if (eventVersionAtStart === messageEventVersion) {
+            const unreadIds = new Set(
+                (data || []).map(message => String(message.id))
+            );
+            const remaining = notifications.filter(notification =>
+                unreadIds.has(String(notification.id))
+            );
+            if (remaining.length !== notifications.length) {
+                notifications.splice(0, notifications.length, ...remaining);
+                renderNotifications();
+            }
+        }
+    }
+
+    window.addEventListener("storage", event => {
+        if (event.key === popupPreferenceKey) {
+            applyPopupPreference(areGameMessagePopupsEnabled());
         }
     });
+
+    window.addEventListener("gamehub:message-popup-preference", event => {
+        applyPopupPreference(Boolean(event.detail?.enabled));
+    });
+
+    function applyPopupPreference(enabled) {
+        if (!enabled) {
+            notifications.splice(0, notifications.length);
+            isMenuOpen = false;
+            document.getElementById("gameMessageNotificationContainer")?.remove();
+            return;
+        }
+
+        void loadUnreadMessages(currentUserId, connectionAttempt);
+    }
+
+    function refreshUnreadMessages() {
+        if (document.visibilityState === "visible") {
+            void loadUnreadMessages(currentUserId, connectionAttempt);
+        }
+    }
+
+    document.addEventListener("visibilitychange", refreshUnreadMessages);
+    window.addEventListener("focus", refreshUnreadMessages);
 
     async function connectToUser(userId) {
         if (userId === currentUserId && channel) return;
@@ -371,9 +529,14 @@
                 console.warn("Could not clean up previous message channel:", error);
             }
         }
-        if (attempt !== connectionAttempt || !userId) return;
+        if (attempt !== connectionAttempt) return;
 
+        notifications.splice(0, notifications.length);
+        isMenuOpen = false;
+        document.getElementById("gameMessageNotificationContainer")?.remove();
         currentUserId = userId;
+        if (!userId) return;
+
         channel = supabase
             .channel(`game-private-messages-${userId}`)
             .on("postgres_changes", {
@@ -381,11 +544,38 @@
                 schema: "public",
                 table: "private_messages"
             }, payload => {
+                messageEventVersion++;
                 void showIncomingMessage(payload.new);
+            })
+            .on("postgres_changes", {
+                event: "UPDATE",
+                schema: "public",
+                table: "private_messages"
+            }, payload => {
+                const message = payload.new;
+                if (!message || message.recipient_id !== currentUserId) return;
+                messageEventVersion++;
+                if (message.read_at) {
+                    recentlyReadMessageIds.add(String(message.id));
+                    removeNotification(message.id);
+                } else {
+                    recentlyReadMessageIds.delete(String(message.id));
+                    void showIncomingMessage(message);
+                }
+            })
+            .on("postgres_changes", {
+                event: "DELETE",
+                schema: "public",
+                table: "private_messages"
+            }, payload => {
+                messageEventVersion++;
+                removeNotification(payload.old?.id);
             })
             .subscribe(status => {
                 console.log("Game private messages realtime:", status);
             });
+
+        await loadUnreadMessages(userId, attempt);
     }
 
     supabase.auth.onAuthStateChange((_event, session) => {
