@@ -209,6 +209,16 @@
         Suggestions
       </button>
       <button
+        id="ownerIssueReportsTab"
+        class="owner-tab"
+        type="button"
+        role="tab"
+        aria-selected="false"
+        aria-controls="ownerIssueReportsView"
+      >
+        Problem Reports
+      </button>
+      <button
         id="ownerCoinsHistoryTab"
         class="owner-tab"
         type="button"
@@ -281,6 +291,22 @@
     </section>
 
     <section
+      id="ownerIssueReportsView"
+      class="owner-panel-view"
+      role="tabpanel"
+      aria-labelledby="ownerIssueReportsTab"
+      hidden
+    >
+      <div class="owner-suggestions-toolbar">
+        <p>Reports forwarded by moderators for your review.</p>
+        <button id="refreshOwnerIssueReports" type="button">↻ Refresh</button>
+      </div>
+      <div id="ownerIssueReportsList" class="owner-suggestions-list" aria-live="polite">
+        <p class="owner-loading">Open this tab to load problem reports.</p>
+      </div>
+    </section>
+
+    <section
       id="ownerCoinsHistoryView"
       class="owner-panel-view"
       role="tabpanel"
@@ -312,7 +338,7 @@
     <div class="owner-header">
       <div>
         <h2>🛡️ Moderator Panel</h2>
-        <p>Review game suggestions before they reach the owner.</p>
+        <p>Review game suggestions and player problem reports.</p>
       </div>
       <button id="closeModeratorPanel" class="close-owner" type="button" aria-label="Close moderator panel">
         ✕
@@ -324,6 +350,13 @@
     </div>
     <div id="moderatorSuggestionsList" class="owner-suggestions-list" aria-live="polite">
       <p class="owner-loading">Open this panel to load suggestions.</p>
+    </div>
+    <div class="owner-suggestions-toolbar">
+      <p>Forward game problem reports to the owner, or delete spam.</p>
+      <button id="refreshModeratorIssueReports" type="button">↻ Refresh Reports</button>
+    </div>
+    <div id="moderatorIssueReportsList" class="owner-suggestions-list" aria-live="polite">
+      <p class="owner-loading">Open this panel to load problem reports.</p>
     </div>
   </div>
 </div>

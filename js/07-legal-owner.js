@@ -315,6 +315,9 @@ const ownerUsersTab =
 const ownerSuggestionsTab =
     document.getElementById("ownerSuggestionsTab");
 
+const ownerIssueReportsTab =
+    document.getElementById("ownerIssueReportsTab");
+
 const ownerCoinsHistoryTab =
     document.getElementById("ownerCoinsHistoryTab");
 
@@ -324,20 +327,35 @@ const ownerUsersView =
 const ownerSuggestionsView =
     document.getElementById("ownerSuggestionsView");
 
+const ownerIssueReportsView =
+    document.getElementById("ownerIssueReportsView");
+
 const ownerCoinsHistoryView =
     document.getElementById("ownerCoinsHistoryView");
 
 const ownerSuggestionsList =
     document.getElementById("ownerSuggestionsList");
 
+const ownerIssueReportsList =
+    document.getElementById("ownerIssueReportsList");
+
 const moderatorSuggestionsList =
     document.getElementById("moderatorSuggestionsList");
+
+const moderatorIssueReportsList =
+    document.getElementById("moderatorIssueReportsList");
 
 const refreshOwnerSuggestions =
     document.getElementById("refreshOwnerSuggestions");
 
 const refreshModeratorSuggestions =
     document.getElementById("refreshModeratorSuggestions");
+
+const refreshOwnerIssueReports =
+    document.getElementById("refreshOwnerIssueReports");
+
+const refreshModeratorIssueReports =
+    document.getElementById("refreshModeratorIssueReports");
 
 const ownerCoinsHistoryStatus =
     document.getElementById("ownerCoinsHistoryStatus");
@@ -366,6 +384,8 @@ const ownerGiveAll =
 let ownerUsers = [];
 let ownerSuggestions = [];
 let moderatorSuggestions = [];
+let ownerIssueReports = [];
+let moderatorIssueReports = [];
 
 
 // =========================================
@@ -720,6 +740,43 @@ async function loadOwnerSuggestions() {
     renderOwnerSuggestions();
 }
 
+async function loadOwnerIssueReports() {
+    if (!ownerIssueReportsList) {
+        return;
+    }
+
+    ownerIssueReportsList.innerHTML =
+        '<p class="owner-loading">Loading problem reports...</p>';
+
+    if (!await checkAdmin()) {
+        ownerIssueReportsList.innerHTML =
+            '<p class="owner-error">You do not have permission to view problem reports.</p>';
+        return;
+    }
+
+    const { data, error } = await supabaseClient.rpc(
+        "admin_list_forwarded_game_issue_reports"
+    );
+
+    if (error) {
+        console.error("Could not load forwarded game reports:", error);
+        ownerIssueReportsList.innerHTML =
+            '<p class="owner-error">Could not load reports. Apply the game-issue-reports SQL migration, then refresh.</p>';
+        showOwnerNotification("Could not load problem reports.", "error");
+        return;
+    }
+
+    if (!Array.isArray(data)) {
+        console.error("Could not load forwarded game reports: invalid response.", data);
+        ownerIssueReportsList.innerHTML =
+            '<p class="owner-error">The reports query returned an invalid response.</p>';
+        return;
+    }
+
+    ownerIssueReports = data;
+    renderGameIssueReports(ownerIssueReportsList, ownerIssueReports, false);
+}
+
 async function loadOwnerCoinsHistory() {
 
     if (!ownerCoinsHistoryStatus || !ownerCoinsHistoryStats) {
@@ -792,6 +849,7 @@ async function activateOwnerTab(selectedTab) {
     const sections = [
         [ownerUsersTab, ownerUsersView],
         [ownerSuggestionsTab, ownerSuggestionsView],
+        [ownerIssueReportsTab, ownerIssueReportsView],
         [ownerCoinsHistoryTab, ownerCoinsHistoryView]
     ];
 
@@ -808,6 +866,8 @@ async function activateOwnerTab(selectedTab) {
 
     if (selectedTab === ownerSuggestionsTab) {
         await loadOwnerSuggestions();
+    } else if (selectedTab === ownerIssueReportsTab) {
+        await loadOwnerIssueReports();
     } else if (selectedTab === ownerCoinsHistoryTab) {
         await loadOwnerCoinsHistory();
     }
@@ -1033,6 +1093,197 @@ async function reviewGameSuggestion(suggestionId, action, ...buttons) {
         "success"
     );
     await loadModeratorSuggestions();
+}
+
+function renderGameIssueReports(list, reports, includeActions) {
+    list.replaceChildren();
+
+    if (reports.length === 0) {
+        const emptyMessage = document.createElement("p");
+        emptyMessage.className = "owner-loading";
+        emptyMessage.textContent = includeActions
+            ? "No problem reports need review."
+            : "No problem reports have been forwarded to the owner.";
+        list.appendChild(emptyMessage);
+        return;
+    }
+
+    reports.forEach(report => {
+        list.appendChild(createGameIssueReportCard(report, includeActions));
+    });
+}
+
+function createGameIssueReportCard(report, includeActions) {
+    const card = document.createElement("article");
+    card.className = "owner-suggestion-card";
+
+    const heading = document.createElement("div");
+    heading.className = "owner-suggestion-heading";
+
+    const gameName = document.createElement("h3");
+    gameName.textContent = report.game_name || "Game report";
+
+    const username = document.createElement("span");
+    username.className = "owner-suggestion-username";
+    setRankedUsername(
+        username,
+        report.username || (report.user_id ? "Player" : "Guest"),
+        report.user_id
+    );
+    heading.append(gameName, username);
+    card.appendChild(heading);
+
+    const gameUrl = String(report.game_url || "").trim();
+    try {
+        const parsedUrl = new URL(gameUrl);
+        if (parsedUrl.protocol !== "https:" && parsedUrl.protocol !== "http:") {
+            throw new TypeError("Unsupported URL protocol");
+        }
+
+        const link = document.createElement("a");
+        link.className = "owner-suggestion-link";
+        link.href = parsedUrl.href;
+        link.target = "_blank";
+        link.rel = "noopener noreferrer";
+        link.textContent = "Open reported game";
+        card.appendChild(link);
+    } catch (error) {
+        console.warn("Skipped invalid game report URL:", gameUrl, error);
+    }
+
+    const reportText = document.createElement("p");
+    reportText.className = "owner-suggestion-reason";
+    reportText.textContent = report.report_text || "No problem details provided.";
+    card.appendChild(reportText);
+
+    if (report.created_at) {
+        const submittedAt = document.createElement("div");
+        submittedAt.className = "owner-suggestion-no-link";
+        const date = new Date(report.created_at);
+        submittedAt.textContent = Number.isNaN(date.getTime())
+            ? "Submitted date unavailable"
+            : `Submitted ${date.toLocaleString()}`;
+        card.appendChild(submittedAt);
+    }
+
+    if (includeActions) {
+        const actions = document.createElement("div");
+        actions.className = "owner-suggestion-actions";
+
+        const forwardButton = document.createElement("button");
+        forwardButton.type = "button";
+        forwardButton.textContent = "Send to owner";
+
+        const deleteButton = document.createElement("button");
+        deleteButton.type = "button";
+        deleteButton.textContent = "Delete";
+
+        forwardButton.addEventListener("click", () => {
+            reviewGameIssueReport(report.id, "forward", forwardButton, deleteButton);
+        });
+        deleteButton.addEventListener("click", () => {
+            reviewGameIssueReport(report.id, "delete", forwardButton, deleteButton);
+        });
+
+        actions.append(forwardButton, deleteButton);
+        card.appendChild(actions);
+    }
+
+    return card;
+}
+
+async function loadModeratorIssueReports() {
+    if (!moderatorIssueReportsList) {
+        return;
+    }
+
+    moderatorIssueReportsList.innerHTML =
+        '<p class="owner-loading">Loading problem reports...</p>';
+
+    if (!await checkModeratorAccess()) {
+        moderatorIssueReportsList.innerHTML =
+            '<p class="owner-error">You do not have permission to review problem reports.</p>';
+        return;
+    }
+
+    const { data, error } = await supabaseClient.rpc(
+        "moderator_list_game_issue_reports"
+    );
+
+    if (error) {
+        console.error("Could not load moderator game reports:", error);
+        moderatorIssueReportsList.innerHTML =
+            '<p class="owner-error">Could not load reports. Apply the game-issue-reports SQL migration, then refresh.</p>';
+        showOwnerNotification("Could not load problem reports.", "error");
+        return;
+    }
+
+    if (!Array.isArray(data)) {
+        console.error("Could not load moderator game reports: invalid response.", data);
+        moderatorIssueReportsList.innerHTML =
+            '<p class="owner-error">The reports query returned an invalid response.</p>';
+        return;
+    }
+
+    moderatorIssueReports = data;
+    renderGameIssueReports(moderatorIssueReportsList, moderatorIssueReports, true);
+
+    if (!moderatorIssueReports.length) {
+        return;
+    }
+
+    moderatorIssueReportsList.querySelectorAll(".owner-suggestion-card").forEach((card, index) => {
+        if (moderatorIssueReports[index] && !moderatorIssueReports[index].id) {
+            card.querySelectorAll("button").forEach(button => {
+                button.disabled = true;
+            });
+            const missingId = document.createElement("p");
+            missingId.className = "owner-error";
+            missingId.textContent = "This report is missing its ID and cannot be reviewed.";
+            card.appendChild(missingId);
+        }
+    });
+}
+
+async function reviewGameIssueReport(reportId, action, ...buttons) {
+    if (!reportId || !await checkModeratorAccess()) {
+        showOwnerNotification("You do not have permission to review problem reports.", "error");
+        return;
+    }
+
+    if (action === "delete" && !confirm("Permanently delete this problem report?")) {
+        return;
+    }
+
+    buttons.forEach(button => {
+        button.disabled = true;
+    });
+
+    try {
+        const functionName = action === "forward"
+            ? "moderator_forward_game_issue_report"
+            : "moderator_delete_game_issue_report";
+        const { error } = await supabaseClient.rpc(functionName, {
+            target_report_id: String(reportId)
+        });
+        if (error) throw error;
+    } catch (error) {
+        console.error(`Could not ${action} game issue report:`, error);
+        showOwnerNotification(
+            `Could not ${action === "forward" ? "send" : "delete"} the problem report.`,
+            "error"
+        );
+        buttons.forEach(button => {
+            button.disabled = false;
+        });
+        return;
+    }
+
+    showOwnerNotification(
+        action === "forward" ? "Problem report sent to the owner." : "Problem report deleted.",
+        "success"
+    );
+    await loadModeratorIssueReports();
 }
 
 
@@ -1694,7 +1945,10 @@ if (moderatorPanelButton) {
 
         if (moderatorOverlay) {
             moderatorOverlay.classList.add("open");
-            await loadModeratorSuggestions();
+            await Promise.all([
+                loadModeratorSuggestions(),
+                loadModeratorIssueReports()
+            ]);
         }
     });
 }
@@ -1703,6 +1957,13 @@ if (refreshModeratorSuggestions) {
     refreshModeratorSuggestions.addEventListener(
         "click",
         loadModeratorSuggestions
+    );
+}
+
+if (refreshModeratorIssueReports) {
+    refreshModeratorIssueReports.addEventListener(
+        "click",
+        loadModeratorIssueReports
     );
 }
 
@@ -1723,6 +1984,7 @@ if (moderatorOverlay) {
 [
     ownerUsersTab,
     ownerSuggestionsTab,
+    ownerIssueReportsTab,
     ownerCoinsHistoryTab
 ].filter(Boolean).forEach(tab => {
     tab.addEventListener("click", async () => {
@@ -1826,6 +2088,10 @@ if (refreshOwnerSuggestions) {
     });
 }
 
+if (refreshOwnerIssueReports) {
+    refreshOwnerIssueReports.addEventListener("click", loadOwnerIssueReports);
+}
+
 
 // =========================================
 // ESCAPE
@@ -1879,6 +2145,8 @@ supabaseClient.auth.onAuthStateChange(
             ownerUsers = [];
             ownerSuggestions = [];
             moderatorSuggestions = [];
+            ownerIssueReports = [];
+            moderatorIssueReports = [];
 
             if (ownerTotalUsers) {
                 ownerTotalUsers.textContent = "—";

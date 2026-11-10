@@ -3999,6 +3999,11 @@ z-index: 1000;
     -webkit-backdrop-filter: blur(15px);
 }
 
+#moderatorOverlay .owner-window {
+    overflow-x: hidden;
+    overflow-y: auto;
+}
+
 .owner-header {
     display: flex;
     justify-content: space-between;
@@ -4020,6 +4025,7 @@ z-index: 1000;
 
 .owner-tabs {
     display: flex;
+    flex-wrap: wrap;
     gap: 8px;
     padding: 12px 20px 0;
 }
