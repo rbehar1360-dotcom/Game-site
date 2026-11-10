@@ -154,7 +154,9 @@
       👑 Owner Panel
     </button>
 
-    
+    <button id="moderatorPanelButton" style="display: none;">
+      🛡️ Moderator Panel
+    </button>
 
     <button id="logoutButton">
       🚪 Logout
@@ -248,10 +250,6 @@
         </button>
       </div>
 
-      <p class="owner-rank-note">
-        MODERATOR ranks do not grant panel access yet: // we will code this later.
-      </p>
-
       <div class="owner-user-total" role="status" aria-live="polite">
         <span>Total users</span>
         <strong id="ownerTotalUsers">—</strong>
@@ -274,7 +272,7 @@
       hidden
     >
       <div class="owner-suggestions-toolbar">
-        <p>Suggestions sent by players.</p>
+        <p>Suggestions approved by moderators and ready for you to add.</p>
         <button id="refreshOwnerSuggestions" type="button">↻ Refresh</button>
       </div>
       <div id="ownerSuggestionsList" class="owner-suggestions-list" aria-live="polite">
@@ -307,6 +305,27 @@
 
   </div>
 
+</div>
+
+<div id="moderatorOverlay" class="owner-overlay">
+  <div class="owner-window">
+    <div class="owner-header">
+      <div>
+        <h2>🛡️ Moderator Panel</h2>
+        <p>Review game suggestions before they reach the owner.</p>
+      </div>
+      <button id="closeModeratorPanel" class="close-owner" type="button" aria-label="Close moderator panel">
+        ✕
+      </button>
+    </div>
+    <div class="owner-suggestions-toolbar">
+      <p>Approve suggestions to send them to the owner, or delete spam.</p>
+      <button id="refreshModeratorSuggestions" type="button">↻ Refresh</button>
+    </div>
+    <div id="moderatorSuggestionsList" class="owner-suggestions-list" aria-live="polite">
+      <p class="owner-loading">Open this panel to load suggestions.</p>
+    </div>
+  </div>
 </div>
 
 

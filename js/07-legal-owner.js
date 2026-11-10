@@ -291,11 +291,20 @@
 const ownerPanelButton =
     document.getElementById("ownerPanelButton");
 
+const moderatorPanelButton =
+    document.getElementById("moderatorPanelButton");
+
 const ownerOverlay =
     document.getElementById("ownerOverlay");
 
+const moderatorOverlay =
+    document.getElementById("moderatorOverlay");
+
 const closeOwnerPanel =
     document.getElementById("closeOwnerPanel");
+
+const closeModeratorPanel =
+    document.getElementById("closeModeratorPanel");
 
 const ownerUserList =
     document.getElementById("ownerUserList");
@@ -321,8 +330,14 @@ const ownerCoinsHistoryView =
 const ownerSuggestionsList =
     document.getElementById("ownerSuggestionsList");
 
+const moderatorSuggestionsList =
+    document.getElementById("moderatorSuggestionsList");
+
 const refreshOwnerSuggestions =
     document.getElementById("refreshOwnerSuggestions");
+
+const refreshModeratorSuggestions =
+    document.getElementById("refreshModeratorSuggestions");
 
 const ownerCoinsHistoryStatus =
     document.getElementById("ownerCoinsHistoryStatus");
@@ -350,6 +365,7 @@ const ownerGiveAll =
 
 let ownerUsers = [];
 let ownerSuggestions = [];
+let moderatorSuggestions = [];
 
 
 // =========================================
@@ -462,17 +478,17 @@ function showOwnerNotification(message, type = "info") {
 
 async function checkAdmin() {
 
-    if (!ownerPanelButton) {
-        return false;
-    }
-
     const user =
         await getCurrentUser();
 
     if (!user) {
 
-        ownerPanelButton.style.display =
-            "none";
+        if (ownerPanelButton) {
+            ownerPanelButton.style.display = "none";
+        }
+        if (moderatorPanelButton) {
+            moderatorPanelButton.style.display = "none";
+        }
 
         return false;
     }
@@ -489,16 +505,22 @@ async function checkAdmin() {
             error
         );
 
-        ownerPanelButton.style.display =
-            "none";
+        if (ownerPanelButton) {
+            ownerPanelButton.style.display = "none";
+        }
+        await checkModeratorAccess();
 
         return false;
     }
 
     if (data === true) {
 
-        ownerPanelButton.style.display =
-            "block";
+        if (ownerPanelButton) {
+            ownerPanelButton.style.display = "block";
+        }
+        if (moderatorPanelButton) {
+            moderatorPanelButton.style.display = "block";
+        }
 
         const { error: syncError } = await supabaseClient.rpc(
             "admin_sync_owner_rank"
@@ -523,10 +545,38 @@ async function checkAdmin() {
         return true;
     }
 
-    ownerPanelButton.style.display =
-        "none";
+    if (ownerPanelButton) {
+        ownerPanelButton.style.display = "none";
+    }
+    await checkModeratorAccess();
 
     return false;
+}
+
+async function checkModeratorAccess() {
+    if (!moderatorPanelButton) {
+        return false;
+    }
+
+    const user = await getCurrentUser();
+    if (!user) {
+        moderatorPanelButton.style.display = "none";
+        return false;
+    }
+
+    const { data, error } = await supabaseClient.rpc(
+        "can_review_game_suggestions"
+    );
+
+    if (error) {
+        console.error("Could not check moderator access:", error);
+        moderatorPanelButton.style.display = "none";
+        return false;
+    }
+
+    const canReview = data === true;
+    moderatorPanelButton.style.display = canReview ? "block" : "none";
+    return canReview;
 }
 
 
@@ -647,12 +697,12 @@ async function loadOwnerSuggestions() {
     }
 
     const { data, error } = await supabaseClient
-        .rpc("admin_list_game_suggestions");
+        .rpc("admin_list_approved_game_suggestions");
 
     if (error) {
         console.error("Could not load game suggestions:", error);
         ownerSuggestionsList.innerHTML = `
-            <p class="owner-error">Could not load suggestions. Apply the owner suggestions database migration, then refresh.</p>
+            <p class="owner-error">Could not load suggestions. Apply the game-suggestions moderation database migration, then refresh.</p>
         `;
         showOwnerNotification("Could not load suggestions.", "error");
         return;
@@ -787,66 +837,202 @@ function renderOwnerSuggestions() {
     );
 
     ownerSuggestions.forEach(suggestion => {
-        const card = document.createElement("article");
-        card.className = "owner-suggestion-card";
+        ownerSuggestionsList.appendChild(
+            createSuggestionCard(
+                suggestion,
+                usernamesById.get(String(suggestion.user_id)) || "Unknown user"
+            )
+        );
+    });
+}
 
-        const heading = document.createElement("div");
-        heading.className = "owner-suggestion-heading";
+function createSuggestionCard(suggestion, usernameText, includeActions = false) {
+    const card = document.createElement("article");
+    card.className = "owner-suggestion-card";
 
-        const gameName = document.createElement("h3");
-        gameName.textContent = suggestion.game_name || "Untitled suggestion";
+    const heading = document.createElement("div");
+    heading.className = "owner-suggestion-heading";
 
-        const username = document.createElement("span");
-        username.className = "owner-suggestion-username";
-        setRankedUsername(
-            username,
-            usernamesById.get(String(suggestion.user_id)) || "Unknown user",
-            suggestion.user_id
+    const gameName = document.createElement("h3");
+    gameName.textContent = suggestion.game_name || "Untitled suggestion";
+
+    const username = document.createElement("span");
+    username.className = "owner-suggestion-username";
+    setRankedUsername(username, usernameText, suggestion.user_id);
+    heading.append(gameName, username);
+    card.appendChild(heading);
+
+    const gameUrl = String(suggestion.game_url || "").trim();
+    const linkLabel = document.createElement("div");
+
+    if (gameUrl) {
+        try {
+            const parsedUrl = new URL(gameUrl);
+            if (parsedUrl.protocol !== "https:" && parsedUrl.protocol !== "http:") {
+                throw new TypeError("Unsupported URL protocol");
+            }
+
+            const link = document.createElement("a");
+            link.className = "owner-suggestion-link";
+            link.href = parsedUrl.href;
+            link.target = "_blank";
+            link.rel = "noopener noreferrer";
+            link.textContent = gameUrl;
+            linkLabel.appendChild(link);
+        } catch (error) {
+            console.warn("Skipped invalid game suggestion URL:", gameUrl, error);
+            linkLabel.className = "owner-suggestion-no-link";
+            linkLabel.textContent = "Invalid game link";
+            card.appendChild(linkLabel);
+        }
+    } else {
+        linkLabel.className = "owner-suggestion-no-link";
+        linkLabel.textContent = "No link provided";
+        card.appendChild(linkLabel);
+    }
+
+    if (linkLabel.childElementCount > 0) {
+        card.appendChild(linkLabel);
+    }
+
+    const reason = document.createElement("p");
+    reason.className = "owner-suggestion-reason";
+    reason.textContent = suggestion.reason || "No reason provided.";
+    card.appendChild(reason);
+
+    if (includeActions) {
+        const actions = document.createElement("div");
+        actions.className = "owner-suggestion-actions";
+
+        const approveButton = document.createElement("button");
+        approveButton.type = "button";
+        approveButton.textContent = "Send to owner";
+        approveButton.addEventListener("click", () => {
+            reviewGameSuggestion(suggestion.id, "approve", approveButton, deleteButton);
+        });
+
+        const deleteButton = document.createElement("button");
+        deleteButton.type = "button";
+        deleteButton.textContent = "Delete";
+        deleteButton.addEventListener("click", () => {
+            reviewGameSuggestion(suggestion.id, "delete", approveButton, deleteButton);
+        });
+
+        actions.append(approveButton, deleteButton);
+        card.appendChild(actions);
+    }
+
+    return card;
+}
+
+async function loadModeratorSuggestions() {
+    if (!moderatorSuggestionsList) {
+        return;
+    }
+
+    moderatorSuggestionsList.innerHTML =
+        '<p class="owner-loading">Loading suggestions...</p>';
+
+    if (!await checkModeratorAccess()) {
+        moderatorSuggestionsList.innerHTML =
+            '<p class="owner-error">You do not have permission to review suggestions.</p>';
+        return;
+    }
+
+    const { data, error } = await supabaseClient.rpc(
+        "moderator_list_game_suggestions"
+    );
+
+    if (error) {
+        console.error("Could not load moderator suggestions:", error);
+        moderatorSuggestionsList.innerHTML =
+            '<p class="owner-error">Could not load suggestions. Apply the game-suggestions moderation database migration, then refresh.</p>';
+        showOwnerNotification("Could not load suggestions.", "error");
+        return;
+    }
+
+    if (!Array.isArray(data)) {
+        console.error("Could not load moderator suggestions: invalid response.", data);
+        moderatorSuggestionsList.innerHTML =
+            '<p class="owner-error">The suggestions query returned an invalid response.</p>';
+        return;
+    }
+
+    moderatorSuggestions = data;
+    moderatorSuggestionsList.replaceChildren();
+
+    if (moderatorSuggestions.length === 0) {
+        const emptyMessage = document.createElement("p");
+        emptyMessage.className = "owner-loading";
+        emptyMessage.textContent = "No suggestions need review.";
+        moderatorSuggestionsList.appendChild(emptyMessage);
+        return;
+    }
+
+    moderatorSuggestions.forEach(suggestion => {
+        const card = createSuggestionCard(
+            suggestion,
+            suggestion.username || (suggestion.user_id ? "Player" : "Guest"),
+            true
         );
 
-        heading.append(gameName, username);
-        card.appendChild(heading);
-
-        const gameUrl = String(suggestion.game_url || "").trim();
-        const linkLabel = document.createElement("div");
-
-        if (gameUrl) {
-            try {
-                const parsedUrl = new URL(gameUrl);
-                if (parsedUrl.protocol !== "https:" && parsedUrl.protocol !== "http:") {
-                    throw new TypeError("Unsupported URL protocol");
-                }
-
-                const link = document.createElement("a");
-                link.className = "owner-suggestion-link";
-                link.href = parsedUrl.href;
-                link.target = "_blank";
-                link.rel = "noopener noreferrer";
-                link.textContent = gameUrl;
-                linkLabel.appendChild(link);
-            } catch (error) {
-                console.warn("Skipped invalid game suggestion URL:", gameUrl, error);
-                linkLabel.className = "owner-suggestion-no-link";
-                linkLabel.textContent = "Invalid game link";
-                card.appendChild(linkLabel);
-            }
-        } else {
-            linkLabel.className = "owner-suggestion-no-link";
-            linkLabel.textContent = "No link provided";
-            card.appendChild(linkLabel);
+        if (!suggestion.id) {
+            card.querySelectorAll("button").forEach(button => {
+                button.disabled = true;
+            });
+            const missingId = document.createElement("p");
+            missingId.className = "owner-error";
+            missingId.textContent =
+                "This suggestion is missing its ID and cannot be reviewed.";
+            card.appendChild(missingId);
         }
 
-        if (linkLabel.childElementCount > 0) {
-            card.appendChild(linkLabel);
-        }
-
-        const reason = document.createElement("p");
-        reason.className = "owner-suggestion-reason";
-        reason.textContent = suggestion.reason || "No reason provided.";
-        card.appendChild(reason);
-
-        ownerSuggestionsList.appendChild(card);
+        moderatorSuggestionsList.appendChild(card);
     });
+}
+
+async function reviewGameSuggestion(suggestionId, action, ...buttons) {
+    if (!suggestionId || !await checkModeratorAccess()) {
+        showOwnerNotification("You do not have permission to review suggestions.", "error");
+        return;
+    }
+
+    if (action === "delete" && !confirm("Permanently delete this suggestion?")) {
+        return;
+    }
+
+    buttons.forEach(button => {
+        button.disabled = true;
+    });
+
+    try {
+        const functionName = action === "approve"
+            ? "moderator_approve_game_suggestion"
+            : "moderator_delete_game_suggestion";
+        const { error } = await supabaseClient.rpc(functionName, {
+            target_suggestion_id: String(suggestionId)
+        });
+
+        if (error) {
+            throw error;
+        }
+    } catch (error) {
+        console.error(`Could not ${action} game suggestion:`, error);
+        showOwnerNotification(
+            `Could not ${action === "approve" ? "send" : "delete"} the suggestion.`,
+            "error"
+        );
+        buttons.forEach(button => {
+            button.disabled = false;
+        });
+        return;
+    }
+
+    showOwnerNotification(
+        action === "approve" ? "Suggestion sent to the owner." : "Suggestion deleted.",
+        "success"
+    );
+    await loadModeratorSuggestions();
 }
 
 
@@ -1489,6 +1675,51 @@ if (ownerPanelButton) {
     );
 }
 
+if (moderatorPanelButton) {
+    moderatorPanelButton.addEventListener("click", async event => {
+        event.preventDefault();
+        event.stopPropagation();
+
+        if (!await checkModeratorAccess()) {
+            showOwnerNotification(
+                "You don't have permission to access this.",
+                "error"
+            );
+            return;
+        }
+
+        if (typeof accountMenu !== "undefined" && accountMenu) {
+            accountMenu.classList.remove("open");
+        }
+
+        if (moderatorOverlay) {
+            moderatorOverlay.classList.add("open");
+            await loadModeratorSuggestions();
+        }
+    });
+}
+
+if (refreshModeratorSuggestions) {
+    refreshModeratorSuggestions.addEventListener(
+        "click",
+        loadModeratorSuggestions
+    );
+}
+
+if (closeModeratorPanel) {
+    closeModeratorPanel.addEventListener("click", () => {
+        moderatorOverlay?.classList.remove("open");
+    });
+}
+
+if (moderatorOverlay) {
+    moderatorOverlay.addEventListener("click", event => {
+        if (event.target === moderatorOverlay) {
+            moderatorOverlay.classList.remove("open");
+        }
+    });
+}
+
 [
     ownerUsersTab,
     ownerSuggestionsTab,
@@ -1616,6 +1847,13 @@ document.addEventListener(
 
         }
 
+        if (
+            event.key === "Escape" &&
+            moderatorOverlay?.classList.contains("open")
+        ) {
+            moderatorOverlay.classList.remove("open");
+        }
+
     }
 );
 
@@ -1639,6 +1877,8 @@ supabaseClient.auth.onAuthStateChange(
         ) {
 
             ownerUsers = [];
+            ownerSuggestions = [];
+            moderatorSuggestions = [];
 
             if (ownerTotalUsers) {
                 ownerTotalUsers.textContent = "—";
@@ -1650,11 +1890,19 @@ supabaseClient.auth.onAuthStateChange(
                     "none";
             }
 
+            if (moderatorPanelButton) {
+                moderatorPanelButton.style.display = "none";
+            }
+
             if (ownerOverlay) {
 
                 ownerOverlay.classList.remove(
                     "open"
                 );
+            }
+
+            if (moderatorOverlay) {
+                moderatorOverlay.classList.remove("open");
             }
         }
     }
