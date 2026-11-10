@@ -300,6 +300,18 @@ const ownerOverlay =
 const moderatorOverlay =
     document.getElementById("moderatorOverlay");
 
+const moderatorSuggestionsTab =
+    document.getElementById("moderatorSuggestionsTab");
+
+const moderatorIssueReportsTab =
+    document.getElementById("moderatorIssueReportsTab");
+
+const moderatorSuggestionsView =
+    document.getElementById("moderatorSuggestionsView");
+
+const moderatorIssueReportsView =
+    document.getElementById("moderatorIssueReportsView");
+
 const closeOwnerPanel =
     document.getElementById("closeOwnerPanel");
 
@@ -774,7 +786,21 @@ async function loadOwnerIssueReports() {
     }
 
     ownerIssueReports = data;
-    renderGameIssueReports(ownerIssueReportsList, ownerIssueReports, false);
+    renderGameIssueReports(ownerIssueReportsList, ownerIssueReports, "owner");
+
+    if (ownerIssueReports.some(report => !report.id)) {
+        ownerIssueReportsList.querySelectorAll(".owner-suggestion-card").forEach((card, index) => {
+            if (ownerIssueReports[index] && !ownerIssueReports[index].id) {
+                card.querySelectorAll("button").forEach(button => {
+                    button.disabled = true;
+                });
+                const missingId = document.createElement("p");
+                missingId.className = "owner-error";
+                missingId.textContent = "This report is missing its ID and cannot be deleted.";
+                card.appendChild(missingId);
+            }
+        });
+    }
 }
 
 async function loadOwnerCoinsHistory() {
@@ -873,6 +899,30 @@ async function activateOwnerTab(selectedTab) {
     }
 }
 
+async function activateModeratorTab(selectedTab) {
+    const sections = [
+        [moderatorSuggestionsTab, moderatorSuggestionsView],
+        [moderatorIssueReportsTab, moderatorIssueReportsView]
+    ];
+
+    sections.forEach(([tab, view]) => {
+        if (!tab || !view) {
+            return;
+        }
+
+        const selected = tab === selectedTab;
+        tab.classList.toggle("active", selected);
+        tab.setAttribute("aria-selected", String(selected));
+        view.hidden = !selected;
+    });
+
+    if (selectedTab === moderatorSuggestionsTab) {
+        await loadModeratorSuggestions();
+    } else if (selectedTab === moderatorIssueReportsTab) {
+        await loadModeratorIssueReports();
+    }
+}
+
 function renderOwnerSuggestions() {
 
     if (!ownerSuggestionsList) {
@@ -897,16 +947,25 @@ function renderOwnerSuggestions() {
     );
 
     ownerSuggestions.forEach(suggestion => {
-        ownerSuggestionsList.appendChild(
-            createSuggestionCard(
-                suggestion,
-                usernamesById.get(String(suggestion.user_id)) || "Unknown user"
-            )
+        const card = createSuggestionCard(
+            suggestion,
+            usernamesById.get(String(suggestion.user_id)) || "Unknown user",
+            "owner"
         );
+        if (!suggestion.id) {
+            card.querySelectorAll("button").forEach(button => {
+                button.disabled = true;
+            });
+            const missingId = document.createElement("p");
+            missingId.className = "owner-error";
+            missingId.textContent = "This suggestion is missing its ID and cannot be deleted.";
+            card.appendChild(missingId);
+        }
+        ownerSuggestionsList.appendChild(card);
     });
 }
 
-function createSuggestionCard(suggestion, usernameText, includeActions = false) {
+function createSuggestionCard(suggestion, usernameText, actionsMode = null) {
     const card = document.createElement("article");
     card.className = "owner-suggestion-card";
 
@@ -960,25 +1019,32 @@ function createSuggestionCard(suggestion, usernameText, includeActions = false) 
     reason.textContent = suggestion.reason || "No reason provided.";
     card.appendChild(reason);
 
-    if (includeActions) {
+    if (actionsMode) {
         const actions = document.createElement("div");
         actions.className = "owner-suggestion-actions";
-
-        const approveButton = document.createElement("button");
-        approveButton.type = "button";
-        approveButton.textContent = "Send to owner";
-        approveButton.addEventListener("click", () => {
-            reviewGameSuggestion(suggestion.id, "approve", approveButton, deleteButton);
-        });
 
         const deleteButton = document.createElement("button");
         deleteButton.type = "button";
         deleteButton.textContent = "Delete";
-        deleteButton.addEventListener("click", () => {
-            reviewGameSuggestion(suggestion.id, "delete", approveButton, deleteButton);
-        });
 
-        actions.append(approveButton, deleteButton);
+        if (actionsMode === "moderator") {
+            const approveButton = document.createElement("button");
+            approveButton.type = "button";
+            approveButton.textContent = "Send to owner";
+            approveButton.addEventListener("click", () => {
+                reviewGameSuggestion(suggestion.id, "approve", approveButton, deleteButton);
+            });
+            deleteButton.addEventListener("click", () => {
+                reviewGameSuggestion(suggestion.id, "delete", approveButton, deleteButton);
+            });
+            actions.append(approveButton, deleteButton);
+        } else {
+            deleteButton.addEventListener("click", () => {
+                deleteOwnerGameSuggestion(suggestion.id, deleteButton);
+            });
+            actions.appendChild(deleteButton);
+        }
+
         card.appendChild(actions);
     }
 
@@ -1033,7 +1099,7 @@ async function loadModeratorSuggestions() {
         const card = createSuggestionCard(
             suggestion,
             suggestion.username || (suggestion.user_id ? "Player" : "Guest"),
-            true
+            "moderator"
         );
 
         if (!suggestion.id) {
@@ -1095,13 +1161,43 @@ async function reviewGameSuggestion(suggestionId, action, ...buttons) {
     await loadModeratorSuggestions();
 }
 
+async function deleteOwnerGameSuggestion(suggestionId, button) {
+    if (!suggestionId || !await checkAdmin()) {
+        showOwnerNotification("You do not have permission to delete suggestions.", "error");
+        return;
+    }
+
+    if (!confirm("Permanently delete this approved game suggestion?")) {
+        return;
+    }
+
+    button.disabled = true;
+    try {
+        const { error } = await supabaseClient.rpc(
+            "admin_delete_approved_game_suggestion",
+            { target_suggestion_id: String(suggestionId) }
+        );
+        if (error) {
+            throw error;
+        }
+    } catch (error) {
+        console.error("Could not delete approved game suggestion:", error);
+        showOwnerNotification("Could not delete the suggestion.", "error");
+        button.disabled = false;
+        return;
+    }
+
+    showOwnerNotification("Suggestion deleted.", "success");
+    await loadOwnerSuggestions();
+}
+
 function renderGameIssueReports(list, reports, includeActions) {
     list.replaceChildren();
 
     if (reports.length === 0) {
         const emptyMessage = document.createElement("p");
         emptyMessage.className = "owner-loading";
-        emptyMessage.textContent = includeActions
+        emptyMessage.textContent = includeActions === "moderator"
             ? "No problem reports need review."
             : "No problem reports have been forwarded to the owner.";
         list.appendChild(emptyMessage);
@@ -1170,22 +1266,28 @@ function createGameIssueReportCard(report, includeActions) {
         const actions = document.createElement("div");
         actions.className = "owner-suggestion-actions";
 
-        const forwardButton = document.createElement("button");
-        forwardButton.type = "button";
-        forwardButton.textContent = "Send to owner";
-
         const deleteButton = document.createElement("button");
         deleteButton.type = "button";
         deleteButton.textContent = "Delete";
 
-        forwardButton.addEventListener("click", () => {
-            reviewGameIssueReport(report.id, "forward", forwardButton, deleteButton);
-        });
-        deleteButton.addEventListener("click", () => {
-            reviewGameIssueReport(report.id, "delete", forwardButton, deleteButton);
-        });
+        if (includeActions === "moderator") {
+            const forwardButton = document.createElement("button");
+            forwardButton.type = "button";
+            forwardButton.textContent = "Send to owner";
+            forwardButton.addEventListener("click", () => {
+                reviewGameIssueReport(report.id, "forward", forwardButton, deleteButton);
+            });
+            deleteButton.addEventListener("click", () => {
+                reviewGameIssueReport(report.id, "delete", forwardButton, deleteButton);
+            });
+            actions.append(forwardButton, deleteButton);
+        } else {
+            deleteButton.addEventListener("click", () => {
+                deleteOwnerGameIssueReport(report.id, deleteButton);
+            });
+            actions.appendChild(deleteButton);
+        }
 
-        actions.append(forwardButton, deleteButton);
         card.appendChild(actions);
     }
 
@@ -1226,7 +1328,7 @@ async function loadModeratorIssueReports() {
     }
 
     moderatorIssueReports = data;
-    renderGameIssueReports(moderatorIssueReportsList, moderatorIssueReports, true);
+    renderGameIssueReports(moderatorIssueReportsList, moderatorIssueReports, "moderator");
 
     if (!moderatorIssueReports.length) {
         return;
@@ -1284,6 +1386,36 @@ async function reviewGameIssueReport(reportId, action, ...buttons) {
         "success"
     );
     await loadModeratorIssueReports();
+}
+
+async function deleteOwnerGameIssueReport(reportId, button) {
+    if (!reportId || !await checkAdmin()) {
+        showOwnerNotification("You do not have permission to delete problem reports.", "error");
+        return;
+    }
+
+    if (!confirm("Permanently delete this forwarded problem report?")) {
+        return;
+    }
+
+    button.disabled = true;
+    try {
+        const { error } = await supabaseClient.rpc(
+            "admin_delete_forwarded_game_issue_report",
+            { target_report_id: String(reportId) }
+        );
+        if (error) {
+            throw error;
+        }
+    } catch (error) {
+        console.error("Could not delete forwarded game report:", error);
+        showOwnerNotification("Could not delete the problem report.", "error");
+        button.disabled = false;
+        return;
+    }
+
+    showOwnerNotification("Problem report deleted.", "success");
+    await loadOwnerIssueReports();
 }
 
 
@@ -1945,10 +2077,7 @@ if (moderatorPanelButton) {
 
         if (moderatorOverlay) {
             moderatorOverlay.classList.add("open");
-            await Promise.all([
-                loadModeratorSuggestions(),
-                loadModeratorIssueReports()
-            ]);
+            await activateModeratorTab(moderatorSuggestionsTab);
         }
     });
 }
@@ -1973,13 +2102,14 @@ if (closeModeratorPanel) {
     });
 }
 
-if (moderatorOverlay) {
-    moderatorOverlay.addEventListener("click", event => {
-        if (event.target === moderatorOverlay) {
-            moderatorOverlay.classList.remove("open");
-        }
+[
+    moderatorSuggestionsTab,
+    moderatorIssueReportsTab
+].filter(Boolean).forEach(tab => {
+    tab.addEventListener("click", async () => {
+        await activateModeratorTab(tab);
     });
-}
+});
 
 [
     ownerUsersTab,
@@ -2008,31 +2138,6 @@ if (closeOwnerPanel) {
         function() {
 
             if (ownerOverlay) {
-
-                ownerOverlay.classList.remove(
-                    "open"
-                );
-            }
-
-        }
-    );
-}
-
-
-// =========================================
-// CLOSE WHEN CLICKING OUTSIDE
-// =========================================
-
-if (ownerOverlay) {
-
-    ownerOverlay.addEventListener(
-        "click",
-        function(event) {
-
-            if (
-                event.target ===
-                ownerOverlay
-            ) {
 
                 ownerOverlay.classList.remove(
                     "open"

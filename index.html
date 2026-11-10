@@ -344,20 +344,57 @@
         ✕
       </button>
     </div>
-    <div class="owner-suggestions-toolbar">
-      <p>Approve suggestions to send them to the owner, or delete spam.</p>
-      <button id="refreshModeratorSuggestions" type="button">↻ Refresh</button>
+    <div class="owner-tabs" role="tablist" aria-label="Moderator panel sections">
+      <button
+        id="moderatorSuggestionsTab"
+        class="owner-tab active"
+        type="button"
+        role="tab"
+        aria-selected="true"
+        aria-controls="moderatorSuggestionsView"
+      >
+        Suggestions
+      </button>
+      <button
+        id="moderatorIssueReportsTab"
+        class="owner-tab"
+        type="button"
+        role="tab"
+        aria-selected="false"
+        aria-controls="moderatorIssueReportsView"
+      >
+        Issues
+      </button>
     </div>
-    <div id="moderatorSuggestionsList" class="owner-suggestions-list" aria-live="polite">
-      <p class="owner-loading">Open this panel to load suggestions.</p>
-    </div>
-    <div class="owner-suggestions-toolbar">
-      <p>Forward game problem reports to the owner, or delete spam.</p>
-      <button id="refreshModeratorIssueReports" type="button">↻ Refresh Reports</button>
-    </div>
-    <div id="moderatorIssueReportsList" class="owner-suggestions-list" aria-live="polite">
-      <p class="owner-loading">Open this panel to load problem reports.</p>
-    </div>
+    <section
+      id="moderatorSuggestionsView"
+      class="owner-panel-view"
+      role="tabpanel"
+      aria-labelledby="moderatorSuggestionsTab"
+    >
+      <div class="owner-suggestions-toolbar">
+        <p>Approve suggestions to send them to the owner, or delete spam.</p>
+        <button id="refreshModeratorSuggestions" type="button">↻ Refresh</button>
+      </div>
+      <div id="moderatorSuggestionsList" class="owner-suggestions-list" aria-live="polite">
+        <p class="owner-loading">Open this panel to load suggestions.</p>
+      </div>
+    </section>
+    <section
+      id="moderatorIssueReportsView"
+      class="owner-panel-view"
+      role="tabpanel"
+      aria-labelledby="moderatorIssueReportsTab"
+      hidden
+    >
+      <div class="owner-suggestions-toolbar">
+        <p>Forward game problem reports to the owner, or delete spam.</p>
+        <button id="refreshModeratorIssueReports" type="button">↻ Refresh</button>
+      </div>
+      <div id="moderatorIssueReportsList" class="owner-suggestions-list" aria-live="polite">
+        <p class="owner-loading">Open this panel to load problem reports.</p>
+      </div>
+    </section>
   </div>
 </div>
 

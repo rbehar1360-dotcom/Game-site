@@ -158,10 +158,15 @@
                 overlay.classList.remove("open");
                 document.body.style.overflow = "";
             };
+            const details = overlay.querySelector("#gameReportDetails");
             overlay.querySelector(".game-report-close").addEventListener("click", closeDialog);
             overlay.querySelector(".game-report-cancel").addEventListener("click", closeDialog);
-            overlay.addEventListener("click", function (event) {
-                if (event.target === overlay) closeDialog();
+            details.addEventListener("input", function () {
+                try {
+                    window.localStorage.setItem(getReportDraftKey(), details.value);
+                } catch (error) {
+                    console.warn("Could not save game report draft:", error);
+                }
             });
             overlay.querySelector(".game-report-form").addEventListener("submit", submitGameReport);
         }
@@ -170,10 +175,19 @@
         document.body.style.overflow = "hidden";
         const details = overlay.querySelector("#gameReportDetails");
         const status = overlay.querySelector(".game-report-status");
-        details.value = "";
+        try {
+            details.value = window.localStorage.getItem(getReportDraftKey()) || "";
+        } catch (error) {
+            console.warn("Could not restore game report draft:", error);
+            details.value = "";
+        }
         status.textContent = "";
         overlay.querySelector(".game-report-submit").disabled = false;
         details.focus();
+    }
+
+    function getReportDraftKey() {
+        return "gameIssueReportDraft:" + window.location.pathname;
     }
 
     async function submitGameReport(event) {
@@ -218,6 +232,11 @@
             });
             if (error) throw error;
 
+            try {
+                window.localStorage.removeItem(getReportDraftKey());
+            } catch (storageError) {
+                console.warn("Could not clear submitted game report draft:", storageError);
+            }
             status.textContent = "Thanks — your report has been sent to the moderators.";
             form.reset();
             window.setTimeout(function () {
