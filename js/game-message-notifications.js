@@ -383,20 +383,21 @@
         notification.open.dataset.senderId = message.sender_id || "";
 
         try {
-            const { data, error } = await supabase.rpc("find_username_by_id", {
-                search_user_id: message.sender_id
-            });
-            if (!error && data?.[0]?.username && message.recipient_id === currentUserId) {
+            const username = await window.getUsernameById(
+                message.sender_id,
+                message.sender_username
+            );
+            if (username && message.recipient_id === currentUserId) {
                 if (typeof setRankedUsername === "function") {
                     setRankedUsername(
                         notification.sender,
-                        data[0].username,
+                        username,
                         message.sender_id
                     );
                 } else {
-                    notification.sender.textContent = data[0].username;
+                    notification.sender.textContent = username;
                 }
-                notification.avatar.textContent = data[0].username.trim().charAt(0).toUpperCase() || "?";
+                notification.avatar.textContent = username.charAt(0).toUpperCase() || "?";
             }
         } catch (error) {
             console.warn("Could not load message sender username:", error);
@@ -443,43 +444,61 @@
         }
     }
 
+    const unreadMessageLoads = new Map();
+
     async function loadUnreadMessages(userId, attempt) {
         if (!userId || !areGameMessagePopupsEnabled()) return;
 
-        const eventVersionAtStart = messageEventVersion;
-        const { data, error } = await supabase
-            .from("private_messages")
-            .select("id, sender_id, recipient_id, message, read_at")
-            .eq("recipient_id", userId)
-            .is("read_at", null);
+        const requestKey = `${userId}:${attempt}`;
+        const pendingLoad = unreadMessageLoads.get(requestKey);
+        if (pendingLoad) return pendingLoad;
 
-        if (error) {
-            console.error("Could not load unread game messages:", error);
-            return;
-        }
+        const load = (async () => {
+            const eventVersionAtStart = messageEventVersion;
+            const { data, error } = await supabase
+                .from("private_messages")
+                .select("id, sender_id, recipient_id, message, read_at")
+                .eq("recipient_id", userId)
+                .is("read_at", null);
 
-        if (
-            attempt !== connectionAttempt ||
-            userId !== currentUserId ||
-            !areGameMessagePopupsEnabled()
-        ) {
-            return;
-        }
+            if (error) {
+                console.error("Could not load unread game messages:", error);
+                return;
+            }
 
-        for (const message of data || []) {
-            await showIncomingMessage(message);
-        }
+            if (
+                attempt !== connectionAttempt ||
+                userId !== currentUserId ||
+                !areGameMessagePopupsEnabled()
+            ) {
+                return;
+            }
 
-        if (eventVersionAtStart === messageEventVersion) {
-            const unreadIds = new Set(
-                (data || []).map(message => String(message.id))
-            );
-            const remaining = notifications.filter(notification =>
-                unreadIds.has(String(notification.id))
-            );
-            if (remaining.length !== notifications.length) {
-                notifications.splice(0, notifications.length, ...remaining);
-                renderNotifications();
+            for (const message of data || []) {
+                await showIncomingMessage(message);
+            }
+
+            if (eventVersionAtStart === messageEventVersion) {
+                const unreadIds = new Set(
+                    (data || []).map(message => String(message.id))
+                );
+                const remaining = notifications.filter(notification =>
+                    unreadIds.has(String(notification.id))
+                );
+                if (remaining.length !== notifications.length) {
+                    notifications.splice(0, notifications.length, ...remaining);
+                    renderNotifications();
+                }
+            }
+        })();
+
+        unreadMessageLoads.set(requestKey, load);
+
+        try {
+            return await load;
+        } finally {
+            if (unreadMessageLoads.get(requestKey) === load) {
+                unreadMessageLoads.delete(requestKey);
             }
         }
     }

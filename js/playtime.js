@@ -703,9 +703,9 @@
 
         try {
             // Check auth user
-            const { data: { user }, error: authError } = await supabase.auth.getUser();
+            const { data: { session }, error: authError } = await supabase.auth.getSession();
 
-            if (authError || !user) {
+            if (authError || !session?.user) {
                 pendingPlaytimeSeconds = Math.max(0, pendingPlaytimeSeconds - seconds);
                 return;
             }
