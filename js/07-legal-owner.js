@@ -384,6 +384,9 @@ const ownerTotalUsers =
 const ownerUserSearch =
     document.getElementById("ownerUserSearch");
 
+const ownerUserFilter =
+    document.getElementById("ownerUserFilter");
+
 const refreshOwnerUsers =
     document.getElementById("refreshOwnerUsers");
 
@@ -394,6 +397,7 @@ const ownerGiveAll =
     document.getElementById("ownerGiveAll");
 
 let ownerUsers = [];
+let ownerUserDetailsLoaded = false;
 let ownerSuggestions = [];
 let moderatorSuggestions = [];
 let ownerIssueReports = [];
@@ -622,6 +626,14 @@ async function loadOwnerUsers() {
         return;
     }
 
+    ownerUserDetailsLoaded = false;
+    if (ownerUserFilter) {
+        ownerUserFilter.disabled = true;
+    }
+    if (ownerGiveAll) {
+        ownerGiveAll.disabled = true;
+    }
+
     if (ownerTotalUsers) {
         ownerTotalUsers.textContent = "Loading…";
     }
@@ -688,9 +700,63 @@ async function loadOwnerUsers() {
 
     ownerUsers = data;
 
-    if (ownerTotalUsers) {
-        ownerTotalUsers.textContent =
-            ownerUsers.length.toLocaleString();
+    let userDetails;
+    let userDetailsError;
+    try {
+        const response = await supabaseClient.rpc(
+            "admin_list_user_details"
+        );
+        userDetails = response.data;
+        userDetailsError = response.error;
+    } catch (error) {
+        userDetailsError = error;
+    }
+
+    if (userDetailsError || !Array.isArray(userDetails)) {
+        console.error(
+            "Could not load user filter details:",
+            userDetailsError || userDetails
+        );
+        if (ownerUserFilter) {
+            ownerUserFilter.value = "all";
+        }
+        showOwnerNotification(
+            "Could not load signup and verification details. User filters are unavailable.",
+            "error"
+        );
+    } else {
+        const detailsByUserId = new Map(
+            userDetails.map(details => [
+                String(details.user_id),
+                details
+            ])
+        );
+        const hasDetailsForEveryUser = ownerUsers.every(
+            user => detailsByUserId.has(String(user.user_id))
+        );
+
+        if (hasDetailsForEveryUser) {
+            ownerUsers = ownerUsers.map(user => ({
+                ...user,
+                ...detailsByUserId.get(String(user.user_id))
+            }));
+            ownerUserDetailsLoaded = true;
+        } else {
+            if (ownerUserFilter) {
+                ownerUserFilter.value = "all";
+            }
+            showOwnerNotification(
+                "Some user filter details are missing. User filters are unavailable.",
+                "error"
+            );
+        }
+    }
+
+    if (ownerUserFilter) {
+        ownerUserFilter.disabled = !ownerUserDetailsLoaded;
+    }
+    if (ownerGiveAll) {
+        ownerGiveAll.disabled = !ownerUserDetailsLoaded;
     }
 
     try {
@@ -1429,30 +1495,28 @@ function renderOwnerUsers() {
         return;
     }
 
-    const search =
-        ownerUserSearch.value
-            .toLowerCase()
-            .trim();
+    const filteredUsers = getFilteredOwnerUsers();
 
-    const filteredUsers =
-        ownerUsers.filter(user => {
+    if (ownerTotalUsers) {
+        ownerTotalUsers.textContent =
+            filteredUsers.length.toLocaleString();
+    }
 
-            const username =
-                String(
-                    user.username || ""
-                ).toLowerCase();
-
-            return username.includes(search);
-        });
+    if (!ownerUserDetailsLoaded) {
+        ownerUserList.innerHTML = `
+            <p class="owner-error">
+                User signup and verification filters are unavailable until their details load.
+            </p>
+        `;
+        return;
+    }
 
     if (filteredUsers.length === 0) {
-
         ownerUserList.innerHTML = `
             <p class="owner-loading">
                 No users found.
             </p>
         `;
-
         return;
     }
 
@@ -1620,6 +1684,38 @@ function renderOwnerUsers() {
     });
 
     attachOwnerActions();
+}
+
+function getFilteredOwnerUsers() {
+    const search =
+        ownerUserSearch.value
+            .toLowerCase()
+            .trim();
+
+    const filter = ownerUserFilter?.value || "all";
+    let filteredUsers = ownerUsers.filter(user => {
+        const username = String(user.username || "").toLowerCase();
+        if (!username.includes(search)) return false;
+        if (filter === "verified") return user.is_verified === true;
+        if (filter === "unverified") return user.is_verified === false;
+        return true;
+    });
+
+    if (filter === "oldest" || filter === "newest") {
+        const direction = filter === "oldest" ? 1 : -1;
+        filteredUsers = filteredUsers.slice().sort((a, b) => {
+            const aTime = Date.parse(a.created_at);
+            const bTime = Date.parse(b.created_at);
+            const aHasDate = Number.isFinite(aTime);
+            const bHasDate = Number.isFinite(bTime);
+
+            if (aHasDate !== bHasDate) return aHasDate ? -1 : 1;
+            if (!aHasDate) return 0;
+            return direction * (aTime - bTime);
+        });
+    }
+
+    return filteredUsers;
 }
 
 
@@ -1939,13 +2035,22 @@ if (ownerGiveAll) {
             const amount =
                 Number(ownerGiveAllAmount?.value);
 
+            if (!ownerUserDetailsLoaded) {
+                showOwnerNotification(
+                    "Load user signup and verification details before giving coins.",
+                    "error"
+                );
+                return;
+            }
+
             if (
-                !Number.isInteger(amount) ||
-                amount <= 0
+                !Number.isSafeInteger(amount) ||
+                amount <= 0 ||
+                amount > 2147483647
             ) {
 
                 showOwnerNotification(
-                    "Enter a valid whole number.",
+                    "Enter a whole number between 1 and 2,147,483,647.",
                     "error"
                 );
 
@@ -1954,9 +2059,29 @@ if (ownerGiveAll) {
                 return;
             }
 
+            const selectedUsers = getFilteredOwnerUsers();
+            const targetUserIds = selectedUsers.map(user => user.user_id);
+            const uniqueTargetUserIds = new Set(targetUserIds);
+
+            if (
+                selectedUsers.length === 0 ||
+                targetUserIds.some(
+                    userId => typeof userId !== "string" || !userId
+                ) ||
+                uniqueTargetUserIds.size !== selectedUsers.length
+            ) {
+                showOwnerNotification(
+                    selectedUsers.length === 0
+                        ? "No users match the current search and filter."
+                        : "The visible users could not be identified safely.",
+                    "error"
+                );
+                return;
+            }
+
             const confirmed =
                 confirm(
-                    `Give ${amount.toLocaleString()} coins to every user?`
+                    `Give ${amount.toLocaleString()} coins to the ${selectedUsers.length.toLocaleString()} user(s) currently shown?`
                 );
 
             if (!confirmed) {
@@ -1965,42 +2090,44 @@ if (ownerGiveAll) {
 
             ownerGiveAll.disabled = true;
 
-            const { data, error } =
-                await supabaseClient.rpc(
-                    "admin_give_coins_to_all",
+            try {
+                const { data, error } = await supabaseClient.rpc(
+                    "admin_give_coins_to_users",
                     {
-                        amount: amount
+                        target_user_ids: targetUserIds,
+                        amount
                     }
                 );
 
-            ownerGiveAll.disabled = false;
+                if (error) {
+                    console.error("Give coins to shown users failed:", error);
+                    showOwnerNotification(
+                        error.message || "Could not give coins to the shown users.",
+                        "error"
+                    );
+                    return;
+                }
 
-            if (error) {
-
+                ownerGiveAllAmount.value = "";
+                await loadOwnerUsers();
+                showOwnerNotification(
+                    `Gave ${amount.toLocaleString()} coins to ${Number(
+                        data || 0
+                    ).toLocaleString()} shown users.`,
+                    "success"
+                );
+            } catch (error) {
                 console.error(
-                    "Give all coins failed:",
+                    "Give coins to shown users failed:",
                     error
                 );
-
                 showOwnerNotification(
-                    error.message ||
-                    "Could not give coins to all users.",
+                    error.message || "Could not give coins to the shown users.",
                     "error"
                 );
-
-                return;
+            } finally {
+                ownerGiveAll.disabled = !ownerUserDetailsLoaded;
             }
-
-            ownerGiveAllAmount.value = "";
-
-            await loadOwnerUsers();
-
-            showOwnerNotification(
-                `Gave ${amount.toLocaleString()} coins to ${Number(
-                    data || 0
-                ).toLocaleString()} users.`,
-                "success"
-            );
         }
     );
 }
@@ -2165,6 +2292,9 @@ if (ownerUserSearch) {
     );
 }
 
+if (ownerUserFilter) {
+    ownerUserFilter.addEventListener("change", renderOwnerUsers);
+}
 
 // =========================================
 // REFRESH USERS

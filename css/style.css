@@ -4147,7 +4147,8 @@ z-index: 1000;
     padding: 15px 20px;
 }
 
-.owner-toolbar input {
+.owner-toolbar input,
+.owner-toolbar select {
     flex: 1;
     padding: 11px 13px;
     border-radius: 9px;
@@ -4162,7 +4163,8 @@ z-index: 1000;
     color: var(--accent-light);
 }
 
-.owner-toolbar input:focus {
+.owner-toolbar input:focus,
+.owner-toolbar select:focus {
     border-color: var(--accent);
     box-shadow: 0 0 12px var(--shadow);
 }
@@ -11884,7 +11886,8 @@ z-index: 1000;
     padding: 12px;
   }
 
-  .owner-toolbar input {
+  .owner-toolbar input,
+  .owner-toolbar select {
     min-width: 0;
     flex: 1 1 100%;
   }

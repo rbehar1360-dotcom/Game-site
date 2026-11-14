@@ -243,16 +243,24 @@
           placeholder="Search users..."
         >
 
+        <select id="ownerUserFilter" aria-label="Filter users">
+          <option value="all">All users</option>
+          <option value="oldest">Oldest users</option>
+          <option value="newest">Newest users</option>
+          <option value="unverified">Unverified users</option>
+          <option value="verified">Verified users</option>
+        </select>
+
         <input
           type="number"
           id="ownerGiveAllAmount"
           min="1"
           step="1"
-          placeholder="Coins for everyone"
+          placeholder="Coins per user"
         >
 
         <button id="ownerGiveAll">
-          🪙 Give All
+          🪙 Give to Shown
         </button>
 
         <button id="refreshOwnerUsers">
@@ -261,7 +269,7 @@
       </div>
 
       <div class="owner-user-total" role="status" aria-live="polite">
-        <span>Total users</span>
+        <span>Users shown</span>
         <strong id="ownerTotalUsers">—</strong>
       </div>
 
