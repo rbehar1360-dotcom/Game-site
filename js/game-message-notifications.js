@@ -235,7 +235,7 @@
             "background:transparent"
         ].join(";");
 
-        const pageUrl = new URL("../index.html", window.location.href);
+        const pageUrl = new URL("../", window.location.href);
         pageUrl.searchParams.set("gameMessagesOverlay", "1");
         if (senderId) {
             pageUrl.searchParams.set("messageUserId", senderId);

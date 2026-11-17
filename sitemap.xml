@@ -4,7 +4,7 @@
     <loc>https://ralphsunblockedgames.vercel.app/</loc>
   </url>
   <url>
-    <loc>https://ralphsunblockedgames.vercel.app/about/index.html</loc>
+    <loc>https://ralphsunblockedgames.vercel.app/about/</loc>
   </url>
   <url>
     <loc>https://ralphsunblockedgames.vercel.app/games/2048.html</loc>
@@ -80,9 +80,6 @@
   </url>
   <url>
     <loc>https://ralphsunblockedgames.vercel.app/games/Chess.html</loc>
-  </url>
-  <url>
-    <loc>https://ralphsunblockedgames.vercel.app/games/ChessEngine.html</loc>
   </url>
   <url>
     <loc>https://ralphsunblockedgames.vercel.app/games/clangrybirds.html</loc>
