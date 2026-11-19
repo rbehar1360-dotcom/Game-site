@@ -1283,6 +1283,15 @@ function renderOwnerSuggestions() {
     });
 }
 
+function isModeratorOwnSubmission(item, currentUserId) {
+    return Boolean(
+        !currentUserIsAdmin &&
+        currentUserId &&
+        item.user_id &&
+        String(currentUserId) === String(item.user_id)
+    );
+}
+
 function createSuggestionCard(suggestion, usernameText, actionsMode = null, currentUserId = null) {
     const card = document.createElement("article");
     card.className = "owner-suggestion-card";
@@ -1346,30 +1355,33 @@ function createSuggestionCard(suggestion, usernameText, actionsMode = null, curr
         deleteButton.textContent = "Delete";
 
         if (actionsMode === "moderator") {
+            const isOwnSubmission =
+                isModeratorOwnSubmission(suggestion, currentUserId);
             const approveButton = document.createElement("button");
             approveButton.type = "button";
             approveButton.textContent = "Send to owner";
             approveButton.addEventListener("click", () => {
+                if (isOwnSubmission) {
+                    showOwnerNotification(
+                        "You cannot send your own suggestion to the owner.",
+                        "error"
+                    );
+                    return;
+                }
                 reviewGameSuggestion(suggestion.id, "approve", approveButton, deleteButton);
             });
             deleteButton.addEventListener("click", () => {
+                if (isOwnSubmission) {
+                    showOwnerNotification(
+                        "You cannot delete your own suggestion.",
+                        "error"
+                    );
+                    return;
+                }
                 reviewGameSuggestion(suggestion.id, "delete", approveButton, deleteButton);
             });
             actions.append(approveButton, deleteButton);
 
-            if (
-                !currentUserIsAdmin &&
-                currentUserId &&
-                suggestion.user_id &&
-                String(currentUserId) === String(suggestion.user_id)
-            ) {
-                approveButton.disabled = true;
-                const selfReviewNote = document.createElement("p");
-                selfReviewNote.className = "owner-error";
-                selfReviewNote.textContent =
-                    "You cannot send your own suggestion to the owner.";
-                card.appendChild(selfReviewNote);
-            }
         } else {
             deleteButton.addEventListener("click", () => {
                 deleteOwnerGameSuggestion(suggestion.id, deleteButton);
@@ -1611,30 +1623,33 @@ function createGameIssueReportCard(report, includeActions, currentUserId = null)
         deleteButton.textContent = "Delete";
 
         if (includeActions === "moderator") {
+            const isOwnSubmission =
+                isModeratorOwnSubmission(report, currentUserId);
             const forwardButton = document.createElement("button");
             forwardButton.type = "button";
             forwardButton.textContent = "Send to owner";
             forwardButton.addEventListener("click", () => {
+                if (isOwnSubmission) {
+                    showOwnerNotification(
+                        "You cannot send your own report to the owner.",
+                        "error"
+                    );
+                    return;
+                }
                 reviewGameIssueReport(report.id, "forward", forwardButton, deleteButton);
             });
             deleteButton.addEventListener("click", () => {
+                if (isOwnSubmission) {
+                    showOwnerNotification(
+                        "You cannot delete your own report.",
+                        "error"
+                    );
+                    return;
+                }
                 reviewGameIssueReport(report.id, "delete", forwardButton, deleteButton);
             });
             actions.append(forwardButton, deleteButton);
 
-            if (
-                !currentUserIsAdmin &&
-                currentUserId &&
-                report.user_id &&
-                String(currentUserId) === String(report.user_id)
-            ) {
-                forwardButton.disabled = true;
-                const selfReviewNote = document.createElement("p");
-                selfReviewNote.className = "owner-error";
-                selfReviewNote.textContent =
-                    "You cannot send your own report to the owner.";
-                card.appendChild(selfReviewNote);
-            }
         } else {
             deleteButton.addEventListener("click", () => {
                 deleteOwnerGameIssueReport(report.id, deleteButton);
