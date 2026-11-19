@@ -1,0 +1,35 @@
+{
+  "redirects": [
+    {
+      "source": "/index.html",
+      "destination": "/",
+      "permanent": true
+    },
+    {
+      "source": "/about/index.html",
+      "destination": "/about/",
+      "permanent": true
+    },
+    {
+      "source": "/about",
+      "destination": "/about/",
+      "permanent": true
+    },
+    {
+      "source": "/games/ChessEngine.html",
+      "destination": "/games/Chess.html",
+      "permanent": true
+    }
+  ],
+  "headers": [
+    {
+      "source": "/GameFiles/(.*)",
+      "headers": [
+        {
+          "key": "X-Robots-Tag",
+          "value": "noindex, nofollow"
+        }
+      ]
+    }
+  ]
+}

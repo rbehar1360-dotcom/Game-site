@@ -26,6 +26,7 @@
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="../js/supabase.js"></script>
 <script src="../js/playtime.js"></script>
+<script src="../js/local-game-page.js"></script>
 
     <!-- Calculator styling -->
     <link
@@ -54,7 +55,14 @@
 
 <body>
 
-    <div id="Calc">
+    <header class="header">
+        <h1>🎮 Calculator!</h1>
+        <a href="../">⬅ Back to Hub</a>
+    </header>
+
+    <main class="game-wrapper">
+        <div class="game-container calculator-game-container">
+            <div id="Calc">
 
         <input
             id="display"
@@ -194,9 +202,10 @@
                 DEG
             </button>
 
+            </div>
         </div>
-
     </div>
+</main>
 
 
     <!-- Calculator JavaScript -->
@@ -204,7 +213,7 @@
     <script src="../js/Calc.js"></script>
 
 
-<footer class="seo-footer"><p>Play more games at <a href="../index.html">Ralph’s Unblocked Games</a>.</p><a href="../about/index.html">About Ralph’s Unblocked Games</a></footer>
+<footer class="seo-footer"><p>Play more games at <a href="../">Ralph’s Unblocked Games</a>.</p><a href="../about/">About Ralph’s Unblocked Games</a></footer>
 </body>
 
 </html>

@@ -154,7 +154,9 @@
       👑 Owner Panel
     </button>
 
-    
+    <button id="moderatorPanelButton" style="display: none;">
+      🛡️ Moderator Panel
+    </button>
 
     <button id="logoutButton">
       🚪 Logout
@@ -207,6 +209,26 @@
         Suggestions
       </button>
       <button
+        id="ownerIssueReportsTab"
+        class="owner-tab"
+        type="button"
+        role="tab"
+        aria-selected="false"
+        aria-controls="ownerIssueReportsView"
+      >
+        Problem Reports
+      </button>
+      <button
+        id="ownerModeratorStatsTab"
+        class="owner-tab"
+        type="button"
+        role="tab"
+        aria-selected="false"
+        aria-controls="ownerModeratorStatsView"
+      >
+        Moderator stats
+      </button>
+      <button
         id="ownerCoinsHistoryTab"
         class="owner-tab"
         type="button"
@@ -214,7 +236,7 @@
         aria-selected="false"
         aria-controls="ownerCoinsHistoryView"
       >
-        Coins History
+        Coins - History
       </button>
     </div>
 
@@ -231,16 +253,24 @@
           placeholder="Search users..."
         >
 
+        <select id="ownerUserFilter" aria-label="Filter users">
+          <option value="all">All users</option>
+          <option value="oldest">Oldest users</option>
+          <option value="newest">Newest users</option>
+          <option value="unverified">Unverified users</option>
+          <option value="verified">Verified users</option>
+        </select>
+
         <input
           type="number"
           id="ownerGiveAllAmount"
           min="1"
           step="1"
-          placeholder="Coins for everyone"
+          placeholder="Coins per user"
         >
 
         <button id="ownerGiveAll">
-          🪙 Give All
+          🪙 Give to Shown
         </button>
 
         <button id="refreshOwnerUsers">
@@ -248,12 +278,8 @@
         </button>
       </div>
 
-      <p class="owner-rank-note">
-        MODERATOR ranks do not grant panel access yet: // we will code this later.
-      </p>
-
       <div class="owner-user-total" role="status" aria-live="polite">
-        <span>Total users</span>
+        <span>Users shown</span>
         <strong id="ownerTotalUsers">—</strong>
       </div>
 
@@ -274,12 +300,65 @@
       hidden
     >
       <div class="owner-suggestions-toolbar">
-        <p>Suggestions sent by players.</p>
+        <p>Suggestions approved by moderators and ready for you to add.</p>
         <button id="refreshOwnerSuggestions" type="button">↻ Refresh</button>
       </div>
       <div id="ownerSuggestionsList" class="owner-suggestions-list" aria-live="polite">
         <p class="owner-loading">Open this tab to load suggestions.</p>
       </div>
+    </section>
+
+    <section
+      id="ownerIssueReportsView"
+      class="owner-panel-view"
+      role="tabpanel"
+      aria-labelledby="ownerIssueReportsTab"
+      hidden
+    >
+      <div class="owner-suggestions-toolbar">
+        <p>Reports forwarded by moderators for your review.</p>
+        <button id="refreshOwnerIssueReports" type="button">↻ Refresh</button>
+      </div>
+      <div id="ownerIssueReportsList" class="owner-suggestions-list" aria-live="polite">
+        <p class="owner-loading">Open this tab to load problem reports.</p>
+      </div>
+    </section>
+
+    <section
+      id="ownerModeratorStatsView"
+      class="owner-panel-view"
+      role="tabpanel"
+      aria-labelledby="ownerModeratorStatsTab"
+      hidden
+    >
+      <div class="owner-moderator-stats-toolbar">
+        <p>Contribution totals for accounts with a rank.</p>
+        <div class="owner-moderator-stats-controls">
+          <input
+            type="search"
+            id="ownerModeratorStatsSearch"
+            placeholder="Search username or rank..."
+            aria-label="Search moderator stats"
+          >
+          <select id="ownerModeratorStatsRankFilter" aria-label="Filter stats by rank">
+            <option value="MODERATOR">MODERATOR</option>
+          </select>
+          <select id="ownerModeratorStatsSort" aria-label="Sort moderator stats">
+            <option value="contributions">Most contributions</option>
+            <option value="suggestions">Most suggestions</option>
+            <option value="issues">Most issue reports</option>
+            <option value="username">Username A–Z</option>
+          </select>
+          <button id="refreshOwnerModeratorStats" type="button">↻ Refresh</button>
+        </div>
+      </div>
+      <p class="owner-moderator-stats-note">
+        Deleted submissions and moderation actions are tracked from the date the audit migration is applied; earlier deletions cannot be recovered.
+      </p>
+      <p id="ownerModeratorStatsStatus" class="owner-moderator-stats-status" role="status" aria-live="polite">
+        Open this tab to load contribution stats.
+      </p>
+      <div id="ownerModeratorStatsList" class="owner-moderator-stats-list" aria-live="polite"></div>
     </section>
 
     <section
@@ -307,6 +386,71 @@
 
   </div>
 
+</div>
+
+<div id="moderatorOverlay" class="owner-overlay">
+  <div class="owner-window">
+    <div class="owner-header">
+      <div>
+        <h2>🛡️ Moderator Panel</h2>
+        <p>Review game suggestions and player problem reports.</p>
+      </div>
+      <button id="closeModeratorPanel" class="close-owner" type="button" aria-label="Close moderator panel">
+        ✕
+      </button>
+    </div>
+    <div class="owner-tabs" role="tablist" aria-label="Moderator panel sections">
+      <button
+        id="moderatorSuggestionsTab"
+        class="owner-tab active"
+        type="button"
+        role="tab"
+        aria-selected="true"
+        aria-controls="moderatorSuggestionsView"
+      >
+        Suggestions
+      </button>
+      <button
+        id="moderatorIssueReportsTab"
+        class="owner-tab"
+        type="button"
+        role="tab"
+        aria-selected="false"
+        aria-controls="moderatorIssueReportsView"
+      >
+        Issues
+      </button>
+    </div>
+    <section
+      id="moderatorSuggestionsView"
+      class="owner-panel-view"
+      role="tabpanel"
+      aria-labelledby="moderatorSuggestionsTab"
+    >
+      <div class="owner-suggestions-toolbar">
+        <p>Approve suggestions to send them to the owner, or delete spam.</p>
+        <button id="refreshModeratorSuggestions" type="button">↻ Refresh</button>
+      </div>
+      <div id="moderatorSuggestionsList" class="owner-suggestions-list" aria-live="polite">
+        <p class="owner-loading">Open this panel to load suggestions.</p>
+      </div>
+    </section>
+    <section
+      id="moderatorIssueReportsView"
+      class="owner-panel-view"
+      role="tabpanel"
+      aria-labelledby="moderatorIssueReportsTab"
+      hidden
+    >
+      <div class="owner-suggestions-toolbar">
+        <p>Forward game problem reports to the owner, or delete spam.</p>
+        <button id="refreshModeratorIssueReports" type="button">↻ Refresh</button>
+      </div>
+      <div id="moderatorIssueReportsList" class="owner-suggestions-list" aria-live="polite">
+        <p class="owner-loading">Open this panel to load problem reports.</p>
+      </div>
+    </section>
+  </div>
 </div>
 
 
@@ -3939,7 +4083,7 @@
         Ralph’s Unblocked Games
       </a>
 
-      <a href="/about/index.html">
+      <a href="/about/">
         About Ralph’s Unblocked Games
       </a>
 

@@ -12,13 +12,9 @@ body {
 
     min-height: 100vh;
 
-    display: flex;
+    display: block;
 
-    justify-content: center;
-
-    align-items: center;
-
-    padding: 20px;
+    padding: 0;
 
     background:
         linear-gradient(
@@ -38,6 +34,47 @@ body {
     transition:
         background 0.4s ease,
         color 0.4s ease;
+}
+
+.header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 15px 25px;
+    background: var(--header);
+    border-bottom: 1px solid var(--accent);
+    backdrop-filter: blur(10px);
+}
+
+.header h1 {
+    margin: 0;
+    font-size: 20px;
+}
+
+.header a {
+    color: var(--accent);
+    font-weight: bold;
+    text-decoration: none;
+}
+
+.header a:hover {
+    text-decoration: underline;
+}
+
+/* =========================================
+   GAME FRAME
+========================================= */
+
+.calculator-game-container {
+    display: flex;
+    min-height: 70vh;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+}
+
+#Calc {
+    margin: 0 auto;
 }
 
 
@@ -315,7 +352,12 @@ body {
 @media (max-width: 550px) {
 
     body {
-        padding: 10px;
+        padding: 0;
+    }
+
+    .calculator-game-container {
+        min-height: 60vh;
+        padding: 16px;
     }
 
 

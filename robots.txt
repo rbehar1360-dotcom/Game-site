@@ -34,6 +34,7 @@ Allow: /
 
 # No separate private URL routes are published by this static site.
 # robots.txt is not access control; keep private Supabase data behind authenticated policies.
+# Keep embedded game files crawlable so their X-Robots-Tag noindex header can be read.
 User-agent: *
 Allow: /
 

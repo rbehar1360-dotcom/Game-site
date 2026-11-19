@@ -654,15 +654,20 @@ async function loadConversationUser(
     userId,
     conversation
 ) {
-    const { data, error } =
-        await supabaseClient.rpc(
-            "find_username_by_id",
-            {
-                search_user_id: userId
-            }
+    try {
+        const username = await window.getUsernameById(
+            userId,
+            conversation.username
         );
 
-    if (error) {
+        if (!username) {
+            conversation.username = "Unknown User";
+            return conversation;
+        }
+
+        conversation.username = username;
+        return conversation;
+    } catch (error) {
         console.error(
             "Could not load username:",
             error
@@ -670,14 +675,6 @@ async function loadConversationUser(
 
         return null;
     }
-
-    const username =
-        data?.[0]?.username ||
-        "Unknown User";
-
-    conversation.username = username;
-
-    return conversation;
 }
 
 function renderConversations(filter = "") {
@@ -842,6 +839,12 @@ async function loadConversations() {
 
     if (requestId !== conversationLoadSequence) return;
 
+    const existingUsernames = new Map(
+        conversationData.map(conversation => [
+            conversation.userId,
+            conversation.username
+        ])
+    );
     const map = new Map();
 
     (data || []).forEach(message => {
@@ -855,7 +858,9 @@ async function loadConversations() {
                 userId: otherUserId,
                 latest: message,
                 unread: 0,
-                username: "Unknown User"
+                username:
+                    existingUsernames.get(otherUserId) ||
+                    "Unknown User"
             });
         }
 
@@ -2012,18 +2017,28 @@ privateMessageInput?.addEventListener(
     }
 );
 
-async function refreshMessageState() {
-    const user = await getCurrentUser();
-    if (!safeUser(user)) return;
+let messageRefreshPromise = null;
 
-    if (currentPrivateUser && isMessagesOpen()) {
-        await markMessagesRead(
-            user.id,
-            currentPrivateUser.id
-        );
-    }
+function refreshMessageState() {
+    if (messageRefreshPromise) return messageRefreshPromise;
 
-    await loadConversations();
+    messageRefreshPromise = (async () => {
+        const user = await getCurrentUser();
+        if (!safeUser(user)) return;
+
+        if (currentPrivateUser && isMessagesOpen()) {
+            await markMessagesRead(
+                user.id,
+                currentPrivateUser.id
+            );
+        }
+
+        await loadConversations();
+    })().finally(() => {
+        messageRefreshPromise = null;
+    });
+
+    return messageRefreshPromise;
 }
 
 document.addEventListener("visibilitychange", () => {
@@ -2090,6 +2105,7 @@ supabaseClient.auth.onAuthStateChange((_event, session) => {
     if (nextUserId === activeMessageUserId) return;
 
     activeMessageUserId = nextUserId;
+    conversationData = [];
 
     window.setTimeout(async () => {
         if (!nextUserId) {

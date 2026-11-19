@@ -3999,6 +3999,11 @@ z-index: 1000;
     -webkit-backdrop-filter: blur(15px);
 }
 
+#moderatorOverlay .owner-window {
+    overflow-x: hidden;
+    overflow-y: auto;
+}
+
 .owner-header {
     display: flex;
     justify-content: space-between;
@@ -4020,6 +4025,7 @@ z-index: 1000;
 
 .owner-tabs {
     display: flex;
+    flex-wrap: wrap;
     gap: 8px;
     padding: 12px 20px 0;
 }
@@ -4113,6 +4119,121 @@ z-index: 1000;
     font-size: 22px;
 }
 
+.owner-moderator-stats-toolbar {
+    padding: 14px 20px 8px;
+}
+
+.owner-moderator-stats-toolbar > p,
+.owner-moderator-stats-note {
+    margin: 0 0 10px;
+    color: var(--text);
+    opacity: 0.72;
+    line-height: 1.5;
+}
+
+.owner-moderator-stats-controls {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+.owner-moderator-stats-controls input,
+.owner-moderator-stats-controls select {
+    min-width: 150px;
+    flex: 1 1 180px;
+    padding: 10px 12px;
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: 9px;
+    background: var(--card);
+    color: var(--text);
+}
+
+.owner-moderator-stats-controls button {
+    padding: 10px 14px;
+    border: 0;
+    border-radius: 9px;
+    background: var(--accent);
+    color: #001018;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+.owner-moderator-stats-note,
+.owner-moderator-stats-status {
+    margin: 0 20px 10px;
+}
+
+.owner-moderator-stats-status {
+    color: var(--accent);
+}
+
+.owner-moderator-stats-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 10px;
+    max-height: 60vh;
+    padding: 0 20px 20px;
+    overflow-y: auto;
+}
+
+.owner-moderator-stat-card {
+    padding: 14px 16px;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 12px;
+    background: var(--card);
+    color: var(--text);
+}
+
+.owner-moderator-stat-heading {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    margin-bottom: 12px;
+}
+
+.owner-moderator-stat-heading h3 {
+    min-width: 0;
+    margin: 0;
+    overflow-wrap: anywhere;
+    color: var(--accent);
+    font-size: 16px;
+}
+
+.owner-moderator-stat-rank {
+    flex: 0 0 auto;
+    padding: 4px 8px;
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: 999px;
+    font-size: 11px;
+}
+
+.owner-moderator-stat-counts {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px;
+}
+
+.owner-moderator-stat-count {
+    padding: 10px;
+    border-radius: 8px;
+    background: rgba(255, 255, 255, 0.04);
+}
+
+.owner-moderator-stat-count span {
+    display: block;
+    color: var(--text);
+    font-size: 12px;
+    opacity: 0.72;
+}
+
+.owner-moderator-stat-count strong {
+    display: block;
+    margin-top: 5px;
+    color: var(--accent);
+    font-size: 20px;
+}
+
 .owner-panel-view[hidden] {
     display: none;
 }
@@ -4141,7 +4262,8 @@ z-index: 1000;
     padding: 15px 20px;
 }
 
-.owner-toolbar input {
+.owner-toolbar input,
+.owner-toolbar select {
     flex: 1;
     padding: 11px 13px;
     border-radius: 9px;
@@ -4156,7 +4278,8 @@ z-index: 1000;
     color: var(--accent-light);
 }
 
-.owner-toolbar input:focus {
+.owner-toolbar input:focus,
+.owner-toolbar select:focus {
     border-color: var(--accent);
     box-shadow: 0 0 12px var(--shadow);
 }
@@ -4267,6 +4390,33 @@ z-index: 1000;
 .owner-suggestion-reason {
     margin: 10px 0 0;
     white-space: pre-wrap;
+}
+
+.owner-suggestion-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 12px;
+}
+
+.owner-suggestion-actions button {
+    padding: 8px 12px;
+    border: 0;
+    border-radius: 8px;
+    background: var(--accent);
+    color: #001018;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+.owner-suggestion-actions button:last-child {
+    background: #b83b4b;
+    color: #fff;
+}
+
+.owner-suggestion-actions button:disabled {
+    cursor: wait;
+    opacity: 0.65;
 }
 
 .owner-suggestion-no-link {
@@ -11851,7 +12001,8 @@ z-index: 1000;
     padding: 12px;
   }
 
-  .owner-toolbar input {
+  .owner-toolbar input,
+  .owner-toolbar select {
     min-width: 0;
     flex: 1 1 100%;
   }
@@ -11884,6 +12035,28 @@ z-index: 1000;
   }
 
   .owner-coins-stats {
+    padding-right: 12px;
+    padding-left: 12px;
+  }
+
+  .owner-moderator-stats-toolbar {
+    padding-right: 12px;
+    padding-left: 12px;
+  }
+
+  .owner-moderator-stats-controls > * {
+    min-width: 0;
+    flex: 1 1 100%;
+  }
+
+  .owner-moderator-stats-note,
+  .owner-moderator-stats-status {
+    margin-right: 12px;
+    margin-left: 12px;
+  }
+
+  .owner-moderator-stats-list {
+    grid-template-columns: 1fr;
     padding-right: 12px;
     padding-left: 12px;
   }

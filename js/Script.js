@@ -2496,29 +2496,22 @@ async function loadConversationUser(
      * For now, search by UUID through a secure RPC.
      */
 
-    const { data, error } =
-        await supabaseClient.rpc(
-            "find_username_by_id",
-            {
-                search_user_id: userId
-            }
+    let username;
+    try {
+        username = await window.getUsernameById(
+            userId,
+            conversation.username
         );
-
-
-    if (error) {
-
+    } catch (error) {
         console.error(
             "Could not load username:",
             error
         );
 
         return;
-
     }
 
-
-    const username =
-        data?.[0]?.username || "Unknown User";
+    username = username || "Unknown User";
 
 
     const item =
