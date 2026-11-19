@@ -219,6 +219,16 @@
         Problem Reports
       </button>
       <button
+        id="ownerModeratorStatsTab"
+        class="owner-tab"
+        type="button"
+        role="tab"
+        aria-selected="false"
+        aria-controls="ownerModeratorStatsView"
+      >
+        Moderator stats
+      </button>
+      <button
         id="ownerCoinsHistoryTab"
         class="owner-tab"
         type="button"
@@ -312,6 +322,43 @@
       <div id="ownerIssueReportsList" class="owner-suggestions-list" aria-live="polite">
         <p class="owner-loading">Open this tab to load problem reports.</p>
       </div>
+    </section>
+
+    <section
+      id="ownerModeratorStatsView"
+      class="owner-panel-view"
+      role="tabpanel"
+      aria-labelledby="ownerModeratorStatsTab"
+      hidden
+    >
+      <div class="owner-moderator-stats-toolbar">
+        <p>Contribution totals for accounts with a rank.</p>
+        <div class="owner-moderator-stats-controls">
+          <input
+            type="search"
+            id="ownerModeratorStatsSearch"
+            placeholder="Search username or rank..."
+            aria-label="Search moderator stats"
+          >
+          <select id="ownerModeratorStatsRankFilter" aria-label="Filter stats by rank">
+            <option value="MODERATOR">MODERATOR</option>
+          </select>
+          <select id="ownerModeratorStatsSort" aria-label="Sort moderator stats">
+            <option value="contributions">Most contributions</option>
+            <option value="suggestions">Most suggestions</option>
+            <option value="issues">Most issue reports</option>
+            <option value="username">Username A–Z</option>
+          </select>
+          <button id="refreshOwnerModeratorStats" type="button">↻ Refresh</button>
+        </div>
+      </div>
+      <p class="owner-moderator-stats-note">
+        Deleted submissions and moderation actions are tracked from the date the audit migration is applied; earlier deletions cannot be recovered.
+      </p>
+      <p id="ownerModeratorStatsStatus" class="owner-moderator-stats-status" role="status" aria-live="polite">
+        Open this tab to load contribution stats.
+      </p>
+      <div id="ownerModeratorStatsList" class="owner-moderator-stats-list" aria-live="polite"></div>
     </section>
 
     <section

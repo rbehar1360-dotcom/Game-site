@@ -333,6 +333,9 @@ const ownerIssueReportsTab =
 const ownerCoinsHistoryTab =
     document.getElementById("ownerCoinsHistoryTab");
 
+const ownerModeratorStatsTab =
+    document.getElementById("ownerModeratorStatsTab");
+
 const ownerUsersView =
     document.getElementById("ownerUsersView");
 
@@ -344,6 +347,9 @@ const ownerIssueReportsView =
 
 const ownerCoinsHistoryView =
     document.getElementById("ownerCoinsHistoryView");
+
+const ownerModeratorStatsView =
+    document.getElementById("ownerModeratorStatsView");
 
 const ownerSuggestionsList =
     document.getElementById("ownerSuggestionsList");
@@ -378,6 +384,24 @@ const ownerCoinsHistoryStats =
 const refreshOwnerCoinsHistory =
     document.getElementById("refreshOwnerCoinsHistory");
 
+const ownerModeratorStatsSearch =
+    document.getElementById("ownerModeratorStatsSearch");
+
+const ownerModeratorStatsRankFilter =
+    document.getElementById("ownerModeratorStatsRankFilter");
+
+const ownerModeratorStatsSort =
+    document.getElementById("ownerModeratorStatsSort");
+
+const ownerModeratorStatsStatus =
+    document.getElementById("ownerModeratorStatsStatus");
+
+const ownerModeratorStatsList =
+    document.getElementById("ownerModeratorStatsList");
+
+const refreshOwnerModeratorStats =
+    document.getElementById("refreshOwnerModeratorStats");
+
 const ownerTotalUsers =
     document.getElementById("ownerTotalUsers");
 
@@ -402,6 +426,8 @@ let ownerSuggestions = [];
 let moderatorSuggestions = [];
 let ownerIssueReports = [];
 let moderatorIssueReports = [];
+let ownerModeratorStats = [];
+let currentUserIsAdmin = false;
 
 
 // =========================================
@@ -518,6 +544,7 @@ async function checkAdmin() {
         await getCurrentUser();
 
     if (!user) {
+        currentUserIsAdmin = false;
 
         if (ownerPanelButton) {
             ownerPanelButton.style.display = "none";
@@ -535,6 +562,7 @@ async function checkAdmin() {
         );
 
     if (error) {
+        currentUserIsAdmin = false;
 
         console.error(
             "Could not check admin status:",
@@ -550,6 +578,7 @@ async function checkAdmin() {
     }
 
     if (data === true) {
+        currentUserIsAdmin = true;
 
         if (ownerPanelButton) {
             ownerPanelButton.style.display = "block";
@@ -581,6 +610,7 @@ async function checkAdmin() {
         return true;
     }
 
+    currentUserIsAdmin = false;
     if (ownerPanelButton) {
         ownerPanelButton.style.display = "none";
     }
@@ -936,12 +966,232 @@ async function loadOwnerCoinsHistory() {
         : "Coin totals loaded.";
 }
 
+async function loadOwnerModeratorStats() {
+    if (!ownerModeratorStatsStatus || !ownerModeratorStatsList) {
+        return;
+    }
+
+    ownerModeratorStats = [];
+    ownerModeratorStatsStatus.textContent = "Loading contribution stats...";
+    ownerModeratorStatsList.replaceChildren();
+    [
+        ownerModeratorStatsSearch,
+        ownerModeratorStatsRankFilter,
+        ownerModeratorStatsSort
+    ].filter(Boolean).forEach(control => {
+        control.disabled = true;
+    });
+
+    if (!await checkAdmin()) {
+        ownerModeratorStatsStatus.textContent =
+            "You don't have permission to view moderator stats.";
+        return;
+    }
+
+    const { data, error } = await supabaseClient.rpc(
+        "admin_list_ranked_user_contributions"
+    );
+
+    if (error) {
+        console.error("Could not load moderator contribution stats:", error);
+        ownerModeratorStatsStatus.textContent =
+            "Could not load stats. Apply sql/migrations/20261118_owner_moderator_contribution_stats.sql and then sql/migrations/20261119_moderator_self_review_and_delete_audit.sql in Supabase, then refresh.";
+        showOwnerNotification("Could not load moderator stats.", "error");
+        return;
+    }
+
+    if (!Array.isArray(data)) {
+        console.error("Could not load moderator contribution stats: invalid response.", data);
+        ownerModeratorStatsStatus.textContent =
+            "The moderator-stats query returned an invalid response.";
+        return;
+    }
+
+    try {
+        ownerModeratorStats = data.map((record, index) => {
+            if (
+                !record ||
+                typeof record.user_id !== "string" ||
+                !record.user_id ||
+                typeof record.username !== "string" ||
+                typeof record.rank !== "string" ||
+                !record.rank
+            ) {
+                throw new TypeError(`Invalid ranked-user record at index ${index}.`);
+            }
+
+            const suggestionsSubmitted = Number(record.suggestions_submitted);
+            const issuesReported = Number(record.issues_reported);
+            const suggestionsDeleted = Number(record.suggestions_deleted);
+            const issuesDeleted = Number(record.issues_deleted);
+            if (
+                !Number.isSafeInteger(suggestionsSubmitted) ||
+                suggestionsSubmitted < 0 ||
+                !Number.isSafeInteger(issuesReported) ||
+                issuesReported < 0 ||
+                !Number.isSafeInteger(suggestionsDeleted) ||
+                suggestionsDeleted < 0 ||
+                !Number.isSafeInteger(issuesDeleted) ||
+                issuesDeleted < 0
+            ) {
+                throw new TypeError(`Invalid contribution counts at index ${index}.`);
+            }
+
+            return {
+                user_id: record.user_id,
+                username: record.username,
+                rank: record.rank,
+                suggestions_submitted: suggestionsSubmitted,
+                issues_reported: issuesReported,
+                suggestions_deleted: suggestionsDeleted,
+                issues_deleted: issuesDeleted
+            };
+        });
+    } catch (validationError) {
+        console.error("Could not load moderator contribution stats: invalid data.", validationError);
+        ownerModeratorStatsStatus.textContent =
+            "The moderator-stats query returned invalid data. Confirm both owner moderator-stats migrations have been applied.";
+        return;
+    }
+
+    [
+        ownerModeratorStatsSearch,
+        ownerModeratorStatsRankFilter,
+        ownerModeratorStatsSort
+    ].filter(Boolean).forEach(control => {
+        control.disabled = false;
+    });
+    renderOwnerModeratorStats();
+}
+
+function renderOwnerModeratorStats() {
+    if (
+        !ownerModeratorStatsList ||
+        !ownerModeratorStatsStatus ||
+        !ownerModeratorStatsRankFilter ||
+        !ownerModeratorStatsSort ||
+        !ownerModeratorStatsSearch
+    ) {
+        return;
+    }
+
+    const selectedRank = ownerModeratorStatsRankFilter.value || "MODERATOR";
+    const ranks = new Set(
+        ownerModeratorStats
+            .map(record => record.rank)
+            .filter(Boolean)
+    );
+    ranks.add("MODERATOR");
+
+    const rankOptions = [
+        { label: "All ranks", value: "all" },
+        ...Array.from(ranks)
+            .sort((a, b) => a.localeCompare(b))
+            .map(rank => ({ label: rank, value: rank }))
+    ];
+    ownerModeratorStatsRankFilter.replaceChildren();
+    rankOptions.forEach(({ label, value }) => {
+        const option = document.createElement("option");
+        option.value = value;
+        option.textContent = label;
+        ownerModeratorStatsRankFilter.appendChild(option);
+    });
+    ownerModeratorStatsRankFilter.value =
+        rankOptions.some(option => option.value === selectedRank)
+            ? selectedRank
+            : "MODERATOR";
+
+    const search = ownerModeratorStatsSearch.value.trim().toLocaleLowerCase();
+    const rankFilter = ownerModeratorStatsRankFilter.value;
+    const sortBy = ownerModeratorStatsSort.value;
+    const filteredStats = ownerModeratorStats
+        .filter(record => {
+            const matchesRank = rankFilter === "all" || record.rank === rankFilter;
+            const matchesSearch = !search ||
+                record.username.toLocaleLowerCase().includes(search) ||
+                record.rank.toLocaleLowerCase().includes(search);
+            return matchesRank && matchesSearch;
+        })
+        .slice()
+        .sort((a, b) => {
+            if (sortBy === "username") {
+                return a.username.localeCompare(b.username);
+            }
+
+            const aCount = sortBy === "suggestions"
+                ? a.suggestions_submitted
+                : sortBy === "issues"
+                    ? a.issues_reported
+                    : a.suggestions_submitted + a.issues_reported;
+            const bCount = sortBy === "suggestions"
+                ? b.suggestions_submitted
+                : sortBy === "issues"
+                    ? b.issues_reported
+                    : b.suggestions_submitted + b.issues_reported;
+            return bCount - aCount || a.username.localeCompare(b.username);
+        });
+
+    ownerModeratorStatsStatus.textContent =
+        `${filteredStats.length.toLocaleString()} of ${ownerModeratorStats.length.toLocaleString()} ranked accounts shown.`;
+    ownerModeratorStatsList.replaceChildren();
+
+    if (filteredStats.length === 0) {
+        const emptyMessage = document.createElement("p");
+        emptyMessage.className = "owner-loading";
+        emptyMessage.textContent = ownerModeratorStats.length
+            ? "No accounts match these filters."
+            : "No ranked accounts found.";
+        ownerModeratorStatsList.appendChild(emptyMessage);
+        return;
+    }
+
+    filteredStats.forEach(record => {
+        const card = document.createElement("article");
+        card.className = "owner-moderator-stat-card";
+
+        const heading = document.createElement("div");
+        heading.className = "owner-moderator-stat-heading";
+
+        const username = document.createElement("h3");
+        username.textContent = record.username || "Player";
+
+        const rank = document.createElement("span");
+        rank.className = "owner-moderator-stat-rank";
+        rank.textContent = record.rank;
+        heading.append(username, rank);
+
+        const counts = document.createElement("div");
+        counts.className = "owner-moderator-stat-counts";
+        [
+            ["Suggestions submitted", record.suggestions_submitted],
+            ["Issues reported", record.issues_reported],
+            ["Suggestions deleted", record.suggestions_deleted],
+            ["Issue reports deleted", record.issues_deleted]
+        ].forEach(([label, count]) => {
+            const stat = document.createElement("div");
+            stat.className = "owner-moderator-stat-count";
+
+            const name = document.createElement("span");
+            name.textContent = label;
+
+            const value = document.createElement("strong");
+            value.textContent = count.toLocaleString();
+            stat.append(name, value);
+            counts.appendChild(stat);
+        });
+
+        card.append(heading, counts);
+        ownerModeratorStatsList.appendChild(card);
+    });
+}
+
 async function activateOwnerTab(selectedTab) {
 
     const sections = [
         [ownerUsersTab, ownerUsersView],
         [ownerSuggestionsTab, ownerSuggestionsView],
         [ownerIssueReportsTab, ownerIssueReportsView],
+        [ownerModeratorStatsTab, ownerModeratorStatsView],
         [ownerCoinsHistoryTab, ownerCoinsHistoryView]
     ];
 
@@ -962,6 +1212,8 @@ async function activateOwnerTab(selectedTab) {
         await loadOwnerIssueReports();
     } else if (selectedTab === ownerCoinsHistoryTab) {
         await loadOwnerCoinsHistory();
+    } else if (selectedTab === ownerModeratorStatsTab) {
+        await loadOwnerModeratorStats();
     }
 }
 
@@ -1031,7 +1283,7 @@ function renderOwnerSuggestions() {
     });
 }
 
-function createSuggestionCard(suggestion, usernameText, actionsMode = null) {
+function createSuggestionCard(suggestion, usernameText, actionsMode = null, currentUserId = null) {
     const card = document.createElement("article");
     card.className = "owner-suggestion-card";
 
@@ -1104,6 +1356,20 @@ function createSuggestionCard(suggestion, usernameText, actionsMode = null) {
                 reviewGameSuggestion(suggestion.id, "delete", approveButton, deleteButton);
             });
             actions.append(approveButton, deleteButton);
+
+            if (
+                !currentUserIsAdmin &&
+                currentUserId &&
+                suggestion.user_id &&
+                String(currentUserId) === String(suggestion.user_id)
+            ) {
+                approveButton.disabled = true;
+                const selfReviewNote = document.createElement("p");
+                selfReviewNote.className = "owner-error";
+                selfReviewNote.textContent =
+                    "You cannot send your own suggestion to the owner.";
+                card.appendChild(selfReviewNote);
+            }
         } else {
             deleteButton.addEventListener("click", () => {
                 deleteOwnerGameSuggestion(suggestion.id, deleteButton);
@@ -1128,6 +1394,13 @@ async function loadModeratorSuggestions() {
     if (!await checkModeratorAccess()) {
         moderatorSuggestionsList.innerHTML =
             '<p class="owner-error">You do not have permission to review suggestions.</p>';
+        return;
+    }
+
+    const currentUser = await getCurrentUser();
+    if (!currentUser) {
+        moderatorSuggestionsList.innerHTML =
+            '<p class="owner-error">Could not verify your account. Sign in again, then refresh.</p>';
         return;
     }
 
@@ -1165,7 +1438,8 @@ async function loadModeratorSuggestions() {
         const card = createSuggestionCard(
             suggestion,
             suggestion.username || (suggestion.user_id ? "Player" : "Guest"),
-            "moderator"
+            "moderator",
+            currentUser.id
         );
 
         if (!suggestion.id) {
@@ -1257,7 +1531,7 @@ async function deleteOwnerGameSuggestion(suggestionId, button) {
     await loadOwnerSuggestions();
 }
 
-function renderGameIssueReports(list, reports, includeActions) {
+function renderGameIssueReports(list, reports, includeActions, currentUserId = null) {
     list.replaceChildren();
 
     if (reports.length === 0) {
@@ -1271,11 +1545,11 @@ function renderGameIssueReports(list, reports, includeActions) {
     }
 
     reports.forEach(report => {
-        list.appendChild(createGameIssueReportCard(report, includeActions));
+        list.appendChild(createGameIssueReportCard(report, includeActions, currentUserId));
     });
 }
 
-function createGameIssueReportCard(report, includeActions) {
+function createGameIssueReportCard(report, includeActions, currentUserId = null) {
     const card = document.createElement("article");
     card.className = "owner-suggestion-card";
 
@@ -1347,6 +1621,20 @@ function createGameIssueReportCard(report, includeActions) {
                 reviewGameIssueReport(report.id, "delete", forwardButton, deleteButton);
             });
             actions.append(forwardButton, deleteButton);
+
+            if (
+                !currentUserIsAdmin &&
+                currentUserId &&
+                report.user_id &&
+                String(currentUserId) === String(report.user_id)
+            ) {
+                forwardButton.disabled = true;
+                const selfReviewNote = document.createElement("p");
+                selfReviewNote.className = "owner-error";
+                selfReviewNote.textContent =
+                    "You cannot send your own report to the owner.";
+                card.appendChild(selfReviewNote);
+            }
         } else {
             deleteButton.addEventListener("click", () => {
                 deleteOwnerGameIssueReport(report.id, deleteButton);
@@ -1374,6 +1662,13 @@ async function loadModeratorIssueReports() {
         return;
     }
 
+    const currentUser = await getCurrentUser();
+    if (!currentUser) {
+        moderatorIssueReportsList.innerHTML =
+            '<p class="owner-error">Could not verify your account. Sign in again, then refresh.</p>';
+        return;
+    }
+
     const { data, error } = await supabaseClient.rpc(
         "moderator_list_game_issue_reports"
     );
@@ -1394,7 +1689,12 @@ async function loadModeratorIssueReports() {
     }
 
     moderatorIssueReports = data;
-    renderGameIssueReports(moderatorIssueReportsList, moderatorIssueReports, "moderator");
+    renderGameIssueReports(
+        moderatorIssueReportsList,
+        moderatorIssueReports,
+        "moderator",
+        currentUser.id
+    );
 
     if (!moderatorIssueReports.length) {
         return;
@@ -2242,6 +2542,7 @@ if (closeModeratorPanel) {
     ownerUsersTab,
     ownerSuggestionsTab,
     ownerIssueReportsTab,
+    ownerModeratorStatsTab,
     ownerCoinsHistoryTab
 ].filter(Boolean).forEach(tab => {
     tab.addEventListener("click", async () => {
@@ -2252,6 +2553,21 @@ if (closeModeratorPanel) {
 if (refreshOwnerCoinsHistory) {
     refreshOwnerCoinsHistory.addEventListener("click", loadOwnerCoinsHistory);
 }
+
+if (refreshOwnerModeratorStats) {
+    refreshOwnerModeratorStats.addEventListener("click", loadOwnerModeratorStats);
+}
+
+[
+    ownerModeratorStatsSearch,
+    ownerModeratorStatsRankFilter,
+    ownerModeratorStatsSort
+].filter(Boolean).forEach(control => {
+    control.addEventListener(
+        control === ownerModeratorStatsSearch ? "input" : "change",
+        renderOwnerModeratorStats
+    );
+});
 
 
 // =========================================
@@ -2377,14 +2693,24 @@ supabaseClient.auth.onAuthStateChange(
             event === "SIGNED_OUT"
         ) {
 
+            currentUserIsAdmin = false;
             ownerUsers = [];
             ownerSuggestions = [];
             moderatorSuggestions = [];
             ownerIssueReports = [];
             moderatorIssueReports = [];
+            ownerModeratorStats = [];
 
             if (ownerTotalUsers) {
                 ownerTotalUsers.textContent = "—";
+            }
+
+            if (ownerModeratorStatsStatus) {
+                ownerModeratorStatsStatus.textContent =
+                    "Open this tab to load contribution stats.";
+            }
+            if (ownerModeratorStatsList) {
+                ownerModeratorStatsList.replaceChildren();
             }
 
             if (ownerPanelButton) {
