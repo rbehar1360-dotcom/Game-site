@@ -1185,12 +1185,22 @@
         }
 
         async function loadReactions() {
+            const commentIds = comments
+                .map(comment => comment.id)
+                .filter(Boolean);
+
+            if (!commentIds.length) {
+                reactions = [];
+                return;
+            }
+
             const { data, error } =
                 await supabase
                     .from(
                         "game_comment_reactions"
                     )
-                    .select("*");
+                    .select("id,comment_id,user_id,reaction")
+                    .in("comment_id", commentIds);
 
             if (error) {
                 console.error(
@@ -1235,7 +1245,7 @@
 
         async function updateLoginState() {
             const { data } =
-                await supabase.auth.getUser();
+                await window.getCurrentAuthUserResponse();
 
             currentUser =
                 data?.user || null;

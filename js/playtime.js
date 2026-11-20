@@ -517,7 +517,8 @@
         if (!supabase) return;
 
         try {
-            const { data: { user }, error } = await supabase.auth.getUser();
+            const { data: { user }, error } =
+                await window.getCurrentAuthUserResponse();
             if (error || !user) return;
             if (gameNotificationUserId === user.id) return;
 
@@ -611,7 +612,7 @@
             signupReminderShown
         ) return;
 
-        signupReminderSeconds += 1;
+        signupReminderSeconds += 30;
         writeSessionValue(signupReminderStorageKey, String(signupReminderSeconds));
 
         if (signupReminderSeconds < signupReminderAfterSeconds || signupAuthCheckPending) return;
@@ -633,21 +634,131 @@
         } finally {
             signupAuthCheckPending = false;
         }
-    }, 1000);
+    }, 30000);
 
     const currentScript = document.currentScript;
     if (currentScript && currentScript.src) {
-        const commentsScript = document.createElement("script");
-        commentsScript.src = new URL("comments.js", currentScript.src).href;
-        document.head.appendChild(commentsScript);
+        const scriptBaseUrl = currentScript.src;
+        let commentsLoadStarted = false;
+        let messageNotificationsLoadStarted = false;
+        let commentsSentinel = null;
 
-        const localGamePageScript = document.createElement("script");
-        localGamePageScript.src = new URL("local-game-page.js", currentScript.src).href;
-        document.head.appendChild(localGamePageScript);
+        function loadComments() {
+            if (commentsLoadStarted) return;
+            commentsLoadStarted = true;
 
-        const messageNotificationsScript = document.createElement("script");
-        messageNotificationsScript.src = new URL("game-message-notifications.js", currentScript.src).href;
-        document.head.appendChild(messageNotificationsScript);
+            const script = document.createElement("script");
+            script.src = new URL("comments.js", scriptBaseUrl).href;
+            script.async = true;
+            script.onload = () => commentsSentinel.remove();
+            script.onerror = () => {
+                console.error("Could not load game comments:", script.src);
+            };
+            document.head.appendChild(script);
+        }
+
+        function installCommentsSentinel() {
+            if (document.querySelector("[data-deferred-game-comments]")) return;
+
+            commentsSentinel = document.createElement("div");
+            commentsSentinel.dataset.deferredGameComments = "true";
+            commentsSentinel.setAttribute("aria-hidden", "true");
+            commentsSentinel.style.height = "1px";
+            document.body.appendChild(commentsSentinel);
+
+            if ("IntersectionObserver" in window) {
+                const observer = new IntersectionObserver(entries => {
+                    if (entries.some(entry => entry.isIntersecting)) {
+                        observer.disconnect();
+                        loadComments();
+                    }
+                }, { rootMargin: "400px 0px" });
+                observer.observe(commentsSentinel);
+            } else {
+                window.addEventListener("scroll", loadComments, {
+                    once: true,
+                    passive: true
+                });
+            }
+        }
+
+        if (document.readyState === "loading") {
+            document.addEventListener(
+                "DOMContentLoaded",
+                installCommentsSentinel,
+                { once: true }
+            );
+        } else {
+            installCommentsSentinel();
+        }
+
+        function isMessagePopupEnabled() {
+            try {
+                return window.localStorage.getItem("gameHubInGameMessagePopups") === "true";
+            } catch (error) {
+                console.error("Could not read the in-game message popup setting:", error);
+                return false;
+            }
+        }
+
+        function loadMessageNotifications() {
+            if (messageNotificationsLoadStarted || !isMessagePopupEnabled()) return;
+            messageNotificationsLoadStarted = true;
+
+            const script = document.createElement("script");
+            script.src = new URL("game-message-notifications.js", scriptBaseUrl).href;
+            script.async = true;
+            script.onerror = () => {
+                messageNotificationsLoadStarted = false;
+                console.error("Could not load game message notifications:", script.src);
+            };
+            document.head.appendChild(script);
+        }
+
+        if (supabase) {
+            supabase.auth.onAuthStateChange((_event, session) => {
+                if (session?.user) {
+                    loadMessageNotifications();
+                }
+            });
+        }
+
+        window.addEventListener("gamehub:message-popup-preference", event => {
+            if (event.detail?.enabled) {
+                void window.getCurrentAuthUserResponse().then(({ data, error }) => {
+                    if (error) {
+                        console.error("Could not check the current session:", error);
+                        return;
+                    }
+                    if (data.user) loadMessageNotifications();
+                });
+            }
+        });
+
+        window.addEventListener("storage", event => {
+            if (
+                event.key === "gameHubInGameMessagePopups" &&
+                event.newValue === "true"
+            ) {
+                void window.getCurrentAuthUserResponse().then(({ data, error }) => {
+                    if (error) {
+                        console.error("Could not check the current session:", error);
+                        return;
+                    }
+                    if (data.user) loadMessageNotifications();
+                });
+            }
+        });
+
+        if (isMessagePopupEnabled()) {
+            void window.getCurrentAuthUserResponse().then(({ data, error }) => {
+                if (error) {
+                    console.error("Could not check the current session:", error);
+                    return;
+                }
+                if (data.user) loadMessageNotifications();
+            });
+        }
     }
 
     if (!gameId) {
@@ -745,7 +856,7 @@ function isGameActive() {
 }
 async function trackerLoop() {
     await savePlaytime();
-    setTimeout(trackerLoop, 5000);
+    setTimeout(trackerLoop, 30000);
 }
     // Start loop
     trackerLoop();

@@ -409,7 +409,7 @@ async function openAchievements(userId, username) {
 
         const {
             data: userData
-        } = await supabaseClient.auth.getUser();
+        } = await window.getCurrentAuthUserResponse();
 
         const isOwnProfile =
             userData?.user?.id === userId;
@@ -491,7 +491,7 @@ if (achievementsButton) {
             const {
                 data: userData,
                 error
-            } = await supabaseClient.auth.getUser();
+            } = await window.getCurrentAuthUserResponse();
 
             console.log("Supabase user result:", userData);
             console.log("Supabase user error:", error);
@@ -630,7 +630,7 @@ document.addEventListener(
 // =========================================
 async function checkAchievements() {
     const { data: { user }, error: userError } =
-        await supabaseClient.auth.getUser();
+        await window.getCurrentAuthUserResponse();
 
     if (userError || !user) return;
 

@@ -14,6 +14,55 @@ const usernameLookupsInFlight = new Map();
 let usernameCacheGeneration = 0;
 let observedAuthState = false;
 let usernameCacheAuthUserId = null;
+let cachedAuthUser = null;
+let cachedAuthUserResolved = false;
+let cachedAuthUserAt = 0;
+let authUserRequest = null;
+let authUserGeneration = 0;
+
+window.getCurrentAuthUserResponse = function () {
+    if (
+        cachedAuthUserResolved &&
+        Date.now() - cachedAuthUserAt < 30000
+    ) {
+        return Promise.resolve({
+            data: { user: cachedAuthUser },
+            error: null
+        });
+    }
+
+    if (authUserRequest) {
+        return authUserRequest;
+    }
+
+    const generation = authUserGeneration;
+    const request = supabaseClient.auth.getUser().then(({ data, error }) => {
+        if (error) {
+            return { data: { user: null }, error };
+        }
+
+        if (generation !== authUserGeneration) {
+            return window.getCurrentAuthUserResponse();
+        }
+
+        cachedAuthUser = data?.user || null;
+        cachedAuthUserResolved = true;
+        cachedAuthUserAt = Date.now();
+        return {
+            data: { user: cachedAuthUser },
+            error: null
+        };
+    });
+
+    let trackedRequest;
+    trackedRequest = request.finally(() => {
+        if (authUserRequest === trackedRequest) {
+            authUserRequest = null;
+        }
+    });
+    authUserRequest = trackedRequest;
+    return trackedRequest;
+};
 
 function clearUsernameCache() {
     usernameCacheGeneration++;
@@ -83,6 +132,12 @@ window.getUsernameById = async function (userId, knownUsername) {
 
 supabaseClient.auth.onAuthStateChange((event, session) => {
     const userId = session?.user?.id || null;
+
+    authUserGeneration++;
+    cachedAuthUser = null;
+    cachedAuthUserResolved = false;
+    cachedAuthUserAt = 0;
+    authUserRequest = null;
 
     if (
         (observedAuthState && userId !== usernameCacheAuthUserId) ||

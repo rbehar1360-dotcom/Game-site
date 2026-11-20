@@ -1333,7 +1333,7 @@ const logoutButton = document.getElementById("logoutButton");
 
 async function updateAccountUI() {
 
-    const { data } = await supabaseClient.auth.getUser();
+    const { data } = await window.getCurrentAuthUserResponse();
 
     const user = data.user;
 
@@ -1373,7 +1373,7 @@ updateAccountUI();
 
 loginButton.addEventListener("click", async function() {
 
-    const { data } = await supabaseClient.auth.getUser();
+    const { data } = await window.getCurrentAuthUserResponse();
 
     if (!data.user) {
 

@@ -213,7 +213,8 @@
         submitButton.disabled = true;
         status.textContent = "Sending report...";
         try {
-            const { data: { user }, error: userError } = await client.auth.getUser();
+            const { data: { user }, error: userError } =
+                await window.getCurrentAuthUserResponse();
             if (userError) throw userError;
 
             const frame = document.getElementById("gameFrame") || document.querySelector("iframe");

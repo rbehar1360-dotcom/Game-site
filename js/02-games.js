@@ -4,7 +4,7 @@
 
 async function getCurrentUser() {
     const { data, error } =
-        await supabaseClient.auth.getUser();
+        await window.getCurrentAuthUserResponse();
 
     if (error) {
         console.error(
@@ -64,39 +64,24 @@ async function setupLikes() {
     }
 
 
-    // =========================================
-    // LOAD ALL LIKE COUNTS IN PARALLEL
-    // =========================================
+    const gameIds = [...new Set(gameData.map(game => game.gameId))];
+    const { data: likeCounts, error: likeCountsError } =
+        await supabaseClient.rpc("get_like_counts_for_games", {
+            p_game_ids: gameIds
+        });
 
-    await Promise.all(
+    if (likeCountsError) {
+        console.error("Could not load game like counts:", likeCountsError);
+    } else {
+        const countsByGameId = new Map(
+            (likeCounts || []).map(row => [row.game_id, row.like_count])
+        );
 
-        gameData.map(async game => {
-
-            const { count, error } =
-                await supabaseClient
-                    .from("likes")
-                    .select("*", {
-                        count: "exact",
-                        head: true
-                    })
-                    .eq("game_id", game.gameId);
-
-            if (error) {
-
-                console.error(
-                    "Could not get likes:",
-                    error
-                );
-
-                return;
-            }
-
+        gameData.forEach(game => {
             game.likeCount.textContent =
-                count || 0;
-
-        })
-
-    );
+                countsByGameId.get(game.gameId) || 0;
+        });
+    }
 
 
     // =========================================
@@ -376,6 +361,9 @@ document.querySelectorAll(".game-link").forEach(link => {
 let favoritesUserId = null;
 let favoritesInitialized = false;
 let favoritesRequestId = 0;
+let favoritesLoadingUserId = null;
+let favoritesLoadPromise = null;
+const favoriteGameIds = new Set();
 
 /*
  * Favorites are handled with event delegation so sorting the game cards
@@ -411,7 +399,7 @@ function clearFavoriteUI() {
 }
 
 async function getCurrentUser() {
-    const { data, error } = await supabaseClient.auth.getUser();
+    const { data, error } = await window.getCurrentAuthUserResponse();
 
     if (error) {
         console.error("Could not get current user:", error);
@@ -422,47 +410,66 @@ async function getCurrentUser() {
 }
 
 async function loadFavorites(user = null) {
-    const requestId = ++favoritesRequestId;
-
     if (!user) {
         user = await getCurrentUser();
     }
 
-    // Ignore an older request if the auth state changed while loading.
-    if (requestId !== favoritesRequestId) return;
-
     if (!user) {
+        favoritesRequestId++;
         favoritesUserId = null;
+        favoriteGameIds.clear();
         clearFavoriteUI();
         return;
     }
 
-    favoritesUserId = user.id;
-
-    const { data: favorites, error } = await supabaseClient
-        .from("favorites")
-        .select("game_id")
-        .eq("user_id", user.id);
-
-    if (error) {
-        console.error("Could not load favorites:", error);
-        return;
+    if (favoritesLoadingUserId === user.id && favoritesLoadPromise) {
+        return favoritesLoadPromise;
     }
 
-    if (requestId !== favoritesRequestId) return;
+    const requestId = ++favoritesRequestId;
+    favoritesUserId = user.id;
 
-    const favoriteIds = new Set(
-        (favorites || []).map(favorite => favorite.game_id)
-    );
+    const request = (async () => {
+        const { data: favorites, error } = await supabaseClient
+            .from("favorites")
+            .select("game_id")
+            .eq("user_id", user.id);
 
-    getFavoriteButtons().forEach(button => {
-        const wrapper = button.closest(".game-wrapper");
-        const gameId = wrapper?.dataset.gameId;
+        if (error) {
+            console.error("Could not load favorites:", error);
+            return;
+        }
 
-        setFavoriteButton(button, favoriteIds.has(gameId));
-    });
+        if (requestId !== favoritesRequestId) return;
 
-    await sortFavoriteGames(favoriteIds);
+        const loadedFavoriteIds = new Set(
+            (favorites || []).map(favorite => favorite.game_id)
+        );
+
+        favoriteGameIds.clear();
+        loadedFavoriteIds.forEach(gameId => favoriteGameIds.add(gameId));
+
+        getFavoriteButtons().forEach(button => {
+            const wrapper = button.closest(".game-wrapper");
+            const gameId = wrapper?.dataset.gameId;
+
+            setFavoriteButton(button, favoriteGameIds.has(gameId));
+        });
+
+        await sortFavoriteGames(favoriteGameIds);
+    })();
+
+    favoritesLoadingUserId = user.id;
+    favoritesLoadPromise = request;
+
+    try {
+        await request;
+    } finally {
+        if (favoritesLoadPromise === request) {
+            favoritesLoadingUserId = null;
+            favoritesLoadPromise = null;
+        }
+    }
 }
 
 async function sortFavoriteGames(favoriteIds = null) {
@@ -564,7 +571,6 @@ async function toggleFavorite(button) {
 
     try {
 
-        // Check the database for the actual current state.
         const { data: existingFavorite, error: findError } =
             await supabaseClient
                 .from("favorites")
@@ -574,11 +580,7 @@ async function toggleFavorite(button) {
                 .maybeSingle();
 
         if (findError) {
-            console.error(
-                "Could not check favorite:",
-                findError
-            );
-
+            console.error("Could not check favorite:", findError);
             return;
         }
 
@@ -591,8 +593,8 @@ async function toggleFavorite(button) {
             const { error } = await supabaseClient
                 .from("favorites")
                 .delete()
-                .eq("id", existingFavorite.id)
-                .eq("user_id", user.id);
+                .eq("user_id", user.id)
+                .eq("game_id", gameId);
 
             if (error) {
                 console.error(
@@ -603,6 +605,7 @@ async function toggleFavorite(button) {
                 return;
             }
 
+            favoriteGameIds.delete(gameId);
             setFavoriteButton(button, false);
         }
 
@@ -628,13 +631,11 @@ async function toggleFavorite(button) {
                 return;
             }
 
+            favoriteGameIds.add(gameId);
             setFavoriteButton(button, true);
-            
         }
 
-        // Reload from Supabase so the UI and database
-        // are guaranteed to be synchronized.
-        await loadFavorites(user);
+        await sortFavoriteGames(favoriteGameIds);
         checkAchievements();
     }
 
@@ -673,13 +674,6 @@ if (!favoritesInitialized) {
 
 
 // =========================================
-// INITIAL FAVORITE LOAD
-// =========================================
-
-loadFavorites();
-
-
-// =========================================
 // AUTH STATE CHANGES
 // =========================================
 
@@ -687,6 +681,8 @@ loadFavorites();
 // - User logs in
 // - User logs out
 // - Session changes
+
+loadFavorites();
 
 supabaseClient.auth.onAuthStateChange(
     async (_event, session) => {
@@ -708,6 +704,7 @@ supabaseClient.auth.onAuthStateChange(
             favoritesRequestId++;
 
             favoritesUserId = null;
+            favoriteGameIds.clear();
 
             clearFavoriteUI();
 

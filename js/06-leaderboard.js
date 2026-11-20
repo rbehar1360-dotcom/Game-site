@@ -1287,7 +1287,7 @@ document.addEventListener("DOMContentLoaded", () => {
         suggestStatus.textContent = "Submitting...";
 
         try {
-          const { data: { user } } = await supabaseClient.auth.getUser();
+          const { data: { user } } = await window.getCurrentAuthUserResponse();
 
           const { error } = await supabaseClient
             .from("game_suggestions")
